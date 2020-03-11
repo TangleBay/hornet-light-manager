@@ -254,7 +254,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $TEXT_RESET
                 if [ "$selector6" = "y" ] || [ "$selector6" = "Y" ]; then
                     echo -e $TEXT_YELLOW && echo " Downloading snapshot file..." && echo -e $TEXT_RESET
-                    sudo -u $user wget -O /home/$user/hornet/latest-export.gz.bin $snapshot
+                    sudo -u $user wget -O /home/$user/hornet/export.bin $snapshot
                 fi
                 sudo systemctl restart hornet
                 echo -e $TEXT_YELLOW && echo " Reset of the database finished and hornet restarted!" && echo -e $TEXT_RESET
@@ -371,7 +371,7 @@ while [ $counter -lt 1 ]; do
                 sudo wget -qO- https://github.com/gohornet/hornet/releases/download/v$latesthornet/HORNET-"$latesthornet"_Linux_"$os".tar.gz | sudo tar -xzf - -C /home/$user/hornet
                 sudo mv /home/$user/hornet/HORNET-"$latesthornet"_Linux_"$os"/* /home/$user/hornet/
                 sudo rm -rf /home/$user/hornet/HORNET-"$latesthornet"_Linux_"$os"*
-                sudo -u $user wget -O /home/$user/hornet/latest-export.gz.bin $snapshot
+                sudo -u $user wget -O /home/$user/hornet/export.bin $snapshot
                 #sudo sed -i 's/\"useProfile\": \"auto\"/\"useProfile\": \"'$profile'\"/g' /home/$user/hornet/config.json
                 #sudo sed -i 's/\"enabled\": false/\"enabled\": '$dashauth'/g' /home/$user/hornet/config.json
                 #sudo sed -i 's/\"username\": "hornet"/\"username\": \"'$dashuser'\"/g' /home/$user/hornet/config.json
