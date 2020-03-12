@@ -1,4 +1,6 @@
 #!/bin/bash
+source ./config.cfg
+pwdcmd=$(pwd)
 check="$(systemctl show -p ActiveState --value hornet)"
 
 if [ "$check" = "active" ]; then
@@ -19,18 +21,18 @@ if [ "$check" = "active" ]; then
 fi
 
 if [ "$check" != "active" ]; then
-    snapshot="$(curl -s https://raw.githubusercontent.com/TangleBay/hornet-light-manager/master/ressources/snapshot.conf)"
+    snapshot="$(curl -s https://raw.githubusercontent.com/TangleBay/hornet-light-manager/$branch/ressources/snapshot.cfg)"
     dt=`date '+%m/%d/%Y %H:%M:%S'`
     sudo systemctl stop hornet
     sudo rm -r /home/$user/hornet/mainnetdb
     sudo -u $user wget -O /home/$user/hornet/latest-export.gz.bin $snapshot
     sudo systemctl restart hornet
-    counter="$(cat $pwdcmd/log/watchdog.log | sed -n -e '1{p;q}')"
+    counter="$(cat ../log/watchdog.log | sed -n -e '1{p;q}')"
     let counter=counter+1
     {
     echo $counter
     echo $dt
-    } > $pwdcmd/log/watchdog.log
+    } > ../log/watchdog.log
     counter=0
 fi
 exit 0
