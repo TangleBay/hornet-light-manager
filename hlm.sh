@@ -36,11 +36,11 @@ snapshot="$(curl -s https://raw.githubusercontent.com/TangleBay/hornet-light-man
 latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
 latesthornet="${latesthornet:1}"
 latesthlm="$(curl -s https://api.github.com/repos/TangleBay/hornet-light-manager/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
-pwdcmd="$(pwd)"
+pwdcmd=$(pwd)
 
 ############################################################################################################################################################
 
-if [ $(id -u) -ne 0 ]; then 
+if [ $(id -u) -ne 0 ]; then
     echo -e $TEXT_RED_B "Please run HLM with sudo or as root"
     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
     echo -e $TEXT_RESET
@@ -48,20 +48,20 @@ if [ $(id -u) -ne 0 ]; then
 fi
 
 
-if [ "$version" != "$latesthlm" ]; then
-    echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $TEXT_RESET
-    sudo -u $user git pull
-    echo -e $TEXT_YELLOW && echo "Backup current HLI config..." && echo -e $TEXT_RESET
-    ScriptLoc=$(readlink -f "$0")
-    exec "$ScriptLoc"
-    exit 0
-fi
+#if [ "$version" != "$latesthlm" ]; then
+#    echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $TEXT_RESET
+#    sudo -u $user git pull
+#    echo -e $TEXT_YELLOW && echo "Backup current HLI config..." && echo -e $TEXT_RESET
+#    ScriptLoc=$(readlink -f "$0")
+#    exec "$ScriptLoc"
+#    exit 0
+#fi
 
-if [ ! -f "config.sh" ]; then
-    echo -e $TEXT_YELLOW && echo " First run detected...Downloading config file!" && echo -e $TEXT_RESET
-    sudo wget -q -O ./ressources/config.sh https://raw.githubusercontent.com/TangleBay/hornet-light-manager/master/ressources/config.sh
-    sudo nano ./ressources/config.sh
-fi
+#if [ ! -f "./ressources/config.sh" ]; then
+#    echo -e $TEXT_YELLOW && echo " First run detected...Downloading config file!" && echo -e $TEXT_RESET
+#    sudo wget -q -O ./ressources/config.sh https://raw.githubusercontent.com/TangleBay/hornet-light-manager/master/ressources/config.sh
+#    sudo nano ./ressources/config.sh
+#fi
 
 counter=0
 while [ $counter -lt 1 ]; do
@@ -136,6 +136,7 @@ while [ $counter -lt 1 ]; do
     echo ""
     echo -e $yellow "x) Exit"
     echo ""
+    echo $latesthornet
     echo -e "\e[90m==========================================================="
     echo -e $TEXT_YELLOW && read -t 30 -p " Please type in your option: " selector
     echo -e $TEXT_RESET
@@ -215,8 +216,8 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "5" ] ; then
-                latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
-                latesthornet="${latesthornet:1}"
+#                latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
+#                latesthornet="${latesthornet:1}"
                 echo -e $TEXT_YELLOW && echo " Get latest hornet version..." && echo -e $TEXT_RESET
                 echo -e $TEXT_YELLOW && echo " Stopping hornet node...(Please note that this may take some time)" && echo -e $TEXT_RESET
                 sudo systemctl stop hornet
@@ -241,7 +242,7 @@ while [ $counter -lt 1 ]; do
                 #    sudo sed -i 's/\"example2.neighbor.com:15600\"/\"'$neighbor2'\"/g' /home/$user/hornet/neighbors.json
                 #    sudo sed -i 's/\"example3.neighbor.com:15600\"/\"'$neighbor3'\"/g' /home/$user/hornet/neighbors.json
                 #    sudo nano /home/$user/hornet/neighbors.json
-                fi
+                #fi
                 sudo systemctl start hornet
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $TEXT_RESET
@@ -274,11 +275,11 @@ while [ $counter -lt 1 ]; do
                     sudo sed -i 's/$user/'$user'/g' ./ressources/watchdog.sh
                     sudo sed -i 's/$os/'$os'/g' ./ressources/watchdog.sh
                     sudo sed -i 's/$pwdcmd/'$pwdcmd'/g' ./ressources/watchdog.sh
-                    sudo -u $user ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
+                    ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
                 fi
                 if [ "$selector7" = "2" ]; then
                     echo -e $TEXT_YELLOW && echo " Disable hornet watchdog..." && echo -e $TEXT_RESET
-                    sudo -u $user ( crontab -l | grep -v -F "$croncmd" ) | crontab -
+                    ( crontab -l | grep -v -F "$croncmd" ) | crontab -
                 fi
                 echo -e $TEXT_YELLOW && echo " Hornet watchdog configuration finished!" && echo -e $TEXT_RESET
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
@@ -356,8 +357,8 @@ while [ $counter -lt 1 ]; do
             echo -e $TEXT_YELLOW && read -p " Please type in your option: " selector
             echo -e $TEXT_RESET
             if [ "$selector" = "1" ]; then
-                latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
-                latesthornet="${latesthornet:1}"
+#                latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
+#                latesthornet="${latesthornet:1}"
                 echo -e $TEXT_YELLOW && echo " Installing necessary packages..." && echo -e $TEXT_RESET
                 sudo apt install nano -y
 
@@ -458,7 +459,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $TEXT_YELLOW && echo " Creating backup of the HLM config file..." && echo -e $TEXT_RESET
                 sudo mv ./ressources/config.sh ./ressources/config.sh.bak
                 echo -e $TEXT_YELLOW && echo " Finished! You can find the HLM backup config in the folder." && echo -e $TEXT_RESET
-                sudo -u $user wget -q -O ./ressources/config.sh https://raw.githubusercontent.com/TangleBay/hornet-light-manager/master/config.sh
+                sudo -u $user wget -q -O ./ressources/config.sh https://raw.githubusercontent.com/TangleBay/hornet-light-manager/master/ressources/config.sh
                 echo -e $TEXT_YELLOW && echo " Downloading latest HLI config completed!" && echo -e $TEXT_RESET
                 sudo nano ./ressources/config.sh
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
