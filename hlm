@@ -6,7 +6,6 @@
 ############################################################################################################################################################
 ############################################################################################################################################################
 version=0.0.1
-branch=dev
 
 TEXT_RESET='\e[0m'
 TEXT_YELLOW='\e[0;33m'
@@ -50,25 +49,25 @@ if [ $(id -u) -ne 0 ]; then
 fi
 
 
-#if [ "$version" != "$latesthlm" ]; then
-#    echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $TEXT_RESET
-#    sudo -u $user git pull
-#    echo -e $TEXT_YELLOW && echo "Backup current HLI config..." && echo -e $TEXT_RESET
-#    ScriptLoc=$(readlink -f "$0")
-#    exec "$ScriptLoc"
-#    exit 0
-#fi
+if [ "$version" != "$latesthlm" ]; then
+    echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $TEXT_RESET
+    sudo -u $user git pull
+    echo -e $TEXT_YELLOW && echo "Backup current HLI config..." && echo -e $TEXT_RESET
+    ScriptLoc=$(readlink -f "$0")
+    exec "$ScriptLoc"
+    exit 0
+fi
 
-#if [ ! -f "./ressources/config.sh" ]; then
-#    echo -e $TEXT_YELLOW && echo " First run detected...Downloading config file!" && echo -e $TEXT_RESET
-#    sudo wget -q -O ./ressources/config.sh https://raw.githubusercontent.com/TangleBay/hornet-light-manager/master/ressources/config.sh
-#    sudo nano ./ressources/config.sh
-#fi
+if [ ! -f "./ressources/config.cfg" ]; then
+    echo -e $TEXT_YELLOW && echo " No config detected...Downloading config file!" && echo -e $TEXT_RESET
+    sudo wget -q -O ./ressources/config.cfg $githubrepo/$branch/ressources/config.cfg
+    sudo nano ./ressources/config.cfg
+fi
 
 counter=0
 while [ $counter -lt 1 ]; do
     clear
-    source ./ressources/config.sh
+    source ./ressources/config.cfg
     source ./ressources/tanglebay.cfg
     nodetempv="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.appVersion')"
     rlmi="$(curl -s https://nodes.tanglebay.org -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestMilestoneIndex')"
@@ -257,10 +256,10 @@ while [ $counter -lt 1 ]; do
             echo ""
             echo -e $red "\033[1m\033[4mEdit Configurations\033[0m"
             echo -e $yellow ""
-            echo " 1) Edit Hornet config.json"
-            echo " 2) Edit Hornet neighbors.json"
-            echo " 3) Edit Tangle Bay config.sh"
-            echo " 4) Edit HLM config.sh"
+            echo " 1) Edit node config.json"
+            echo " 2) Edit node neighbors.json"
+            echo " 3) Edit Pool config.cfg"
+            echo " 4) Edit HLM config.cfg"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
             echo ""
@@ -305,12 +304,12 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "4" ] ; then
-                if [ ! -f "./ressources/config.sh" ]; then
+                if [ ! -f "./ressources/config.cfg" ]; then
                     echo -e $TEXT_YELLOW && echo " No config file found...Downloading config file!" && echo -e $TEXT_RESET
-                    sudo -u $user wget -q -O ./ressources/config.sh $githubrepo/$branch/ressources/config.sh
+                    sudo -u $user wget -q -O ./ressources/config.cfg $githubrepo/$branch/ressources/config.cfg
                     echo -e $TEXT_YELLOW && echo " Please try again!" && echo -e $TEXT_RESET
                 else
-                    sudo nano ./ressources/config.sh
+                    sudo nano ./ressources/config.cfg
                     echo -e $TEXT_YELLOW && echo " Edit configuration finished!" && echo -e $TEXT_RESET
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $TEXT_RESET
@@ -321,7 +320,7 @@ while [ $counter -lt 1 ]; do
                 counter2=1
             fi
         done
-        unset selector   
+        unset selector
     fi
 
 ############################################################################################################################################################
@@ -358,7 +357,7 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "3" ]; then
                 curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/nodes/$nodepassword
                 domain2=https://$domain:$apiport
-                curl -X POST "https://register.tanglebay.org/nodes" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"$domain2\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$password\" }" |jq
+                curl -X POST "https://register.tanglebay.org/nodes" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"$domain2\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $TEXT_RESET
             fi
@@ -489,13 +488,13 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "3" ]; then
                 echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel hornet watchdog: " selector7
                 echo -e $TEXT_RESET
-                croncmd="$pwdcmd/ressources/watchdog.sh"
+                croncmd="$pwdcmd/ressources/watchdog"
                 cronjob="*/15 * * * * $croncmd"
                 if [ "$selector7" = "1" ]; then
                     echo -e $TEXT_YELLOW && echo " Enable hornet watchdog..." && echo -e $TEXT_RESET
                     sudo mkdir -p ./log
                     sudo echo "0" > ./log/watchdog.log
-                    sudo chmod 700 ./ressources/watchdog.sh
+                    sudo chmod 700 ./ressources/watchdog
                     ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
                 fi
                 if [ "$selector7" = "2" ]; then
