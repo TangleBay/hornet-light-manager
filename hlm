@@ -291,6 +291,32 @@ while [ $counter -lt 1 ]; do
                 echo -e $TEXT_RESET
             fi
 
+            if [ "$selector" = "3" ] ; then
+                if [ ! -f "./ressources/tanglebay.cfg" ]; then
+                    echo -e $TEXT_YELLOW && echo " No config file found...Downloading config file!" && echo -e $TEXT_RESET
+                    sudo -u $user wget -q -O ./ressources/tanglebay.cfg $githubrepo/$branch/ressources/tanglebay.cfg
+                    echo -e $TEXT_YELLOW && echo " Please try again!" && echo -e $TEXT_RESET
+                else
+                    sudo nano ./ressources/tanglebay.cfg
+                    echo -e $TEXT_YELLOW && echo " Edit configuration finished!" && echo -e $TEXT_RESET
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $TEXT_RESET
+                fi
+            fi
+
+            if [ "$selector" = "4" ] ; then
+                if [ ! -f "./ressources/config.sh" ]; then
+                    echo -e $TEXT_YELLOW && echo " No config file found...Downloading config file!" && echo -e $TEXT_RESET
+                    sudo -u $user wget -q -O ./ressources/config.sh $githubrepo/$branch/ressources/config.sh
+                    echo -e $TEXT_YELLOW && echo " Please try again!" && echo -e $TEXT_RESET
+                else
+                    sudo nano ./ressources/config.sh
+                    echo -e $TEXT_YELLOW && echo " Edit configuration finished!" && echo -e $TEXT_RESET
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $TEXT_RESET
+                fi
+            fi
+
             if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
                 counter2=1
             fi
