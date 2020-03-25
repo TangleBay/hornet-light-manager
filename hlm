@@ -31,6 +31,11 @@ if ! [ -x "$(command -v jq)" ]; then
     sudo apt install jq -y > /dev/null
     clear
 fi
+if ! [ -x "$(command -v nano)" ]; then
+    echo -e $text_yellow && echo "Installing necessary package nano..." && echo -e $text_reset
+    sudo apt install nano -y > /dev/null
+    clear
+fi
 
 ############################################################################################################################################################
 
@@ -39,7 +44,7 @@ snapshot="$(curl -s $githubrepo/$branch/ressources/snapshot.cfg)"
 latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
 latesthornet="${latesthornet:1}"
 latesthlm="$(curl -s https://api.github.com/repos/TangleBay/hornet-light-manager/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
-pwdcmd=$(pwd)
+pwdcmd=`dirname "$BASH_SOURCE"`
 
 ############################################################################################################################################################
 
@@ -50,28 +55,31 @@ if [ $(id -u) -ne 0 ]; then
     exit 0
 fi
 
+# Set HLM Variable
+echo "hlm=$pwdcmd/hlm" >> /etc/environment
+
 if [ "$version" != "$latesthlm" ]; then
     echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $text_reset
     sudo wget -O $pwdcmd/hlm $githubrepo/$branch/hlm
     sudo wget -O $pwdcmd/ressources/config.cfg $githubrepo/$branch/ressources/config.cfg
-    sudo nano ./ressources/config.cfg
+    sudo nano $pwdcmd/ressources/config.cfg
     echo -e $text_yellow && echo "Backup current HLI config..." && echo -e $text_reset
     ScriptLoc=$(readlink -f "$0")
     exec "$ScriptLoc"
     exit 0
 fi
 
-if [ ! -f "./ressources/config.cfg" ]; then
+if [ ! -f "$pwdcmd/ressources/config.cfg" ]; then
     echo -e $text_yellow && echo " No config detected...Downloading config file!" && echo -e $text_reset
-    sudo wget -q -O ./ressources/config.cfg $githubrepo/$branch/ressources/config.cfg
-    sudo nano ./ressources/config.cfg
+    sudo wget -q -O $pwdcmd/ressources/config.cfg $githubrepo/$branch/ressources/config.cfg
+    sudo nano $pwdcmd/ressources/config.cfg
 fi
 
 counter=0
 while [ $counter -lt 1 ]; do
     clear
-    source ./ressources/config.cfg
-    source ./ressources/tanglebay.cfg
+    source $pwdcmd/ressources/config.cfg
+    source $pwdcmd/ressources/node-pool.cfg
     nodetempv="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.appVersion')"
     lmi="$(curl -s https://nodes.tanglebay.org -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestMilestoneIndex')"
     lsmi="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestSolidSubtangleMilestoneIndex')"
@@ -81,16 +89,16 @@ while [ $counter -lt 1 ]; do
     let lmi=lmi+0
     let lsmi=lsmi+0
 
-    sudo crontab -l | grep -q './ressources/watchdog' && watchdog=active || watchdog=inactive
-    if [ -f "./log/watchdog.log" ]; then
-        watchdogcount="$(cat ./log/watchdog.log | sed -n -e '1{p;q}')"
-        watchdogtime="$(cat ./log/watchdog.log | sed -n -e '2{p;q}')"
+    sudo crontab -l | grep -q '$pwdcmdressources/watchdog' && watchdog=active || watchdog=inactive
+    if [ -f "$pwdcmd/log/watchdog.log" ]; then
+        watchdogcount="$(cat $pwdcmd/log/watchdog.log | sed -n -e '1{p;q}')"
+        watchdogtime="$(cat $pwdcmd/log/watchdog.log | sed -n -e '2{p;q}')"
     fi
 
     ############################################################################################################################################################
 
     echo ""
-    echo -e $yellow "\033[1m\033[4mWelcome to the Hornet lightweight  manager! [v$version]\033[0m"
+    echo -e $yellow "\033[1m\033[4mWelcome to the Hornet lightweight manager! [v$version]\033[0m"
     echo ""
     if [ -n "$nodev" ]; then
         if [ "$nodev" == "$latesthornet" ]; then
@@ -167,63 +175,14 @@ while [ $counter -lt 1 ]; do
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
-#                latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
-#                latesthornet="${latesthornet:1}"
-                echo -e $text_yellow && echo " Installing necessary packages..." && echo -e $text_reset
-                sudo apt install nano -y
-
-                echo -e $text_yellow && echo " Starting installation of hornet" && echo -e $text_reset
-                sudo useradd -m $user
-                sudo mkdir /home/$user > /dev/null && sudo chown $user:$user /home/$user
-                sudo usermod -d /home/$user -m $user
-                sudo -u $user mkdir /home/$user/hornet
-
-                echo -e $text_yellow && echo " Downloading hornet files..." && echo -e $text_reset
-                sudo wget -qO- https://github.com/gohornet/hornet/releases/download/v$latesthornet/HORNET-"$latesthornet"_Linux_"$os".tar.gz | sudo tar -xzf - -C /home/$user/hornet
-                sudo mv /home/$user/hornet/HORNET-"$latesthornet"_Linux_"$os"/* /home/$user/hornet/
-                sudo rm -rf /home/$user/hornet/HORNET-"$latesthornet"_Linux_"$os"*
-                sudo -u $user wget -O /home/$user/hornet/export.bin $snapshot
-#                sudo sed -i 's/\"useProfile\": \"auto\"/\"useProfile\": \"'$profile'\"/g' /home/$user/hornet/config.json
-#                sudo sed -i 's/\"enabled\": false/\"enabled\": '$dashauth'/g' /home/$user/hornet/config.json
-#                sudo sed -i 's/\"username\": "hornet"/\"username\": \"'$dashuser'\"/g' /home/$user/hornet/config.json
-#                sudo sed -i 's/\"password\": "hornet"/\"password\": \"'$dashpw'\"/g' /home/$user/hornet/config.json
-#                sudo sed -i 's/\"port\": 15600/\"port\": '$nbport'/g' /home/$user/hornet/config.json
-#                sudo sed -i 's/\"example1.neighbor.com:15600\"/\"'$neighbor1'\"/g' /home/$user/hornet/neighbors.json
-#                sudo sed -i 's/\"example2.neighbor.com:15600\"/\"'$neighbor2'\"/g' /home/$user/hornet/neighbors.json
-#                sudo sed -i 's/\"example3.neighbor.com:15600\"/\"'$neighbor3'\"/g' /home/$user/hornet/neighbors.json
-                sudo -u $user mkdir /home/$user/hornet/mainnetdb
-                sudo chown -R $user:$user /home/$user/hornet
-                sudo chmod 770 /home/$user/hornet/hornet
-
-                echo -e $text_yellow && echo " Creating service for hornet..." && echo -e $text_reset
-                {
-                echo "[Unit]"
-                echo "Description=HORNET Fullnode"
-                echo "After=network.target"
-                echo ""
-                echo "[Service]"
-                echo "WorkingDirectory=/home/$user/hornet"
-                echo "User=$user"
-                echo "TasksMax=infinity"
-                echo "KillSignal=SIGTERM"
-                echo "TimeoutStopSec=infinity"
-                echo "ExecStart=/home/$user/hornet/hornet -c config"
-                echo "SyslogIdentifier=HORNET"
-                echo "Restart=on-failure"
-                echo "RestartSec=1200"
-                echo ""
-                echo "[Install]"
-                echo "WantedBy=multi-user.target"
-                echo "Alias=hornet.service"
-                } > /lib/systemd/system/hornet.service
-
-                echo -e $text_yellow && echo " Activate hornet service..." && echo -e $text_reset
-                sudo systemctl daemon-reload
-                sudo systemctl enable hornet.service
-                echo -e $text_yellow && echo " Starting hornet node! (Please note that this may take some time)" && echo -e $text_reset
-                sudo systemctl restart hornet
-                sudo systemctl status hornet
-
+                sudo wget -qO - https://ppa.hornet.zone/pubkey.txt | sudo apt-key add -
+                sudo sh -c 'echo "deb http://ppa.hornet.zone testing main" >> /etc/apt/sources.list.d/hornet.list'
+                sudo apt update
+                sudo apt install hornet -y
+                check="$(systemctl show -p ActiveState --value hornet)"
+                if [ "$check" != "active" ]; then
+                    sudo systecmtl restart hornet
+                fi
                 echo -e $text_yellow && echo " Hornet installation finished!" && echo -e $text_reset
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
@@ -231,7 +190,7 @@ while [ $counter -lt 1 ]; do
 
             if [ "$selector" = "2" ]; then
                 echo -e $text_yellow && echo " Installing necessary packages..." && echo -e $text_reset
-                sudo apt install software-properties-common curl jq -y
+                sudo apt install software-properties-common -y
                 sudo add-apt-repository ppa:certbot/certbot -y > /dev/null
                 sudo apt update && sudo apt install python-certbot-nginx -y
                 sudo apt update && sudo apt dist-upgrade -y && sudo apt upgrade -y && apt autoremove -y
@@ -242,7 +201,7 @@ while [ $counter -lt 1 ]; do
                 sudo systemctl daemon-reload
 
                 echo -e $text_yellow && echo " Copying Nginx configuration..." && echo -e $text_reset
-                sudo cp ./ressources/nginx-config.template /etc/nginx/sites-available/default
+                sudo cp $pwdcmd/ressources/nginx-config.template /etc/nginx/sites-available/default
                 sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
                 sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
                 sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
@@ -253,7 +212,7 @@ while [ $counter -lt 1 ]; do
                 sudo certbot --nginx -d $domain
 
                 if [ -f "/etc/letsencrypt/live/$domain/fullchain.pem" ]; then
-                    sudo cp ./ressources/nginx-config.template /etc/nginx/sites-available/default
+                    sudo cp $pwdcmd/ressources/nginx-config.template /etc/nginx/sites-available/default
                     sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
                     sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
                     sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
@@ -272,9 +231,9 @@ while [ $counter -lt 1 ]; do
                 cronjob="*/15 * * * * $croncmd"
                 if [ "$selector_watchdog" = "1" ]; then
                     echo -e $text_yellow && echo " Enable hornet watchdog..." && echo -e $text_reset
-                    sudo mkdir -p ./log
-                    sudo echo "0" > ./log/watchdog.log
-                    sudo chmod 700 ./ressources/watchdog
+                    sudo mkdir -p $pwdcmd/log
+                    sudo echo "0" > $pwdcmd/log/watchdog.log
+                    sudo chmod 700 $pwdcmd/ressources/watchdog
                     ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
                 fi
                 if [ "$selector_watchdog" = "2" ]; then
@@ -502,12 +461,12 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "3" ] ; then
-                if [ ! -f "./ressources/tanglebay.cfg" ]; then
+                if [ ! -f "$pwdcmd/ressources/node-pool.cfg" ]; then
                     echo -e $text_yellow && echo " No config file found...Downloading config file!" && echo -e $text_reset
-                    sudo -u $user wget -q -O ./ressources/tanglebay.cfg $githubrepo/$branch/ressources/tanglebay.cfg
+                    sudo -u $user wget -q -O $pwdcmd/ressources/node-pool.cfg $githubrepo/$branch/ressources/node-pool.cfg
                     echo -e $text_yellow && echo " Please try again!" && echo -e $text_reset
                 else
-                    sudo nano ./ressources/tanglebay.cfg
+                    sudo nano $pwdcmd/ressources/node-pool.cfg
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $text_reset
@@ -515,12 +474,12 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "4" ] ; then
-                if [ ! -f "./ressources/config.cfg" ]; then
+                if [ ! -f "$pwdcmd/ressources/config.cfg" ]; then
                     echo -e $text_yellow && echo " No config file found...Downloading config file!" && echo -e $text_reset
-                    sudo -u $user wget -q -O ./ressources/config.cfg $githubrepo/$branch/ressources/config.cfg
+                    sudo -u $user wget -q -O $pwdcmd/ressources/config.cfg $githubrepo/$branch/ressources/config.cfg
                     echo -e $text_yellow && echo " Please try again!" && echo -e $text_reset
                 else
-                    sudo nano ./ressources/config.cfg
+                    sudo nano $pwdcmd/ressources/config.cfg
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $text_reset

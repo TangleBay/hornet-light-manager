@@ -5,7 +5,7 @@
 
 **Download the latest release version of the script and run it. Do the following steps:**
 
-1. First you should clone the repo `cd ~ && git clone https://github.com/TangleBay/Hornet-Light-Manager.git && cd Hornet-Light-Manager`
+1. First you should clone the repo `cd /var/lib && git clone https://github.com/TangleBay/hlm.git && cd hlm`
 2. `sudo chmod +x hlm`
 3. Run the Manager (HLM): `sudo ./hlm`
 4. With the first start, no config is detected and it will downloaded automatically and opened to edit.
