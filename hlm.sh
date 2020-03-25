@@ -224,13 +224,13 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "3" ]; then
                 echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel hornet watchdog: " selector_watchdog
                 echo -e $text_reset
-                croncmd="$pwdcmd/ressources/watchdog"
+                croncmd="$pwdcmd/ressources/watchdog.sh"
                 cronjob="*/15 * * * * $croncmd"
                 if [ "$selector_watchdog" = "1" ]; then
                     echo -e $text_yellow && echo " Enable hornet watchdog..." && echo -e $text_reset
                     sudo mkdir -p $pwdcmd/log
                     sudo echo "0" > $pwdcmd/log/watchdog.log
-                    sudo chmod 700 $pwdcmd/ressources/watchdog
+                    sudo chmod 700 $pwdcmd/ressources/watchdog.sh
                     ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
                 fi
                 if [ "$selector_watchdog" = "2" ]; then
