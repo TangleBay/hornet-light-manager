@@ -5,10 +5,10 @@
 
 **Download the latest release version of the script and run it. Do the following steps:**
 
-1. First you should clone the repo `cd /var/lib && git clone https://github.com/TangleBay/hlm.git && cd hlm`
-2. `sudo chmod +x hlm`
-3. Run the Manager (HLM): `sudo ./hlm`
-4. With the first start, no config is detected and it will downloaded automatically and opened to edit.
+1. First you should clone the repo `cd /var/lib && sudo git clone https://github.com/TangleBay/hornet-light-manager.git && sudo chmod +x /var/lib/hornet-light-manager/hlm.sh`
+2. Set aliases for run hlm from every source `echo "alias hlm='/var/lib/hornet-light-manager/hlm.sh'" >> ~/.bashrc && echo "alias sudo='sudo '" >> ~/.bashrc && . ~/.bashrc`
+3. Run the Manager (HLM): `sudo hlm`
+4. With the first start it is necessary to edit the HLM config!!!
 
 
 # Install reverse proxy #

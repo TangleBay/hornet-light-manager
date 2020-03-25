@@ -86,7 +86,7 @@ while [ $counter -lt 1 ]; do
     let lmi=lmi+0
     let lsmi=lsmi+0
 
-    sudo crontab -l | grep -q '$pwdcmd/ressources/watchdog' && watchdog=active || watchdog=inactive
+    sudo crontab -l | grep -q $pwdcmd/ressources/watchdog && watchdog=active || watchdog=inactive
     if [ -f "$pwdcmd/log/watchdog.log" ]; then
         watchdogcount="$(cat $pwdcmd/log/watchdog.log | sed -n -e '1{p;q}')"
         watchdogtime="$(cat $pwdcmd/log/watchdog.log | sed -n -e '2{p;q}')"
@@ -173,7 +173,7 @@ while [ $counter -lt 1 ]; do
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
                 sudo wget -qO - https://ppa.hornet.zone/pubkey.txt | sudo apt-key add -
-                sudo sh -c 'echo "deb http://ppa.hornet.zone testing main" >> /etc/apt/sources.list.d/hornet.list'
+                sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" >> /etc/apt/sources.list.d/hornet.list'
                 sudo apt update
                 sudo apt install hornet -y
                 check="$(systemctl show -p ActiveState --value hornet)"
@@ -316,8 +316,6 @@ while [ $counter -lt 1 ]; do
                         echo -e "$text_green Already up to date."
                     else
                         echo -e $text_red " New Hornet version found... $text_red(v$latesthornet)"
-        #                latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
-        #                latesthornet="${latesthornet:1}"
                         echo -e $text_yellow " Stopping hornet node...(Please note that this may take some time)"
                         sudo systemctl stop hornet
                         echo -e $text_yellow " Updating hornet..."
@@ -451,8 +449,6 @@ while [ $counter -lt 1 ]; do
                 else
                     sudo nano $pwdcmd/ressources/config.cfg
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
-                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $text_reset
                 fi
             fi
 
