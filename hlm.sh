@@ -76,7 +76,6 @@ counter=0
 while [ $counter -lt 1 ]; do
     clear
     source $pwdcmd/ressources/config.cfg
-    source $pwdcmd/ressources/node-pool.cfg
     nodetempv="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.appVersion')"
     lmi="$(curl -s https://nodes.tanglebay.org -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestMilestoneIndex')"
     lsmi="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestSolidSubtangleMilestoneIndex')"
@@ -86,7 +85,7 @@ while [ $counter -lt 1 ]; do
     let lmi=lmi+0
     let lsmi=lsmi+0
 
-    sudo crontab -l | grep -q '$pwdcmdressources/watchdog' && watchdog=active || watchdog=inactive
+    sudo crontab -l | grep -q '$pwdcmd/ressources/watchdog' && watchdog=active || watchdog=inactive
     if [ -f "$pwdcmd/log/watchdog.log" ]; then
         watchdogcount="$(cat $pwdcmd/log/watchdog.log | sed -n -e '1{p;q}')"
         watchdogtime="$(cat $pwdcmd/log/watchdog.log | sed -n -e '2{p;q}')"
@@ -95,38 +94,38 @@ while [ $counter -lt 1 ]; do
     ############################################################################################################################################################
 
     echo ""
-    echo -e $yellow "\033[1m\033[4mWelcome to the Hornet lightweight manager! [v$version]\033[0m"
+    echo -e $text_yellow "\033[1m\033[4mWelcome to the Hornet lightweight manager! [v$version]\033[0m"
     echo ""
     if [ -n "$nodev" ]; then
         if [ "$nodev" == "$latesthornet" ]; then
-            echo -e "$yellow Version:$text_green $nodev"
+            echo -e "$text_yellow Version:$text_green $nodev"
         else
-            echo -e "$yellow Version:$text_red $nodev"
+            echo -e "$text_yellow Version:$text_red $nodev"
         fi
     else
-        echo -e "$yellow Version:$text_red N/A"
+        echo -e "$text_yellow Version:$text_red N/A"
     fi
     echo ""
     if [ -n "$nodev" ]; then
         let milestone=$lmi-$lsmi
         if [ $milestone -gt 4 ]; then
-            echo -e "$yellow Status:$text_red not synced"
-            echo -e "$yellow Delay: $text_red$milestone$yellow milestone(s)"
+            echo -e "$text_yellow Status:$text_red not synced"
+            echo -e "$text_yellow Delay: $text_red$milestone$text_yellow milestone(s)"
         else
-            echo -e "$yellow Status:$text_green synced"
-            echo -e "$yellow Delay: $milestone$yellow milestone(s)"
+            echo -e "$text_yellow Status:$text_green synced"
+            echo -e "$text_yellow Delay: $milestone$text_yellow milestone(s)"
         fi
     else
-        echo -e "$yellow Status:$text_red offline"
+        echo -e "$text_yellow Status:$text_red offline"
     fi
     echo ""
     if [ "$watchdog" != "active" ]; then
-        echo -e "$yellow Watchdog:$text_red $watchdog"
+        echo -e "$text_yellow Watchdog:$text_red $watchdog"
     else
-        echo -e "$yellow Watchdog:$text_green $watchdog"
-        echo -e "$yellow Restarts:$text_red $watchdogcount"
+        echo -e "$text_yellow Watchdog:$text_green $watchdog"
+        echo -e "$text_yellow Restarts:$text_red $watchdogcount"
         if [ -n "$watchdogtime" ]; then
-            echo -e "$yellow Last restart: $watchdogtime"
+            echo -e "$text_yellow Last restart: $watchdogtime"
         fi
     fi
     echo ""
@@ -140,7 +139,7 @@ while [ $counter -lt 1 ]; do
     echo ""
     echo " 2) Hornet Node"
     echo ""
-    echo " 3) einfachIOTA Pool"
+    echo " 3) Node Pool"
     echo ""
     echo " 4) Edit Configurations"
     echo ""
@@ -320,20 +319,8 @@ while [ $counter -lt 1 ]; do
         #                latesthornet="${latesthornet:1}"
                         echo -e $text_yellow " Stopping hornet node...(Please note that this may take some time)"
                         sudo systemctl stop hornet
-                        echo -e $text_yellow " Downloading new hornet file..."
-                        sudo wget -qO- https://github.com/gohornet/hornet/releases/download/v$latesthornet/HORNET-"$latesthornet"_Linux_"$os".tar.gz | sudo tar -xzf - -C /home/$user/hornet
-                        sudo mv /home/$user/hornet/HORNET-"$latesthornet"_Linux_"$os"/hornet /home/$user/hornet/
-                        echo -e $text_yellow " Backup & replace current config file..."
-                        sudo mv /home/$user/hornet/config.json /home/$user/hornet/config.json.bak
-                        sudo mv /home/$user/hornet/HORNET-"$latesthornet"_Linux_"$os"/config.json /home/$user/hornet/
-        #                sudo sed -i 's/\"useProfile\": \"auto\"/\"useProfile\": \"'$profile'\"/g' /home/$user/hornet/config.json
-        #                sudo sed -i 's/\"enabled\": false/\"enabled\": '$dashauth'/g' /home/$user/hornet/config.json
-        #                sudo sed -i 's/\"username\": "hornet"/\"username\": \"'$dashuser'\"/g' /home/$user/hornet/config.json
-        #                sudo sed -i 's/\"password\": "hornet"/\"password\": \"'$dashpw'\"/g' /home/$user/hornet/config.json
-        #                sudo sed -i 's/\"port\": 15600/\"port\": '$nbport'/g' /home/$user/hornet/config.json
-                        sudo rm -rf /home/$user/hornet/HORNET-"$latesthornet"_Linux_"$os"*
-                        sudo chown -R $user:$user /home/$user/hornet/
-                        sudo chmod 770 /home/$user/hornet/hornet
+                        echo -e $text_yellow " Updating hornet..."
+                        apt update && sudo apt install -y --force-confnew --only-upgrade hornet 
                         echo -e $text_yellow " Starting hornet node..."
                         sudo systemctl start hornet
                         echo -e $text_yellow " Updating hornet version finished!"
@@ -347,12 +334,12 @@ while [ $counter -lt 1 ]; do
 
             if [ "$selector" = "4" ]; then
                 sudo systemctl stop hornet
-                sudo rm -rf /home/$user/hornet/mainnetdb/
+                sudo rm -rf /var/lib/hornet/mainnetdb/
                 echo -e $TEXT_RED_B && read -p " Would you like to download the latest snapshot (y/N): " selector6
                 echo -e $text_reset
                 if [ "$selector6" = "y" ] || [ "$selector6" = "Y" ]; then
                     echo -e $text_yellow && echo " Downloading snapshot file..." && echo -e $text_reset
-                    sudo -u $user wget -O /home/$user/hornet/export.bin $snapshot
+                    sudo -u $user wget -O /var/lib/hornet/export.bin $snapshot
                 fi
                 sudo systemctl restart hornet
                 echo -e $text_yellow && echo " Reset of the database finished and hornet restarted!" && echo -e $text_reset
@@ -423,10 +410,9 @@ while [ $counter -lt 1 ]; do
             echo ""
             echo -e $text_red "\033[1m\033[4mEdit Configurations\033[0m"
             echo -e $text_yellow ""
-            echo " 1) Edit node config.json"
+            echo " 1) Edit hornet config.json"
             echo " 2) Edit node neighbors.json"
-            echo " 3) Edit pool config.cfg"
-            echo " 4) Edit HLM config.cfg"
+            echo " 3) Edit HLM config.cfg"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
             echo ""
@@ -437,7 +423,7 @@ while [ $counter -lt 1 ]; do
             echo -e $text_reset
 
             if [ "$selector" = "1" ] ; then
-                sudo nano /home/$user/hornet/config.json
+                sudo nano /var/lib/hornet/config.json
                 echo -e $TEXT_RED_B && read -p " Would you like to restart hornet now (y/N): " selector4
                 if [ "$selector4" = "y" ] || [ "$selector4" = "y" ]; then
                     sudo systemctl restart hornet
@@ -447,30 +433,16 @@ while [ $counter -lt 1 ]; do
                 fi
             fi
             if [ "$selector" = "2" ] ; then
-                if [ ! -f "/home/$user/hornet/neighbors.json" ]; then
+                if [ ! -f "/var/lib/hornet/neighbors.json" ]; then
                     echo -e $text_yellow && echo " No neighbors.json found...Downloading config file!" && echo -e $text_reset
-                    sudo -u $user wget -q -O /home/$user/hornet/neighbors.json https://raw.githubusercontent.com/gohornet/hornet/master/neighbors.json
+                    sudo -u $user wget -q -O /var/lib/hornet/neighbors.json https://raw.githubusercontent.com/gohornet/hornet/master/neighbors.json
                 fi
-                sudo nano /home/$user/hornet/neighbors.json
+                sudo nano /var/lib/hornet/neighbors.json
                 echo -e $text_yellow && echo " New neighbors configuration loaded!" && echo -e $text_reset
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
-
             if [ "$selector" = "3" ] ; then
-                if [ ! -f "$pwdcmd/ressources/node-pool.cfg" ]; then
-                    echo -e $text_yellow && echo " No config file found...Downloading config file!" && echo -e $text_reset
-                    sudo -u $user wget -q -O $pwdcmd/ressources/node-pool.cfg $githubrepo/$branch/ressources/node-pool.cfg
-                    echo -e $text_yellow && echo " Please try again!" && echo -e $text_reset
-                else
-                    sudo nano $pwdcmd/ressources/node-pool.cfg
-                    echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
-                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $text_reset
-                fi
-            fi
-
-            if [ "$selector" = "4" ] ; then
                 if [ ! -f "$pwdcmd/ressources/config.cfg" ]; then
                     echo -e $text_yellow && echo " No config file found...Downloading config file!" && echo -e $text_reset
                     sudo -u $user wget -q -O $pwdcmd/ressources/config.cfg $githubrepo/$branch/ressources/config.cfg
