@@ -55,9 +55,6 @@ if [ $(id -u) -ne 0 ]; then
     exit 0
 fi
 
-# Set HLM Variable
-echo "hlm=$pwdcmd/hlm" >> /etc/environment
-
 if [ "$version" != "$latesthlm" ]; then
     echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $text_reset
     sudo wget -O $pwdcmd/hlm $githubrepo/$branch/hlm
@@ -138,7 +135,7 @@ while [ $counter -lt 1 ]; do
     echo ""
     echo -e $text_red "\033[1m\033[4mManagement\033[0m"
     echo ""
-    echo -e $yellow
+    echo -e $text_yellow
     echo " 1) Installations"
     echo ""
     echo " 2) Hornet Node"
@@ -149,7 +146,7 @@ while [ $counter -lt 1 ]; do
     echo ""
     echo -e "\e[90m-----------------------------------------------------------"
     echo ""
-    echo -e $yellow "x) Exit"
+    echo -e $text_yellow "x) Exit"
     echo ""
     echo -e "\e[90m==========================================================="
     echo -e $text_yellow && read -t 30 -p " Please type in your option: " selector
@@ -161,7 +158,7 @@ while [ $counter -lt 1 ]; do
             clear
             echo ""
             echo -e $text_red "\033[1m\033[4mInstaller Manager\033[0m"
-            echo -e $yellow ""
+            echo -e $text_yellow ""
             echo " 1) Installer for hornet"
             echo " 2) Installer for nginx reverse proxy"
             echo " 3) Installer for Watchdog"
@@ -169,7 +166,7 @@ while [ $counter -lt 1 ]; do
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
             echo ""
-            echo -e $yellow "x) Back"
+            echo -e $text_yellow "x) Back"
             echo ""
             echo -e "\e[90m==========================================================="
             echo -e $text_yellow && read -p " Please type in your option: " selector
