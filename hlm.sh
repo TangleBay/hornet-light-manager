@@ -5,14 +5,16 @@
 # DO NOT EDIT THE LINES BELOW !!! DO NOT EDIT THE LINES BELOW !!! DO NOT EDIT THE LINES BELOW !!! DO NOT EDIT THE LINES BELOW !!!
 ############################################################################################################################################################
 ############################################################################################################################################################
+
 version=0.0.1
 
-TEXT_RESET='\e[0m'
-TEXT_YELLOW='\e[0;33m'
+############################################################################################################################################################
+
 TEXT_RED_B='\e[1;31m'
-yellow='\e[33m'
-green='\e[32m'
-red='\e[31m'
+text_yellow='\e[33m'
+text_green='\e[32m'
+text_red='\e[31m'
+text_reset='\e[0m'
 clear
 
 function pause(){
@@ -20,170 +22,286 @@ function pause(){
 }
 
 if ! [ -x "$(command -v curl)" ]; then
-    echo -e $TEXT_YELLOW && echo "Installing necessary packages curl..." && echo -e $TEXT_RESET
+    echo -e $text_yellow && echo "Installing necessary packages curl..." && echo -e $text_reset
     sudo apt install curl -y > /dev/null
     clear
 fi
 if ! [ -x "$(command -v jq)" ]; then
-    echo -e $TEXT_YELLOW && echo "Installing necessary package jq..." && echo -e $TEXT_RESET
+    echo -e $text_yellow && echo "Installing necessary package jq..." && echo -e $text_reset
     sudo apt install jq -y > /dev/null
     clear
 fi
-
-############################################################################################################################################################
-
-snapshot="$(curl -s https://raw.githubusercontent.com/TangleBay/hornet-light-manager/master/ressources/snapshot.conf)"
-latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
-latesthornet="${latesthornet:1}"
-latesthlm="$(curl -s https://api.github.com/repos/TangleBay/hornet-light-manager/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
-pwdcmd="$(pwd)"
-
-############################################################################################################################################################
-
-if [ $(id -u) -ne 0 ]; then 
-    echo -e $TEXT_RED_B "Please run HLM with sudo or as root"
-    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-    echo -e $TEXT_RESET
-    exit 0
+if ! [ -x "$(command -v nano)" ]; then
+    echo -e $text_yellow && echo "Installing necessary package nano..." && echo -e $text_reset
+    sudo apt install nano -y > /dev/null
+    clear
 fi
 
 
+############################################################################################################################################################
+
+githubrepo="https://raw.githubusercontent.com/TangleBay/hornet-light-manager"
+snapshot="$(curl -s $githubrepo/$branch/ressources/snapshot.cfg)"
+latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
+latesthornet="${latesthornet:1}"
+latesthlm="$(curl -s https://api.github.com/repos/TangleBay/hornet-light-manager/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
+pwdcmd=`dirname "$BASH_SOURCE"`
+
+############################################################################################################################################################
+
+if [ $(id -u) -ne 0 ]; then
+    echo -e $TEXT_RED_B "Please run HLM with sudo or as root"
+    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+    echo -e $text_reset
+    exit 0
+fi
+
 if [ "$version" != "$latesthlm" ]; then
-    echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $TEXT_RESET
-    sudo -u $user git pull
-    echo -e $TEXT_YELLOW && echo "Backup current HLI config..." && echo -e $TEXT_RESET
+    echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $text_reset
+    sudo wget -O $pwdcmd/hlm $githubrepo/$branch/hlm
+    sudo wget -O $pwdcmd/ressources/config.cfg $githubrepo/$branch/ressources/config.cfg
+    sudo nano $pwdcmd/ressources/config.cfg
+    echo -e $text_yellow && echo "Backup current HLI config..." && echo -e $text_reset
     ScriptLoc=$(readlink -f "$0")
     exec "$ScriptLoc"
     exit 0
 fi
 
-if [ ! -f "config.sh" ]; then
-    echo -e $TEXT_YELLOW && echo " First run detected...Downloading config file!" && echo -e $TEXT_RESET
-    sudo wget -q -O ./ressources/config.sh https://raw.githubusercontent.com/TangleBay/hornet-light-manager/master/ressources/config.sh
-    sudo nano ./ressources/config.sh
+if [ ! -f "$pwdcmd/ressources/config.cfg" ]; then
+    echo -e $text_yellow && echo " No config detected...Downloading config file!" && echo -e $text_reset
+    sudo wget -q -O $pwdcmd/ressources/config.cfg $githubrepo/$branch/ressources/config.cfg
+    sudo nano $pwdcmd/ressources/config.cfg
 fi
 
 counter=0
 while [ $counter -lt 1 ]; do
     clear
-    source ./ressources/config.sh
+    source $pwdcmd/ressources/config.cfg
     nodetempv="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.appVersion')"
-    rlmi="$(curl -s https://nodes.tanglebay.org -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestMilestoneIndex')"
-    llmi="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestSolidSubtangleMilestoneIndex')"
+    lmi="$(curl -s https://nodes.tanglebay.org -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestMilestoneIndex')"
+    lsmi="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestSolidSubtangleMilestoneIndex')"
 
     nodev="${nodetempv%\"}"
     nodev="${nodev#\"}"
-    let rlmi=rlmi+0
-    let llmi=llmi+0
+    let lmi=lmi+0
+    let lsmi=lsmi+0
 
-    sudo crontab -l | grep -q './log/watchdog'  && watchdog=active || watchdog=inactive
-    if [ -f "./log/watchdog.log" ]; then
-        watchdogcount="$(cat ./log/watchdog.log | sed -n -e '1{p;q}')"
-        watchdogtime="$(cat ./log/watchdog.log | sed -n -e '2{p;q}')"
+    sudo crontab -l | grep -q $pwdcmd/ressources/watchdog && watchdog=active || watchdog=inactive
+    if [ -f "$pwdcmd/log/watchdog.log" ]; then
+        watchdogcount="$(cat $pwdcmd/log/watchdog.log | sed -n -e '1{p;q}')"
+        watchdogtime="$(cat $pwdcmd/log/watchdog.log | sed -n -e '2{p;q}')"
     fi
 
     ############################################################################################################################################################
 
     echo ""
-    echo -e $yellow "\033[1m\033[4mWelcome to the Hornet lightweight  manager! [v$version]\033[0m"
+    echo -e $text_yellow "\033[1m\033[4mWelcome to the Hornet lightweight manager! [v$version]\033[0m"
     echo ""
     if [ -n "$nodev" ]; then
         if [ "$nodev" == "$latesthornet" ]; then
-            echo -e "$yellow Version:$green $nodev"
+            echo -e "$text_yellow Version:$text_green $nodev"
         else
-            echo -e "$yellow Version:$red $nodev"
+            echo -e "$text_yellow Version:$text_red $nodev"
         fi
     else
-        echo -e "$yellow Version:$red N/A"
+        echo -e "$text_yellow Version:$text_red N/A"
     fi
     echo ""
     if [ -n "$nodev" ]; then
-        let lmi=$rlmi-$llmi
-        if [ $lmi -gt 4 ]; then
-            echo -e "$yellow Status:$red not synced"
-            echo -e "$yellow Delay: $red$lmi$yellow milestone(s)"
+        let milestone=$lmi-$lsmi
+        if [ $milestone -gt 4 ]; then
+            echo -e "$text_yellow Status:$text_red not synced"
+            echo -e "$text_yellow Delay: $text_red$milestone$text_yellow milestone(s)"
         else
-            echo -e "$yellow Status:$green synced"
-            echo -e "$yellow Delay: $lmi$yellow milestone(s)"
+            echo -e "$text_yellow Status:$text_green synced"
+            echo -e "$text_yellow Delay: $milestone$text_yellow milestone(s)"
         fi
     else
-        echo -e "$yellow Status:$red offline"
+        echo -e "$text_yellow Status:$text_red offline"
     fi
     echo ""
     if [ "$watchdog" != "active" ]; then
-        echo -e "$yellow Watchdog:$red $watchdog"
+        echo -e "$text_yellow Watchdog:$text_red $watchdog"
     else
-        echo -e "$yellow Watchdog:$green $watchdog"
-        echo -e "$yellow Restarts:$red $watchdogcount"
+        echo -e "$text_yellow Watchdog:$text_green $watchdog"
+        echo -e "$text_yellow Restarts:$text_red $watchdogcount"
         if [ -n "$watchdogtime" ]; then
-            echo -e "$yellow Last restart: $watchdogtime"
+            echo -e "$text_yellow Last restart: $watchdogtime"
         fi
     fi
     echo ""
 
     echo -e "\e[90m==========================================================="
     echo ""
-    echo -e $red "\033[1m\033[4mManagement\033[0m"
+    echo -e $text_red "\033[1m\033[4mManagement\033[0m"
     echo ""
-    echo -e $yellow
-    echo " 1) Hornet Manager"
+    echo -e $text_yellow
+    echo " 1) Installations"
     echo ""
-    echo " 2) Tangle Bay Manager"
+    echo " 2) Hornet Node"
     echo ""
-    echo " 3) Installs Manager"
+    echo " 3) Node Pool"
+    echo ""
+    echo " 4) Edit Configurations"
     echo ""
     echo -e "\e[90m-----------------------------------------------------------"
     echo ""
-    echo -e $yellow "x) Exit"
+    echo -e $text_yellow "x) Exit"
     echo ""
     echo -e "\e[90m==========================================================="
-    echo -e $TEXT_YELLOW && read -t 30 -p " Please type in your option: " selector
-    echo -e $TEXT_RESET
+    echo -e $text_yellow && read -t 30 -p " Please type in your option: " selector
+    echo -e $text_reset
 
-    if [ "$selector" = "1" ] ; then
+    if [ "$selector" = "1" ]; then
         counter1=0
         while [ $counter1 -lt 1 ]; do
             clear
             echo ""
-            echo -e $red "\033[1m\033[4mHornet Manager\033[0m"
-            echo -e $yellow ""
-            echo " 1) Control hornet (start/stop)"
-            echo " 2) Show last live log"
-            echo " 3) Edit neighbors.json"
-            echo " 4) Edit config.json"
-            echo " 5) Update the hornet node"
-            echo " 6) Delete mainnet database"
-            echo " 7) Manage watchdog"
+            echo -e $text_red "\033[1m\033[4mInstaller Manager\033[0m"
+            echo -e $text_yellow ""
+            echo " 1) Installer for hornet"
+            echo " 2) Installer for nginx reverse proxy"
+            echo " 3) Installer for Watchdog"
+            echo " r) Reset Hornet-Light-Manager"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
             echo ""
-            echo -e $yellow "x) Back"
+            echo -e $text_yellow "x) Back"
             echo ""
             echo -e "\e[90m==========================================================="
-            echo -e $TEXT_YELLOW && read -p " Please type in your option: " selector
-            echo -e $TEXT_RESET
+            echo -e $text_yellow && read -p " Please type in your option: " selector
+            echo -e $text_reset
+            if [ "$selector" = "1" ]; then
+                sudo wget -qO - https://ppa.hornet.zone/pubkey.txt | sudo apt-key add -
+                sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" >> /etc/apt/sources.list.d/hornet.list'
+                sudo apt update
+                sudo apt install hornet -y
+                check="$(systemctl show -p ActiveState --value hornet)"
+                if [ "$check" != "active" ]; then
+                    sudo systecmtl restart hornet
+                fi
+                echo -e $text_yellow && echo " Hornet installation finished!" && echo -e $text_reset
+                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                echo -e $text_reset
+            fi
+
+            if [ "$selector" = "2" ]; then
+                echo -e $text_yellow && echo " Installing necessary packages..." && echo -e $text_reset
+                sudo apt install software-properties-common -y
+                sudo add-apt-repository ppa:certbot/certbot -y > /dev/null
+                sudo apt update && sudo apt install python-certbot-nginx -y
+                sudo apt update && sudo apt dist-upgrade -y && sudo apt upgrade -y && apt autoremove -y
+
+                echo -e $text_yellow && echo " Updating Nginx..." && echo -e $text_reset
+                sudo mkdir /etc/systemd/system/nginx.service.d
+                sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
+                sudo systemctl daemon-reload
+
+                echo -e $text_yellow && echo " Copying Nginx configuration..." && echo -e $text_reset
+                sudo cp $pwdcmd/ressources/nginx-config.template /etc/nginx/sites-available/default
+                sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
+                sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
+                sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
+                sudo find /etc/nginx/nginx.conf -type f -exec sed -i 's/\# server_names_hash_bucket_size 64;/server_names_hash_bucket_size 64;/g' {} \;
+                sudo systemctl restart nginx
+
+                echo -e $text_yellow && echo " Starting SSL-Certificate installation..." && echo -e $text_reset
+                sudo certbot --nginx -d $domain
+
+                if [ -f "/etc/letsencrypt/live/$domain/fullchain.pem" ]; then
+                    sudo cp $pwdcmd/ressources/nginx-config.template /etc/nginx/sites-available/default
+                    sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
+                    sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
+                    sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
+                    sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/\#RjtV27dw/''/g' {} \;
+                    sudo systemctl restart nginx
+                fi
+                echo -e $text_yellow && echo " Reverse proxy installation finished!" && echo -e $text_reset
+                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                echo -e $text_reset
+            fi
+
+            if [ "$selector" = "3" ]; then
+                echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel hornet watchdog: " selector_watchdog
+                echo -e $text_reset
+                croncmd="$pwdcmd/ressources/watchdog"
+                cronjob="*/15 * * * * $croncmd"
+                if [ "$selector_watchdog" = "1" ]; then
+                    echo -e $text_yellow && echo " Enable hornet watchdog..." && echo -e $text_reset
+                    sudo mkdir -p $pwdcmd/log
+                    sudo echo "0" > $pwdcmd/log/watchdog.log
+                    sudo chmod 700 $pwdcmd/ressources/watchdog
+                    ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
+                fi
+                if [ "$selector_watchdog" = "2" ]; then
+                    echo -e $text_yellow && echo " Disable hornet watchdog..." && echo -e $text_reset
+                    ( crontab -l | grep -v -F "$croncmd" ) | crontab -
+                fi
+                echo -e $text_yellow && echo " Hornet watchdog configuration finished!" && echo -e $text_reset
+                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                echo -e $text_reset
+            fi
+
+            if [ "$selector" = "r" ] || [ "$selector" = "R" ]; then
+                echo -e $TEXT_RED_B && read -p " Are you sure you want to reset HLM (y/N): " selector_hlmreset
+                if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
+                    sudo git reset --hard origin/$branch
+                    echo -e $text_red " HLM was successfully reset!"
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
+                fi
+            fi
+
+            if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
+                counter1=1
+            fi
+        done
+        unset selector
+    fi
+
+############################################################################################################################################################
+
+    if [ "$selector" = "2" ] ; then
+        counter2=0
+        while [ $counter2 -lt 1 ]; do
+            clear
+            echo ""
+            echo -e $text_red "\033[1m\033[4mHornet Management\033[0m"
+            echo -e $text_yellow ""
+            echo " 1) Control hornet (start/stop)"
+            echo " 2) Show latest node log"
+            echo " 3) Update the hornet version"
+            echo " 4) Reset mainnet database"
+            echo ""
+            echo -e "\e[90m-----------------------------------------------------------"
+            echo ""
+            echo -e $text_yellow "x) Back"
+            echo ""
+            echo -e "\e[90m==========================================================="
+            echo -e $text_yellow && read -p " Please type in your option: " selector
+            echo -e $text_reset
             if [ "$selector" = "1" ] ; then
                 echo -e $TEXT_RED_B && read -p " Would you like to (1)restart/(2)stop/(3)status or (c)ancel: " selector1
-                echo -e $TEXT_RESET
+                echo -e $text_reset
                 if [ "$selector1" = "1" ]; then
                     unset selector1
                     sudo systemctl restart hornet
-                    echo -e $TEXT_YELLOW && echo " Hornet node (re)started!" && echo -e $TEXT_RESET
+                    echo -e $text_yellow && echo " Hornet node (re)started!" && echo -e $text_reset
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $TEXT_RESET
+                    echo -e $text_reset
                 fi
                 if [ "$selector1" = "2" ]; then
                     unset selector1
                     sudo systemctl stop hornet
-                    echo -e $TEXT_YELLOW && echo " Hornet node stopped!" && echo -e $TEXT_RESET
+                    echo -e $text_yellow " Hornet node stopped!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $TEXT_RESET
+                    echo -e $text_reset
                 fi
                 if [ "$selector1" = "3" ]; then
                     unset selector1
                     sudo systemctl status hornet
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $TEXT_RESET
+                    echo -e $text_reset
                 fi
             fi
 
@@ -192,143 +310,42 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "3" ] ; then
-                if [ ! -f "/home/$user/hornet/neighbors.json" ]; then
-                    echo -e $TEXT_YELLOW && echo " No neighbors.json found...Downloading config file!" && echo -e $TEXT_RESET
-                    sudo -u $user wget -q -O /home/$user/hornet/neighbors.json https://raw.githubusercontent.com/gohornet/hornet/master/neighbors.json
+                if [ -n "$nodev" ]; then
+                    echo -e $text_yellow " Checking if a new version is available..."
+                    if [ "$nodev" == "$latesthornet" ]; then
+                        echo -e "$text_green Already up to date."
+                    else
+                        echo -e $text_red " New Hornet version found... $text_red(v$latesthornet)"
+                        echo -e $text_yellow " Stopping hornet node...(Please note that this may take some time)"
+                        sudo systemctl stop hornet
+                        echo -e $text_yellow " Updating hornet..."
+                        apt update && sudo apt install -y --force-confnew --only-upgrade hornet 
+                        echo -e $text_yellow " Starting hornet node..."
+                        sudo systemctl start hornet
+                        echo -e $text_yellow " Updating hornet version finished!"
+                        echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                        echo -e $text_reset
+                    fi
+                else
+                    echo -e "$text_red Error! Please try again later."
                 fi
-                sudo nano /home/$user/hornet/neighbors.json
-                echo -e $TEXT_YELLOW && echo " Neighbors configuration changed!" && echo -e $TEXT_RESET
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $TEXT_RESET
-
             fi
 
-            if [ "$selector" = "4" ] ; then
-                sudo nano /home/$user/hornet/config.json
-                echo -e $TEXT_RED_B && read -p " Would you like to restart hornet now (y/N): " selector4
-                if [ "$selector4" = "y" ] || [ "$selector4" = "y" ]; then
-                    sudo systemctl restart hornet
-                    echo -e $TEXT_YELLOW && echo " Hornet node restarted!" && echo -e $TEXT_RESET
-                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $TEXT_RESET
-                fi
-            fi
-
-            if [ "$selector" = "5" ] ; then
-                latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
-                latesthornet="${latesthornet:1}"
-                echo -e $TEXT_YELLOW && echo " Get latest hornet version..." && echo -e $TEXT_RESET
-                echo -e $TEXT_YELLOW && echo " Stopping hornet node...(Please note that this may take some time)" && echo -e $TEXT_RESET
+            if [ "$selector" = "4" ]; then
                 sudo systemctl stop hornet
-                echo -e $TEXT_YELLOW && echo " Downloading new hornet file..." && echo -e $TEXT_RESET
-                sudo wget -qO- https://github.com/gohornet/hornet/releases/download/v$latesthornet/HORNET-"$latesthornet"_Linux_"$os".tar.gz | sudo tar -xzf - -C /home/$user/hornet
-                sudo mv /home/$user/hornet/HORNET-"$latesthornet"_Linux_"$os"/hornet /home/$user/hornet/
-                echo -e $TEXT_YELLOW && echo " Backup current hornet config file..." && echo -e $TEXT_RESET
-                sudo mv /home/$user/hornet/config.json /home/$user/hornet/config.json.bak
-                sudo mv /home/$user/hornet/HORNET-"$latesthornet"_Linux_"$os"/config.json /home/$user/hornet/
-                #sudo sed -i 's/\"useProfile\": \"auto\"/\"useProfile\": \"'$profile'\"/g' /home/$user/hornet/config.json
-                #sudo sed -i 's/\"enabled\": false/\"enabled\": '$dashauth'/g' /home/$user/hornet/config.json
-                #sudo sed -i 's/\"username\": "hornet"/\"username\": \"'$dashuser'\"/g' /home/$user/hornet/config.json
-                #sudo sed -i 's/\"password\": "hornet"/\"password\": \"'$dashpw'\"/g' /home/$user/hornet/config.json
-                #sudo sed -i 's/\"port\": 15600/\"port\": '$nbport'/g' /home/$user/hornet/config.json
-                sudo rm -rf /home/$user/hornet/HORNET-"$latesthornet"_Linux_"$os"*
-                sudo chown -R $user:$user /home/$user/hornet/
-                sudo chmod 770 /home/$user/hornet/hornet
-                #if [ ! -f "/home/$user/hornet/neighbors.json" ]; then
-                #    echo -e $TEXT_YELLOW && echo " No neighbors.json found...Downloading config file!" && echo -e $TEXT_RESET
-                #    sudo -u $user wget -q -O /home/$user/hornet/neighbors.json https://raw.githubusercontent.com/gohornet/hornet/master/neighbors.json
-                #    sudo sed -i 's/\"example1.neighbor.com:15600\"/\"'$neighbor1'\"/g' /home/$user/hornet/neighbors.json
-                #    sudo sed -i 's/\"example2.neighbor.com:15600\"/\"'$neighbor2'\"/g' /home/$user/hornet/neighbors.json
-                #    sudo sed -i 's/\"example3.neighbor.com:15600\"/\"'$neighbor3'\"/g' /home/$user/hornet/neighbors.json
-                #    sudo nano /home/$user/hornet/neighbors.json
-                fi
-                sudo systemctl start hornet
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $TEXT_RESET
-            fi
-
-            if [ "$selector" = "6" ]; then
-                sudo systemctl stop hornet
-                sudo rm -rf /home/$user/hornet/mainnetdb/
+                sudo rm -rf /var/lib/hornet/mainnetdb/
                 echo -e $TEXT_RED_B && read -p " Would you like to download the latest snapshot (y/N): " selector6
-                echo -e $TEXT_RESET
+                echo -e $text_reset
                 if [ "$selector6" = "y" ] || [ "$selector6" = "Y" ]; then
-                    echo -e $TEXT_YELLOW && echo " Downloading snapshot file..." && echo -e $TEXT_RESET
-                    sudo -u $user wget -O /home/$user/hornet/export.bin $snapshot
+                    echo -e $text_yellow && echo " Downloading snapshot file..." && echo -e $text_reset
+                    sudo -u $user wget -O /var/lib/hornet/export.bin $snapshot
                 fi
                 sudo systemctl restart hornet
-                echo -e $TEXT_YELLOW && echo " Reset of the database finished and hornet restarted!" && echo -e $TEXT_RESET
+                echo -e $text_yellow && echo " Reset of the database finished and hornet restarted!" && echo -e $text_reset
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $TEXT_RESET
+                echo -e $text_reset
             fi
 
-            if [ "$selector" = "7" ]; then
-                echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel hornet watchdog: " selector7
-                echo -e $TEXT_RESET
-                croncmd="$pwdcmd/ressources/watchdog.sh"
-                cronjob="*/15 * * * * $croncmd"
-                if [ "$selector7" = "1" ]; then
-                    echo -e $TEXT_YELLOW && echo " Enable hornet watchdog..." && echo -e $TEXT_RESET
-                    sudo echo "0" > ./log/watchdog.log
-                    sudo chmod 700 ./ressources/watchdog.sh
-                    sudo sed -i 's/$user/'$user'/g' ./ressources/watchdog.sh
-                    sudo sed -i 's/$os/'$os'/g' ./ressources/watchdog.sh
-                    sudo sed -i 's/$pwdcmd/'$pwdcmd'/g' ./ressources/watchdog.sh
-                    sudo -u $user ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
-                fi
-                if [ "$selector7" = "2" ]; then
-                    echo -e $TEXT_YELLOW && echo " Disable hornet watchdog..." && echo -e $TEXT_RESET
-                    sudo -u $user ( crontab -l | grep -v -F "$croncmd" ) | crontab -
-                fi
-                echo -e $TEXT_YELLOW && echo " Hornet watchdog configuration finished!" && echo -e $TEXT_RESET
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $TEXT_RESET
-            fi
-            if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
-                counter1=1
-            fi
-        done
-        unset selector
-    fi
-
-    ############################################################################################################################################################
-
-    if [ "$selector" = "2" ]; then
-        counter2=0
-        while [ $counter2 -lt 1 ]; do
-            clear
-            echo ""
-            echo -e $red "\033[1m\033[4mTangle Bay Manager\033[0m"
-            echo -e $yellow ""
-            echo " 1) Add your node to Tangle Bay"
-            echo " 2) Remove your node from Tangle Bay"
-            echo " 3) Update node on Tangle Bay"
-            echo ""
-            echo -e "\e[90m-----------------------------------------------------------"
-            echo ""
-            echo -e $yellow "x) Back"
-            echo ""
-            echo -e "\e[90m==========================================================="
-            echo -e $TEXT_YELLOW && read -p " Please type in your option: " selector
-            echo -e $TEXT_RESET
-            if [ "$selector" = "1" ]; then
-                domain2=https://$domain:$apiport
-                curl -X POST "https://register.tanglebay.org/nodes" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$name\", \"url\": \"$domain2\", \"address\": \"$donationaddress\", \"pow\": \"$pow\" }" |jq
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $TEXT_RESET
-            fi
-            if [ "$selector" = "2" ]; then
-                curl -X DELETE https://register.tanglebay.org/nodes/$password |jq
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $TEXT_RESET
-            fi
-            if [ "$selector" = "3" ]; then
-                curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/nodes/$password
-                domain2=https://$domain:$apiport
-                curl -X POST "https://register.tanglebay.org/nodes" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$name\", \"url\": \"$domain2\", \"address\": \"$donationaddress\", \"pow\": \"$pow\", \"password\": \"$password\" }" |jq
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $TEXT_RESET
-            fi
             if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
                 counter2=1
             fi
@@ -336,145 +353,113 @@ while [ $counter -lt 1 ]; do
         unset selector
     fi
 
+############################################################################################################################################################
+
     if [ "$selector" = "3" ]; then
         counter3=0
         while [ $counter3 -lt 1 ]; do
             clear
             echo ""
-            echo -e $red "\033[1m\033[4mInstaller Manager\033[0m"
-            echo -e $yellow ""
-            echo " 1) Install hornet node"
-            echo " 2) Install nginx reverse proxy"
-            echo " 3) Download latest HLM config"
-            echo " 4) Edit HLM config"
+            echo -e $text_red "\033[1m\033[4meinfachIOTA Pool\033[0m"
+            echo ""
+            echo -e $text_yellow " Pool: https://pool.einfachiota.de"
+            echo -e $text_yellow ""
+            echo " 1) Add your node to the pool"
+            echo " 2) Remove your node from the pool"
+            echo " 3) Update node on the pool"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
             echo ""
-            echo -e $yellow "x) Back"
+            echo -e $text_yellow "x) Back"
             echo ""
             echo -e "\e[90m==========================================================="
-            echo -e $TEXT_YELLOW && read -p " Please type in your option: " selector
-            echo -e $TEXT_RESET
+            echo -e $text_yellow && read -p " Please type in your option: " selector
+            echo -e $text_reset
             if [ "$selector" = "1" ]; then
-                latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
-                latesthornet="${latesthornet:1}"
-                echo -e $TEXT_YELLOW && echo " Installing necessary packages..." && echo -e $TEXT_RESET
-                sudo apt install nano -y
-
-                echo -e $TEXT_YELLOW && echo " Starting installation of hornet" && echo -e $TEXT_RESET
-                sudo useradd -m $user
-                sudo mkdir /home/$user > /dev/null && sudo chown $user:$user /home/$user
-                sudo usermod -d /home/$user -m $user
-                sudo -u $user mkdir /home/$user/hornet
-
-                echo -e $TEXT_YELLOW && echo " Downloading hornet files..." && echo -e $TEXT_RESET
-                sudo wget -qO- https://github.com/gohornet/hornet/releases/download/v$latesthornet/HORNET-"$latesthornet"_Linux_"$os".tar.gz | sudo tar -xzf - -C /home/$user/hornet
-                sudo mv /home/$user/hornet/HORNET-"$latesthornet"_Linux_"$os"/* /home/$user/hornet/
-                sudo rm -rf /home/$user/hornet/HORNET-"$latesthornet"_Linux_"$os"*
-                sudo -u $user wget -O /home/$user/hornet/export.bin $snapshot
-                #sudo sed -i 's/\"useProfile\": \"auto\"/\"useProfile\": \"'$profile'\"/g' /home/$user/hornet/config.json
-                #sudo sed -i 's/\"enabled\": false/\"enabled\": '$dashauth'/g' /home/$user/hornet/config.json
-                #sudo sed -i 's/\"username\": "hornet"/\"username\": \"'$dashuser'\"/g' /home/$user/hornet/config.json
-                #sudo sed -i 's/\"password\": "hornet"/\"password\": \"'$dashpw'\"/g' /home/$user/hornet/config.json
-                #sudo sed -i 's/\"port\": 15600/\"port\": '$nbport'/g' /home/$user/hornet/config.json
-                #sudo sed -i 's/\"example1.neighbor.com:15600\"/\"'$neighbor1'\"/g' /home/$user/hornet/neighbors.json
-                #sudo sed -i 's/\"example2.neighbor.com:15600\"/\"'$neighbor2'\"/g' /home/$user/hornet/neighbors.json
-                #sudo sed -i 's/\"example3.neighbor.com:15600\"/\"'$neighbor3'\"/g' /home/$user/hornet/neighbors.json
-                sudo -u $user mkdir /home/$user/hornet/mainnetdb
-                sudo chown -R $user:$user /home/$user/hornet
-                sudo chmod 770 /home/$user/hornet/hornet
-
-                echo -e $TEXT_YELLOW && echo " Creating service for hornet..." && echo -e $TEXT_RESET
-                {
-                echo "[Unit]"
-                echo "Description=HORNET Fullnode"
-                echo "After=network.target"
-                echo ""
-                echo "[Service]"
-                echo "WorkingDirectory=/home/$user/hornet"
-                echo "User=$user"
-                echo "TasksMax=infinity"
-                echo "KillSignal=SIGTERM"
-                echo "TimeoutStopSec=infinity"
-                echo "ExecStart=/home/$user/hornet/hornet -c config"
-                echo "SyslogIdentifier=HORNET"
-                echo "Restart=on-failure"
-                echo "RestartSec=1200"
-                echo ""
-                echo "[Install]"
-                echo "WantedBy=multi-user.target"
-                echo "Alias=hornet.service"
-                } > /lib/systemd/system/hornet.service
-
-                echo -e $TEXT_YELLOW && echo " Activate hornet service..." && echo -e $TEXT_RESET
-                sudo systemctl daemon-reload
-                sudo systemctl enable hornet.service
-                echo -e $TEXT_YELLOW && echo " Starting hornet node! (Please note that this may take some time)" && echo -e $TEXT_RESET
-                sudo systemctl restart hornet
-                sudo systemctl status hornet
-
-                echo -e $TEXT_YELLOW && echo " Hornet installation finished!" && echo -e $TEXT_RESET
+                domain2=https://$domain:$apiport
+                curl -X POST "https://register.tanglebay.org/nodes" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"$domain2\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $TEXT_RESET
+                echo -e $text_reset
             fi
-
             if [ "$selector" = "2" ]; then
-                echo -e $TEXT_YELLOW && echo " Installing necessary packages..." && echo -e $TEXT_RESET
-                sudo apt install software-properties-common curl jq -y
-                sudo add-apt-repository ppa:certbot/certbot -y > /dev/null
-                sudo apt update && sudo apt install python-certbot-nginx -y
-                sudo apt update && sudo apt dist-upgrade -y && sudo apt upgrade -y && apt autoremove -y
-
-                echo -e $TEXT_YELLOW && echo " Updating Nginx..." && echo -e $TEXT_RESET
-                sudo mkdir /etc/systemd/system/nginx.service.d
-                sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
-                sudo systemctl daemon-reload
-
-                echo -e $TEXT_YELLOW && echo " Copying Nginx configuration..." && echo -e $TEXT_RESET
-                sudo cp ./ressources/nginx.conf /etc/nginx/sites-available/default
-                sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
-                sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
-                sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
-                sudo find /etc/nginx/nginx.conf -type f -exec sed -i 's/\# server_names_hash_bucket_size 64;/server_names_hash_bucket_size 64;/g' {} \;
-                sudo systemctl restart nginx
-
-                echo -e $TEXT_YELLOW && echo " Starting SSL-Certificate installation..." && echo -e $TEXT_RESET
-                sudo certbot --nginx -d $domain
-
-                if [ -f "/etc/letsencrypt/live/$domain/fullchain.pem" ]; then
-                    sudo cp ./ressources/nginx.conf /etc/nginx/sites-available/default
-                    sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
-                    sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
-                    sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
-                    sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/\#RjtV27dw/''/g' {} \;
-                    sudo systemctl restart nginx
-                fi
-                echo -e $TEXT_YELLOW && echo " Reverse proxy installation finished!" && echo -e $TEXT_RESET
+                curl -X DELETE https://register.tanglebay.org/nodes/$nodepassword |jq
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $TEXT_RESET
+                echo -e $text_reset
             fi
-
             if [ "$selector" = "3" ]; then
-                echo -e $TEXT_YELLOW && echo " Creating backup of the HLM config file..." && echo -e $TEXT_RESET
-                sudo mv ./ressources/config.sh ./ressources/config.sh.bak
-                echo -e $TEXT_YELLOW && echo " Finished! You can find the HLM backup config in the folder." && echo -e $TEXT_RESET
-                sudo -u $user wget -q -O ./ressources/config.sh https://raw.githubusercontent.com/TangleBay/hornet-light-manager/master/config.sh
-                echo -e $TEXT_YELLOW && echo " Downloading latest HLI config completed!" && echo -e $TEXT_RESET
-                sudo nano ./ressources/config.sh
+                curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/nodes/$nodepassword
+                domain2=https://$domain:$apiport
+                curl -X POST "https://register.tanglebay.org/nodes" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"$domain2\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $TEXT_RESET
+                echo -e $text_reset
             fi
-
-            if [ "$selector" = "4" ]; then
-                sudo nano ./ressources/config.sh
-            fi
-
             if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
                 counter3=1
             fi
         done
         unset selector
     fi
+
+############################################################################################################################################################
+
+    if [ "$selector" = "4" ]; then
+        counter4=0
+        while [ $counter4 -lt 1 ]; do
+            clear
+            echo ""
+            echo -e $text_red "\033[1m\033[4mEdit Configurations\033[0m"
+            echo -e $text_yellow ""
+            echo " 1) Edit hornet config.json"
+            echo " 2) Edit node neighbors.json"
+            echo " 3) Edit HLM config.cfg"
+            echo ""
+            echo -e "\e[90m-----------------------------------------------------------"
+            echo ""
+            echo -e $text_yellow "x) Back"
+            echo ""
+            echo -e "\e[90m==========================================================="
+            echo -e $text_yellow && read -p " Please type in your option: " selector
+            echo -e $text_reset
+
+            if [ "$selector" = "1" ] ; then
+                sudo nano /var/lib/hornet/config.json
+                echo -e $TEXT_RED_B && read -p " Would you like to restart hornet now (y/N): " selector4
+                if [ "$selector4" = "y" ] || [ "$selector4" = "y" ]; then
+                    sudo systemctl restart hornet
+                    echo -e $text_yellow && echo " Hornet node restarted!" && echo -e $text_reset
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
+                fi
+            fi
+            if [ "$selector" = "2" ] ; then
+                if [ ! -f "/var/lib/hornet/neighbors.json" ]; then
+                    echo -e $text_yellow && echo " No neighbors.json found...Downloading config file!" && echo -e $text_reset
+                    sudo -u $user wget -q -O /var/lib/hornet/neighbors.json https://raw.githubusercontent.com/gohornet/hornet/master/neighbors.json
+                fi
+                sudo nano /var/lib/hornet/neighbors.json
+                echo -e $text_yellow && echo " New neighbors configuration loaded!" && echo -e $text_reset
+                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                echo -e $text_reset
+            fi
+            if [ "$selector" = "3" ] ; then
+                if [ ! -f "$pwdcmd/ressources/config.cfg" ]; then
+                    echo -e $text_yellow && echo " No config file found...Downloading config file!" && echo -e $text_reset
+                    sudo -u $user wget -q -O $pwdcmd/ressources/config.cfg $githubrepo/$branch/ressources/config.cfg
+                    echo -e $text_yellow && echo " Please try again!" && echo -e $text_reset
+                else
+                    sudo nano $pwdcmd/ressources/config.cfg
+                    echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
+                fi
+            fi
+
+            if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
+                counter4=1
+            fi
+        done
+        unset selector
+    fi
+
+############################################################################################################################################################
 
     if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
         counter=1

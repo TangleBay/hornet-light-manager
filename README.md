@@ -5,10 +5,10 @@
 
 **Download the latest release version of the script and run it. Do the following steps:**
 
-1. First you should clone the repo `cd ~ && git clone https://github.com/TangleBay/Hornet-Light-Manager.git && cd Hornet-Light-Manager`
-2. `sudo chmod +x hlm.sh`
-3. Run the Manager (HLM): `sudo ./hlm.sh`
-4. With the first start, no config is detected and it will downloaded automatically and opened to edit.
+1. First you should clone the repo `cd /var/lib && sudo git clone https://github.com/TangleBay/hornet-light-manager.git && sudo chmod +x /var/lib/hornet-light-manager/hlm.sh`
+2. Set aliases for run hlm from every source `echo "alias hlm='/var/lib/hornet-light-manager/hlm.sh'" >> ~/.bashrc && echo "alias sudo='sudo '" >> ~/.bashrc && . ~/.bashrc`
+3. Run the Manager (HLM): `sudo hlm`
+4. With the first start it is necessary to edit the HLM config!!!
 
 
 # Install reverse proxy #
@@ -32,19 +32,19 @@
 **I would be very happy if you would join the Tangle Bay Dock so that together we can provide a strong and reliable node to the ecosystem and thus the Trinity users.**
 
 **To add your node to the dock please follow these steps:**
-1. Set your node name and pow option in the HLM config over the HLM itself
-2. Choose the option "2" and add your node
+1. Set your node name and pow option in the pool config over the HLM itself
+2. Choose the option "3" and add your node
 3. You get now a password! Please copy the password and save it in the config.sh (and also write it down!).
 4. You're done, welcome to the dock party!
 
 **To remove your node from the dock please follow these steps:**
-1. Set your password in the HLM config over the HLM itself
+1. Set your password in the pool config over the HLM itself
 2. Choose the option "3" and "2"
 3. If your node details shows up, your node was successfully removed.
 4. Thank you very much for your participation in the dock!
 
 **To udpdate your node on the dock please follow these steps:**
-1. Set your donation address and make sure you have your password set in the HLM config
+1. Set your donation address and make sure you have your password set in the pool config
 2. Choose the option "3" and "3"
 3. If your node details shows up, your node was successfully updated.
 4. Thank you very much for your participation in the dock!

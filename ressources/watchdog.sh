@@ -1,4 +1,6 @@
 #!/bin/bash
+pwdcmd=`dirname "$BASH_SOURCE"`
+source $pwdcmd/config.cfg
 check="$(systemctl show -p ActiveState --value hornet)"
 
 if [ "$check" = "active" ]; then
@@ -9,28 +11,20 @@ if [ "$check" = "active" ]; then
     version="${version#\"}"
     if [ "$version" != "$latesthornet" ]; then
         sudo systemctl stop hornet
-        sudo -u $user wget -qO- https://github.com/gohornet/hornet/releases/download/v$latesthornet/HORNET-"$latesthornet"_Linux_$os.tar.gz | sudo -u $user tar -xzf - -C /home/$user/hornet
-        sudo mv /home/$user/hornet/HORNET-"$latesthornet"_Linux_$os/hornet /home/$user/hornet/
-        sudo mv /home/$user/hornet/HORNET-"$latesthornet"_Linux_$os/config.json /home/$user/hornet/
-        sudo rm -rf /home/$user/hornet/HORNET-"$latesthornet"_Linux_$os
-        sudo chmod 770 /home/$user/hornet/hornet
+        apt update && sudo apt install -y --force-confnew --only-upgrade hornet 
         sudo systemctl start hornet
     fi
 fi
 
 if [ "$check" != "active" ]; then
-    snapshot="$(curl -s https://raw.githubusercontent.com/TangleBay/hornet-light-manager/master/ressources/snapshot.conf)"
     dt=`date '+%m/%d/%Y %H:%M:%S'`
-    sudo systemctl stop hornet
-    sudo rm -r /home/$user/hornet/mainnetdb
-    sudo -u $user wget -O /home/$user/hornet/latest-export.gz.bin $snapshot
     sudo systemctl restart hornet
-    counter="$(cat $pwdcmd/log/watchdog.log | sed -n -e '1{p;q}')"
+    counter="$(cat $pwdcmd/../log/watchdog.log | sed -n -e '1{p;q}')"
     let counter=counter+1
     {
     echo $counter
     echo $dt
-    } > $pwdcmd/log/watchdog.log
+    } > $pwdcmd/../log/watchdog.log
     counter=0
 fi
 exit 0
