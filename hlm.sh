@@ -37,6 +37,7 @@ if ! [ -x "$(command -v nano)" ]; then
     clear
 fi
 
+
 ############################################################################################################################################################
 
 githubrepo="https://raw.githubusercontent.com/TangleBay/hornet-light-manager"
@@ -361,7 +362,7 @@ while [ $counter -lt 1 ]; do
         while [ $counter3 -lt 1 ]; do
             clear
             echo ""
-            echo -e $red "\033[1m\033[4meinfachIOTA Pool\033[0m"
+            echo -e $text_red "\033[1m\033[4meinfachIOTA Pool\033[0m"
             echo ""
             echo -e $text_yellow " Pool: https://pool.einfachiota.de"
             echo -e $text_yellow ""
