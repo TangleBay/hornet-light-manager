@@ -7,7 +7,7 @@
 
 1. First you should clone the repo `cd /var/lib && sudo git clone https://github.com/TangleBay/hornet-light-manager.git && sudo chmod +x /var/lib/hornet-light-manager/hlm.sh`
 2. Set aliases for run hlm from every source `echo "alias hlm='sudo /var/lib/hornet-light-manager/hlm.sh'" >> ~/.bashrc && . ~/.bashrc`
-3. Run the Manager (HLM): `sudo hlm`
+3. Run the Manager (HLM): `hlm`
 4. With the first start it is necessary to edit the HLM config!!!
 
 

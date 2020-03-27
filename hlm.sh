@@ -174,7 +174,7 @@ while [ $counter -lt 1 ]; do
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
                 sudo wget -qO - https://ppa.hornet.zone/pubkey.txt | sudo apt-key add -
-                sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" > /etc/apt/sources.list.d/hornet.list'
+                sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
                 sudo apt update
                 sudo apt install hornet -y
                 check="$(systemctl show -p ActiveState --value hornet)"
