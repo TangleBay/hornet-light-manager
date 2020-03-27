@@ -27,27 +27,27 @@
 **Also if you want to reach you dashboard from an external IP (outside of your local network) you need to open the TCP port which is selected in the installer script (dashport).**
 
 
-# Tangle Bay Pool #
+# IOTA Community Node Pool #
 
-**I would be very happy if you would join the Tangle Bay Dock so that together we can provide a strong and reliable node to the ecosystem and thus the Trinity users.**
+**I would be very happy if you would join the IOTA Community Node Pool so that together we can provide a strong and reliable node to the ecosystem and thus the Trinity users.**
 
-**To add your node to the dock please follow these steps:**
+**To add your node to the ICNP please follow these steps:**
 1. Set your node name and pow option in the pool config over the HLM itself
 2. Choose the option "3" and add your node
 3. You get now a password! Please copy the password and save it in the config.sh (and also write it down!).
-4. You're done, welcome to the dock party!
+4. You're done, welcome to the pool party!
 
-**To remove your node from the dock please follow these steps:**
+**To remove your node from the ICNP please follow these steps:**
 1. Set your password in the pool config over the HLM itself
 2. Choose the option "3" and "2"
 3. If your node details shows up, your node was successfully removed.
-4. Thank you very much for your participation in the dock!
+4. Thank you very much for your participation in the ICNP!
 
-**To udpdate your node on the dock please follow these steps:**
+**To udpdate your node on the ICNP please follow these steps:**
 1. Set your donation address and make sure you have your password set in the pool config
 2. Choose the option "3" and "3"
 3. If your node details shows up, your node was successfully updated.
-4. Thank you very much for your participation in the dock!
+4. Thank you very much for your participation in the ICNP!
 
 
 # Support #
