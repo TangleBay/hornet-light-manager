@@ -41,7 +41,7 @@ fi
 ############################################################################################################################################################
 
 githubrepo="https://raw.githubusercontent.com/TangleBay/hornet-light-manager"
-snapshot="$(curl -s $githubrepo/$branch/ressources/snapshot.cfg)"
+snapshot="$(curl -s $githubrepo/$hlm/ressources/snapshot.cfg)"
 latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
 latesthornet="${latesthornet:1}"
 latesthlm="$(curl -s https://api.github.com/repos/TangleBay/hornet-light-manager/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
@@ -58,8 +58,8 @@ fi
 
 if [ "$version" != "$latesthlm" ]; then
     echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $text_reset
-    sudo wget -O $pwdcmd/hlm $githubrepo/$branch/hlm
-    sudo wget -O $pwdcmd/ressources/config.cfg $githubrepo/$branch/ressources/config.cfg
+    sudo wget -O $pwdcmd/hlm $githubrepo/$hlm/hlm
+    sudo wget -O $pwdcmd/ressources/config.cfg $githubrepo/$hlm/ressources/config.cfg
     sudo nano $pwdcmd/ressources/config.cfg
     echo -e $text_yellow && echo "Backup current HLI config..." && echo -e $text_reset
     ScriptLoc=$(readlink -f "$0")
@@ -69,7 +69,7 @@ fi
 
 if [ ! -f "$pwdcmd/ressources/config.cfg" ]; then
     echo -e $text_yellow && echo " No config detected...Downloading config file!" && echo -e $text_reset
-    sudo wget -q -O $pwdcmd/ressources/config.cfg $githubrepo/$branch/ressources/config.cfg
+    sudo wget -q -O $pwdcmd/ressources/config.cfg $githubrepo/$hlm/ressources/config.cfg
     sudo nano $pwdcmd/ressources/config.cfg
 fi
 
@@ -257,7 +257,7 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "r" ] || [ "$selector" = "R" ]; then
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to reset HLM (y/N): " selector_hlmreset
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
-                    sudo git reset --hard origin/$branch
+                    sudo git reset --hard origin/$hlm
                     echo -e $text_red " HLM was successfully reset!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $text_reset
@@ -456,7 +456,7 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "3" ] ; then
                 if [ ! -f "$pwdcmd/ressources/config.cfg" ]; then
                     echo -e $text_yellow && echo " No config file found...Downloading config file!" && echo -e $text_reset
-                    sudo -u $user wget -q -O $pwdcmd/ressources/config.cfg $githubrepo/$branch/ressources/config.cfg
+                    sudo -u $user wget -q -O $pwdcmd/ressources/config.cfg $githubrepo/$hlm/ressources/config.cfg
                     echo -e $text_yellow && echo " Please try again!" && echo -e $text_reset
                 else
                     sudo nano $pwdcmd/ressources/config.cfg
