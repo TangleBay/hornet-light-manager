@@ -280,9 +280,9 @@ while [ $counter -lt 1 ]; do
             echo ""
             echo -e $text_red "\033[1m\033[4mHornet Management\033[0m"
             echo -e $text_yellow ""
-            echo " 1) Control hornet (start/stop)"
+            echo " 1) Control Hornet (start/stop)"
             echo " 2) Show latest node log"
-            echo " 3) Update the hornet version"
+            echo " 3) Update the Hornet version"
             echo " 4) Reset mainnet database"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
@@ -328,13 +328,13 @@ while [ $counter -lt 1 ]; do
                         echo -e "$text_green Already up to date."
                     else
                         echo -e $text_red " New Hornet version found... $text_red(v$latesthornet)"
-                        echo -e $text_yellow " Stopping hornet node...(Please note that this may take some time)"
+                        echo -e $text_yellow " Stopping Hornet node...(Please note that this may take some time)"
                         sudo systemctl stop hornet
-                        echo -e $text_yellow " Updating hornet..."
+                        echo -e $text_yellow " Updating Hornet..."
                         apt update && sudo apt install -y --force-confnew --only-upgrade hornet 
-                        echo -e $text_yellow " Starting hornet node..."
+                        echo -e $text_yellow " Starting Hornet node..."
                         sudo systemctl start hornet
-                        echo -e $text_yellow " Updating hornet version finished!"
+                        echo -e $text_yellow " Updating Hornet version finished!"
                         echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                         echo -e $text_reset
                     fi
@@ -421,9 +421,11 @@ while [ $counter -lt 1 ]; do
             echo ""
             echo -e $text_red "\033[1m\033[4mEdit Configurations\033[0m"
             echo -e $text_yellow ""
-            echo " 1) Edit hornet config.json"
-            echo " 2) Edit node neighbors.json"
-            echo " 3) Edit HLM config.cfg"
+            echo " 1) Edit Hornet service"
+            echo " 2) Edit Hornet config.json"
+            echo " 3) Edit Hornet peering.json"
+            echo " 4) Edit Hornet config.json"
+            echo " 5) Edit HLM config.cfg"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
             echo ""
@@ -434,7 +436,7 @@ while [ $counter -lt 1 ]; do
             echo -e $text_reset
 
             if [ "$selector" = "1" ] ; then
-                sudo nano /var/lib/hornet/config.json
+                sudo nano /etc/default/hornet
                 echo -e $TEXT_RED_B && read -p " Would you like to restart hornet now (y/N): " selector4
                 if [ "$selector4" = "y" ] || [ "$selector4" = "y" ]; then
                     sudo systemctl restart hornet
@@ -444,16 +446,36 @@ while [ $counter -lt 1 ]; do
                 fi
             fi
             if [ "$selector" = "2" ] ; then
-                if [ ! -f "/var/lib/hornet/neighbors.json" ]; then
-                    echo -e $text_yellow && echo " No neighbors.json found...Downloading config file!" && echo -e $text_reset
-                    sudo -u $user wget -q -O /var/lib/hornet/neighbors.json https://raw.githubusercontent.com/gohornet/hornet/master/neighbors.json
+                sudo nano /var/lib/hornet/config.json
+                echo -e $TEXT_RED_B && read -p " Would you like to restart hornet now (y/N): " selector4
+                if [ "$selector4" = "y" ] || [ "$selector4" = "y" ]; then
+                    sudo systemctl restart hornet
+                    echo -e $text_yellow && echo " Hornet node restarted!" && echo -e $text_reset
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
                 fi
-                sudo nano /var/lib/hornet/neighbors.json
-                echo -e $text_yellow && echo " New neighbors configuration loaded!" && echo -e $text_reset
+            fi
+            if [ "$selector" = "3" ] ; then
+                if [ ! -f "/var/lib/hornet/neighbors.json" ]; then
+                    echo -e $text_yellow && echo " No peering.json found...Downloading config file!" && echo -e $text_reset
+                    sudo -u $user wget -q -O /var/lib/hornet/peering.json https://raw.githubusercontent.com/gohornet/hornet/master/peering.json
+                fi
+                sudo nano /var/lib/hornet/peering.json
+                echo -e $text_yellow && echo " New peering configuration loaded!" && echo -e $text_reset
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
-            if [ "$selector" = "3" ] ; then
+            if [ "$selector" = "4" ] ; then
+                sudo nano /var/lib/hornet/config_comnet.json
+                echo -e $TEXT_RED_B && read -p " Would you like to restart hornet now (y/N): " selector4
+                if [ "$selector4" = "y" ] || [ "$selector4" = "y" ]; then
+                    sudo systemctl restart hornet
+                    echo -e $text_yellow && echo " Hornet node restarted!" && echo -e $text_reset
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
+                fi
+            fi
+            if [ "$selector" = "5" ] ; then
                 if [ ! -f "$pwdcmd/ressources/config.cfg" ]; then
                     echo -e $text_yellow && echo " No config file found...Downloading config file!" && echo -e $text_reset
                     sudo -u $user wget -q -O $pwdcmd/ressources/config.cfg $githubrepo/$hlm/ressources/config.cfg
