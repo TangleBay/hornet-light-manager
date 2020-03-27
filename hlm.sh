@@ -86,7 +86,7 @@ while [ $counter -lt 1 ]; do
     let lmi=lmi+0
     let lsmi=lsmi+0
 
-    sudo crontab -l | grep -q $pwdcmd/ressources/watchdog && watchdog=active || watchdog=inactive
+    sudo crontab -l | grep -q $pwdcmd/ressources/watchdog.sh && watchdog=active || watchdog=inactive
     if [ -f "$pwdcmd/log/watchdog.log" ]; then
         watchdogcount="$(cat $pwdcmd/log/watchdog.log | sed -n -e '1{p;q}')"
         watchdogtime="$(cat $pwdcmd/log/watchdog.log | sed -n -e '2{p;q}')"
@@ -159,9 +159,10 @@ while [ $counter -lt 1 ]; do
             echo ""
             echo -e $text_red "\033[1m\033[4mInstaller Manager\033[0m"
             echo -e $text_yellow ""
-            echo " 1) Installer for hornet"
-            echo " 2) Installer for nginx reverse proxy"
-            echo " 3) Installer for Watchdog"
+            echo " 1) Install for hornet"
+            echo " 2) Install nginx reverse proxy"
+            echo " 3) Install Watchdog"
+            echo " 4) Remove Hornet"
             echo " r) Reset Hornet-Light-Manager"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
@@ -173,7 +174,7 @@ while [ $counter -lt 1 ]; do
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
                 sudo wget -qO - https://ppa.hornet.zone/pubkey.txt | sudo apt-key add -
-                sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" >> /etc/apt/sources.list.d/hornet.list'
+                sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" > /etc/apt/sources.list.d/hornet.list'
                 sudo apt update
                 sudo apt install hornet -y
                 check="$(systemctl show -p ActiveState --value hornet)"
@@ -240,6 +241,17 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_yellow && echo " Hornet watchdog configuration finished!" && echo -e $text_reset
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
+            fi
+
+            if [ "$selector" = "4" ]; then
+                echo -e $TEXT_RED_B && read -p " Are you sure you want to remove Hornet (y/N): " selector_hornetremove
+                if [ "$selector_hornetremove" = "y" ] || [ "$selector_hornetremove" = "Y" ]; then
+                    sudo systemctl stop hornet
+                    apt purge hornet -y
+                    echo -e $text_red " Hornet was successfully removed!"
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
+                fi
             fi
 
             if [ "$selector" = "r" ] || [ "$selector" = "R" ]; then

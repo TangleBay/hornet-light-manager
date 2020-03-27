@@ -11,7 +11,7 @@ if [ "$check" = "active" ]; then
     version="${version#\"}"
     if [ "$version" != "$latesthornet" ]; then
         sudo systemctl stop hornet
-        apt update && sudo apt install -y --force-confnew --only-upgrade hornet 
+        sudo apt update && sudo apt install -y --force-confnew --only-upgrade hornet 
         sudo systemctl start hornet
     fi
 fi
