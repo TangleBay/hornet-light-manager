@@ -65,6 +65,12 @@ if ! [ -x "$(command -v nano)" ]; then
     clear
 fi
 
+if ! [ -x "$(command -v whois)" ]; then
+    echo -e $text_yellow && echo "Installing necessary package whois..." && echo -e $text_reset
+    sudo apt install nano -y > /dev/null
+    clear
+fi
+
 if [ "$version" != "$latesthlm" ]; then
     echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $text_reset
     ( cd $pwdcmd ; sudo git pull > /dev/null )
@@ -103,8 +109,9 @@ while [ $counter -lt 1 ]; do
     echo ""
     echo -e $text_yellow "\033[1m\033[4mWelcome to the Hornet lightweight manager! [v$version]\033[0m"
     echo ""
+    echo -e $text_red " Hornet Node"
     if [ -n "$nodev" ]; then
-        if [ "$nodev" == "$latesthornet" ]; then
+        if [ "$nodev" = "$latesthornet" ]; then
             echo -e "$text_yellow Version:$text_green $nodev"
         else
             echo -e "$text_yellow Version:$text_red $nodev"
@@ -112,7 +119,6 @@ while [ $counter -lt 1 ]; do
     else
         echo -e "$text_yellow Version:$text_red N/A"
     fi
-    echo ""
     if [ "-n "$nodev"" ]; then
         if [ "$sync" = "false" ]; then
             echo -e "$text_yellow Status:$text_red not synced"
@@ -152,7 +158,7 @@ while [ $counter -lt 1 ]; do
     echo -e $text_yellow "x) Exit"
     echo ""
     echo -e "\e[90m==========================================================="
-    echo -e $text_yellow && read -t 30 -p " Please type in your option: " selector
+    echo -e $text_yellow && read -t 60 -p " Please type in your option: " selector
     echo -e $text_reset
 
     if [ "$selector" = "1" ]; then
@@ -163,13 +169,12 @@ while [ $counter -lt 1 ]; do
             echo -e $text_red "\033[1m\033[4mInstaller Manager\033[0m"
             echo -e $text_yellow ""
             echo " 1) Install Hornet"
-            echo " 2) Install HTTPS proxy"
-            echo " 3) Install Watchdog"
+            echo " 2) Remove Hornet"
             echo ""
-            echo " 5) Remove Hornet"
-            echo " 6) Remove Hornet"
+            echo " 3) Install HTTPS proxy"
             echo ""
-            echo " r) Reset Hornet-Light-Manager"
+            echo " 4) Install Watchdog"
+            echo " 5) Reset Hornet-Light-Manager"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
             echo ""
@@ -203,6 +208,17 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "2" ]; then
+                echo -e $TEXT_RED_B && read -p " Are you sure you want to remove Hornet (y/N): " selector_hornetremove
+                if [ "$selector_hornetremove" = "y" ] || [ "$selector_hornetremove" = "Y" ]; then
+                    sudo systemctl stop hornet
+                    sudo apt purge hornet -y
+                    echo -e $text_red " Hornet was successfully removed!"
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
+                fi
+            fi
+
+            if [ "$selector" = "3" ]; then
                 echo -e $text_yellow && echo " Installing necessary packages..." && echo -e $text_reset
                 sudo apt install software-properties-common -y
                 sudo add-apt-repository ppa:certbot/certbot -y > /dev/null
@@ -220,6 +236,8 @@ while [ $counter -lt 1 ]; do
                 sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
                 sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
                 sudo find /etc/nginx/nginx.conf -type f -exec sed -i 's/\# server_names_hash_bucket_size 64;/server_names_hash_bucket_size 64;/g' {} \;
+                dashpw="$(mkpasswd -m sha-512 $dashpw)"
+                sudo echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
                 sudo systemctl restart nginx
 
                 echo -e $text_yellow && echo " Starting SSL-Certificate installation..." && echo -e $text_reset
@@ -238,7 +256,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_reset
             fi
 
-            if [ "$selector" = "3" ]; then
+            if [ "$selector" = "4" ]; then
                 echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel hornet watchdog: " selector_watchdog
                 echo -e $text_reset
                 croncmd="$pwdcmd/watchdog.sh"
@@ -259,35 +277,13 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_reset
             fi
 
-            if [ "$selector" = "4" ]; then
-                echo -e $TEXT_RED_B && read -p " Are you sure you want to remove Hornet (y/N): " selector_hornetremove
-                if [ "$selector_hornetremove" = "y" ] || [ "$selector_hornetremove" = "Y" ]; then
-                    sudo systemctl stop hornet
-                    sudo apt update && sudo apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install hornet
-                    sudo systemctl start hornet
-                    echo -e $text_red " Hornet was successfully removed!"
-                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $text_reset
-                fi
-            fi
-
             if [ "$selector" = "5" ]; then
-                echo -e $TEXT_RED_B && read -p " Are you sure you want to remove Hornet (y/N): " selector_hornetremove
-                if [ "$selector_hornetremove" = "y" ] || [ "$selector_hornetremove" = "Y" ]; then
-                    sudo systemctl stop hornet
-                    sudo apt purge hornet -y
-                    echo -e $text_red " Hornet was successfully removed!"
-                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $text_reset
-                fi
-            fi
-
-            if [ "$selector" = "r" ] || [ "$selector" = "R" ]; then
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to reset HLM (y/N): " selector_hlmreset
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
                     ( cd $pwdcmd ; sudo git pull )
                     ( cd $pwdcmd ; sudo git reset --hard origin/$branch )
                     sudo chmod +x $pwdcmd/hlm.sh $pwdcmd/watchdog.sh
+                    sudo nano $pwdcmd/config.cfg
                     echo -e $text_red " HLM was successfully reset!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
                     ScriptLoc=$(readlink -f "$0")
@@ -314,8 +310,10 @@ while [ $counter -lt 1 ]; do
             echo -e $text_yellow ""
             echo " 1) Control Hornet (start/stop)"
             echo " 2) Show latest node log"
-            echo " 3) Update Hornet version"
-            echo " 4) Reset mainnet database"
+            echo " 3) Reset mainnet database"
+            echo ""
+            echo " 4) Update Dashboard login"
+            echo " 5) Update Hornet version"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
             echo ""
@@ -353,9 +351,43 @@ while [ $counter -lt 1 ]; do
                 sudo journalctl -fu hornet | less -FRSXM
             fi
 
-            if [ "$selector" = "3" ] ; then
+            if [ "$selector" = "3" ]; then
+                sudo systemctl stop hornet
+                sudo rm -rf $hornetdir/mainnetdb/
+                echo -e $TEXT_RED_B && read -p " Would you like to download the latest snapshot (y/N): " selector6
+                echo -e $text_reset
+                if [ "$selector6" = "y" ] || [ "$selector6" = "Y" ]; then
+                    echo -e $text_yellow && echo " Downloading snapshot file..." && echo -e $text_reset
+                    sudo -u hornet wget -O $hornetdir/export.bin $snapshot
+                fi
+                sudo systemctl restart hornet
+                echo -e $text_yellow && echo " Reset of the database finished and hornet restarted!" && echo -e $text_reset
+                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                echo -e $text_reset
+            fi
+
+            if [ "$selector" = "4" ]; then
+                if [ -f "/etc/nginx/.htpasswd" ]; then
+                    echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
+                    echo -e $text_yellow && echo " Hornet Dashboard login updated!" && echo -e $text_reset
+                else
+                    echo -e $text_red "Please install nginx first!"
+                fi
+                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                echo -e $text_reset
+            fi
+
+            if [ "$selector" = "5" ] ; then
                 if [ -n "$nodev" ]; then
                     echo -e $text_yellow " Checking if a new version is available..."
+                    if [ "$release" = "stable" ]; then
+                        latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
+                        latesthornet="${latesthornet:1}"
+                    fi
+                    if [ "$release" = "testing" ]; then
+                        latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases | grep -oP '"tag_name": "\K(.*)(?=")' | head -n 1)"
+                        latesthornet="${latesthornet:1}"
+                    fi
                     if [ "$nodev" = "$latesthornet" ]; then
                         echo -e "$text_green Already up to date."
                     else
@@ -373,21 +405,6 @@ while [ $counter -lt 1 ]; do
                 else
                     echo -e "$text_red Error! Please try again later."
                 fi
-            fi
-
-            if [ "$selector" = "4" ]; then
-                sudo systemctl stop hornet
-                sudo rm -rf $hornetdir/mainnetdb/
-                echo -e $TEXT_RED_B && read -p " Would you like to download the latest snapshot (y/N): " selector6
-                echo -e $text_reset
-                if [ "$selector6" = "y" ] || [ "$selector6" = "Y" ]; then
-                    echo -e $text_yellow && echo " Downloading snapshot file..." && echo -e $text_reset
-                    sudo -u hornet wget -O $hornetdir/export.bin $snapshot
-                fi
-                sudo systemctl restart hornet
-                echo -e $text_yellow && echo " Reset of the database finished and hornet restarted!" && echo -e $text_reset
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $text_reset
             fi
 
             if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
