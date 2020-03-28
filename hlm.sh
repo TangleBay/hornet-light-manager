@@ -199,6 +199,7 @@ while [ $counter -lt 1 ]; do
                 else
                     echo -e $text_red " Hornet already installed. Please remove first!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
+                fi
             fi
 
             if [ "$selector" = "2" ]; then
