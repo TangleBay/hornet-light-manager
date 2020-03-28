@@ -55,9 +55,9 @@ fi
 
 if [ "$version" != "$latesthlm" ]; then
     echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $text_reset
-    ( cd /var/lib/hornet-light-manager ; sudo git reset --hard origin/$branch )
-    sudo chmod +x $pwdcmd/hlm.sh
-    sudo chmod +x $pwdcmd/watchdog.sh
+    ( cd $pwdcmd ; sudo git pull > /dev/null )
+    ( cd $pwdcmd ; sudo git reset --hard origin/$branch )
+    sudo chmod +x $pwdcmd/hlm.sh $pwdcmd/watchdog.sh
     ScriptLoc=$(readlink -f "$0")
     exec "$ScriptLoc"
     exit 0
@@ -243,7 +243,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to remove Hornet (y/N): " selector_hornetremove
                 if [ "$selector_hornetremove" = "y" ] || [ "$selector_hornetremove" = "Y" ]; then
                     sudo systemctl stop hornet
-                    apt purge hornet -y
+                    sudo apt purge hornet -y
                     echo -e $text_red " Hornet was successfully removed!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $text_reset
@@ -253,9 +253,9 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "r" ] || [ "$selector" = "R" ]; then
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to reset HLM (y/N): " selector_hlmreset
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
+                    ( cd $pwdcmd ; sudo git pull > /dev/null )
                     ( cd $pwdcmd ; sudo git reset --hard origin/$branch )
-                    sudo chmod +x $pwdcmd/hlm.sh
-                    sudo chmod +x $pwdcmd/watchdog.sh
+                    sudo chmod +x $pwdcmd/hlm.sh $pwdcmd/watchdog.sh
                     echo -e $text_red " HLM was successfully reset!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
                     ScriptLoc=$(readlink -f "$0")
