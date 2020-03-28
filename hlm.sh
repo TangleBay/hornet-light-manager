@@ -109,24 +109,23 @@ while [ $counter -lt 1 ]; do
     echo ""
     echo -e $text_yellow "\033[1m\033[4mWelcome to the Hornet lightweight manager! [v$version]\033[0m"
     echo ""
-    echo -e $text_red " Hornet Node"
     if [ -n "$nodev" ]; then
         if [ "$nodev" = "$latesthornet" ]; then
-            echo -e "$text_yellow Version:$text_green $nodev"
+            echo -e "$text_yellow Hornet Version:$text_green $nodev"
         else
-            echo -e "$text_yellow Version:$text_red $nodev"
+            echo -e "$text_yellow Hornet Version:$text_red $nodev"
         fi
     else
-        echo -e "$text_yellow Version:$text_red N/A"
+        echo -e "$text_yellow Hornet Version:$text_red N/A"
     fi
     if [ "-n "$nodev"" ]; then
         if [ "$sync" = "false" ]; then
-            echo -e "$text_yellow Status:$text_red not synced"
+            echo -e "$text_yellow Hornet Status:$text_red not synced"
         else
-            echo -e "$text_yellow Status:$text_green synced"
+            echo -e "$text_yellow Hornet Status:$text_green synced"
         fi
     else
-        echo -e "$text_yellow Status:$text_red offline"
+        echo -e "$text_yellow Hornet Status:$text_red offline"
     fi
     echo ""
     if [ "$watchdog" != "active" ]; then
