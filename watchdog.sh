@@ -27,7 +27,7 @@ if [ "$check" = "active" ]; then
             sudo apt update && sudo apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install hornet
             sudo systemctl start hornet
         fi
-    fi    
+    fi
 fi
 
 if [ "$check" != "active" ]; then
