@@ -367,6 +367,7 @@ while [ $counter -lt 1 ]; do
 
             if [ "$selector" = "4" ]; then
                 if [ -f "/etc/nginx/.htpasswd" ]; then
+                    dashpw="$(mkpasswd -m sha-512 $dashpw)"
                     echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
                     echo -e $text_yellow && echo " Hornet Dashboard login updated!" && echo -e $text_reset
                 else
