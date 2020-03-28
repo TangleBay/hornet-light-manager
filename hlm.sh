@@ -15,7 +15,17 @@ text_yellow='\e[33m'
 text_green='\e[32m'
 text_red='\e[31m'
 text_reset='\e[0m'
+
+githubrepo="https://raw.githubusercontent.com/TangleBay/hornet-light-manager"
+hlmcfgs="https://raw.githubusercontent.com/TangleBay/hlm-cfgs/master"
+snapshot="$(curl -s $hlmcfgs/snapshot.cfg)"
+latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
+latesthornet="${latesthornet:1}"
+latesthlm="$(curl -s https://api.github.com/repos/TangleBay/hornet-light-manager/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
+pwdcmd=`dirname "$BASH_SOURCE"`
+source $pwdcmd/config.cfg
 clear
+############################################################################################################################################################
 
 function pause(){
    read -p "$*"
@@ -36,20 +46,6 @@ if ! [ -x "$(command -v nano)" ]; then
     sudo apt install nano -y > /dev/null
     clear
 fi
-
-
-############################################################################################################################################################
-
-githubrepo="https://raw.githubusercontent.com/TangleBay/hornet-light-manager"
-hlmcfgs="https://raw.githubusercontent.com/TangleBay/hlm-cfgs/master"
-snapshot="$(curl -s $hlmcfgs/snapshot.cfg)"
-latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
-latesthornet="${latesthornet:1}"
-latesthlm="$(curl -s https://api.github.com/repos/TangleBay/hornet-light-manager/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
-pwdcmd=`dirname "$BASH_SOURCE"`
-
-############################################################################################################################################################
-
 if [ $(id -u) -ne 0 ]; then
     echo -e $TEXT_RED_B "Please run HLM with sudo or as root"
     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
@@ -59,7 +55,7 @@ fi
 
 if [ "$version" != "$latesthlm" ]; then
     echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $text_reset
-    ( cd /var/lib/hornet-light-manager ; sudo git reset --hard origin/$hlm )
+    ( cd /var/lib/hornet-light-manager ; sudo git reset --hard origin/master )
     sudo chmod +x $pwdcmd/hlm.sh
     sudo chmod +x $pwdcmd/watchdog.sh
     ScriptLoc=$(readlink -f "$0")
@@ -257,7 +253,7 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "r" ] || [ "$selector" = "R" ]; then
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to reset HLM (y/N): " selector_hlmreset
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
-                    ( cd $pwdcmd ; sudo git reset --hard origin/$hlm )
+                    ( cd $pwdcmd ; sudo git reset --hard origin/master )
                     sudo chmod +x $pwdcmd/hlm.sh
                     sudo chmod +x $pwdcmd/watchdog.sh
                     echo -e $text_red " HLM was successfully reset!"
