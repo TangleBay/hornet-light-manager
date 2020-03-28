@@ -58,25 +58,23 @@ fi
 
 if [ "$version" != "$latesthlm" ]; then
     echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $text_reset
-    sudo wget -O $pwdcmd/hlm $githubrepo/$hlm/hlm
-    sudo wget -O $pwdcmd/ressources/config.cfg $githubrepo/$hlm/ressources/config.cfg
-    sudo nano $pwdcmd/ressources/config.cfg
-    echo -e $text_yellow && echo "Backup current HLI config..." && echo -e $text_reset
+    ( cd /var/lib/hornet-light-manager ; sudo git reset --hard origin/$hlm )
+    sudo chmod +x $pwdcmd/hlm.sh
     ScriptLoc=$(readlink -f "$0")
     exec "$ScriptLoc"
     exit 0
 fi
 
-if [ ! -f "$pwdcmd/ressources/config.cfg" ]; then
-    echo -e $text_yellow && echo " No config detected...Downloading config file!" && echo -e $text_reset
-    sudo wget -q -O $pwdcmd/ressources/config.cfg $githubrepo/$hlm/ressources/config.cfg
-    sudo nano $pwdcmd/ressources/config.cfg
+if [ ! -f "$pwdcmd/ressources/icnp.cfg" ]; then
+    echo -e $text_yellow && echo " No pool config detected...Downloading pool config file!" && echo -e $text_reset
+    sudo wget -q -O $pwdcmd/ressources/icnp.cfg $githubrepo/icnp/ressources/icnp.cfg
 fi
 
 counter=0
 while [ $counter -lt 1 ]; do
     clear
     source $pwdcmd/ressources/config.cfg
+    source $pwdcmd/ressources/icnp.cfg
     nodetempv="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.appVersion')"
     lmi="$(curl -s https://nodes.tanglebay.org -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestMilestoneIndex')"
     lsmi="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestSolidSubtangleMilestoneIndex')"
@@ -257,7 +255,7 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "r" ] || [ "$selector" = "R" ]; then
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to reset HLM (y/N): " selector_hlmreset
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
-                    sudo git reset --hard origin/$hlm
+                    ( cd /var/lib/hornet-light-manager ; sudo git reset --hard origin/master )
                     echo -e $text_red " HLM was successfully reset!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $text_reset
@@ -388,8 +386,7 @@ while [ $counter -lt 1 ]; do
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
-                domain2=https://$domain:$apiport
-                curl -X POST "https://register.tanglebay.org/nodes" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"$domain2\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq
+                curl -X POST "https://register.tanglebay.org/nodes" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
@@ -400,8 +397,7 @@ while [ $counter -lt 1 ]; do
             fi
             if [ "$selector" = "3" ]; then
                 curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/nodes/$nodepassword
-                domain2=https://$domain:$apiport
-                curl -X POST "https://register.tanglebay.org/nodes" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"$domain2\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
+                curl -X POST "https://register.tanglebay.org/nodes" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
@@ -422,9 +418,9 @@ while [ $counter -lt 1 ]; do
             echo -e $text_red "\033[1m\033[4mEdit Configurations\033[0m"
             echo -e $text_yellow ""
             echo " 1) Edit Hornet service"
-            echo " 2) Edit Hornet config.json"
+            echo " 2) Edit Hornet config"
             echo " 3) Edit Hornet peering.json"
-            echo " 4) Edit Hornet config.json"
+            echo " 4) Edit Hornet ComNet config"
             echo " 5) Edit HLM config.cfg"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
