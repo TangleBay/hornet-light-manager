@@ -41,7 +41,8 @@ fi
 ############################################################################################################################################################
 
 githubrepo="https://raw.githubusercontent.com/TangleBay/hornet-light-manager"
-snapshot="$(curl -s $githubrepo/$hlm/ressources/snapshot.cfg)"
+hlmcfgs="https://raw.githubusercontent.com/TangleBay/hlm-cfgs/master"
+snapshot="$(curl -s $hlmcfgs/snapshot.cfg)"
 latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
 latesthornet="${latesthornet:1}"
 latesthlm="$(curl -s https://api.github.com/repos/TangleBay/hornet-light-manager/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
@@ -60,21 +61,22 @@ if [ "$version" != "$latesthlm" ]; then
     echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $text_reset
     ( cd /var/lib/hornet-light-manager ; sudo git reset --hard origin/$hlm )
     sudo chmod +x $pwdcmd/hlm.sh
+    sudo chmod +x $pwdcmd/watchdog.sh
     ScriptLoc=$(readlink -f "$0")
     exec "$ScriptLoc"
     exit 0
 fi
 
-if [ ! -f "$pwdcmd/ressources/icnp.cfg" ]; then
+if [ ! -f "$pwdcmd/icnp.cfg" ]; then
     echo -e $text_yellow && echo " No pool config detected...Downloading pool config file!" && echo -e $text_reset
-    sudo wget -q -O $pwdcmd/ressources/icnp.cfg $githubrepo/icnp/ressources/icnp.cfg
+    sudo wget -q -O $pwdcmd/icnp.cfg $hlmcfgs/icnp.cfg
 fi
 
 counter=0
 while [ $counter -lt 1 ]; do
     clear
-    source $pwdcmd/ressources/config.cfg
-    source $pwdcmd/ressources/icnp.cfg
+    source $pwdcmd/config.cfg
+    source $pwdcmd/icnp.cfg
     nodetempv="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.appVersion')"
     lmi="$(curl -s https://nodes.tanglebay.org -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestMilestoneIndex')"
     lsmi="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestSolidSubtangleMilestoneIndex')"
@@ -84,7 +86,7 @@ while [ $counter -lt 1 ]; do
     let lmi=lmi+0
     let lsmi=lsmi+0
 
-    sudo crontab -l | grep -q $pwdcmd/ressources/watchdog.sh && watchdog=active || watchdog=inactive
+    sudo crontab -l | grep -q $pwdcmd/watchdog.sh && watchdog=active || watchdog=inactive
     if [ -f "$pwdcmd/log/watchdog.log" ]; then
         watchdogcount="$(cat $pwdcmd/log/watchdog.log | sed -n -e '1{p;q}')"
         watchdogtime="$(cat $pwdcmd/log/watchdog.log | sed -n -e '2{p;q}')"
@@ -177,7 +179,7 @@ while [ $counter -lt 1 ]; do
                 sudo apt install hornet -y
                 check="$(systemctl show -p ActiveState --value hornet)"
                 if [ "$check" != "active" ]; then
-                    sudo systecmtl restart hornet
+                    sudo systemctl restart hornet
                 fi
                 echo -e $text_yellow && echo " Hornet installation finished!" && echo -e $text_reset
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
@@ -197,7 +199,7 @@ while [ $counter -lt 1 ]; do
                 sudo systemctl daemon-reload
 
                 echo -e $text_yellow && echo " Copying Nginx configuration..." && echo -e $text_reset
-                sudo cp $pwdcmd/ressources/nginx-config.template /etc/nginx/sites-available/default
+                sudo cp $pwdcmd/nginx-config.template /etc/nginx/sites-available/default
                 sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
                 sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
                 sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
@@ -208,7 +210,7 @@ while [ $counter -lt 1 ]; do
                 sudo certbot --nginx -d $domain
 
                 if [ -f "/etc/letsencrypt/live/$domain/fullchain.pem" ]; then
-                    sudo cp $pwdcmd/ressources/nginx-config.template /etc/nginx/sites-available/default
+                    sudo cp $pwdcmd/nginx-config.template /etc/nginx/sites-available/default
                     sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
                     sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
                     sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
@@ -223,13 +225,13 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "3" ]; then
                 echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel hornet watchdog: " selector_watchdog
                 echo -e $text_reset
-                croncmd="$pwdcmd/ressources/watchdog.sh"
+                croncmd="$pwdcmd/watchdog.sh"
                 cronjob="*/15 * * * * $croncmd"
                 if [ "$selector_watchdog" = "1" ]; then
                     echo -e $text_yellow && echo " Enable hornet watchdog..." && echo -e $text_reset
                     sudo mkdir -p $pwdcmd/log
                     sudo echo "0" > $pwdcmd/log/watchdog.log
-                    sudo chmod 700 $pwdcmd/ressources/watchdog.sh
+                    sudo chmod 700 $pwdcmd/watchdog.sh
                     ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
                 fi
                 if [ "$selector_watchdog" = "2" ]; then
@@ -255,10 +257,14 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "r" ] || [ "$selector" = "R" ]; then
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to reset HLM (y/N): " selector_hlmreset
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
-                    ( cd /var/lib/hornet-light-manager ; sudo git reset --hard origin/master )
+                    ( cd $pwdcmd ; sudo git reset --hard origin/$hlm )
+                    sudo chmod +x $pwdcmd/hlm.sh
+                    sudo chmod +x $pwdcmd/watchdog.sh
                     echo -e $text_red " HLM was successfully reset!"
-                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $text_reset
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
+                    ScriptLoc=$(readlink -f "$0")
+                    exec "$ScriptLoc"
+                    exit 0
                 fi
             fi
 
@@ -329,7 +335,7 @@ while [ $counter -lt 1 ]; do
                         echo -e $text_yellow " Stopping Hornet node...(Please note that this may take some time)"
                         sudo systemctl stop hornet
                         echo -e $text_yellow " Updating Hornet..."
-                        apt update && sudo apt install -y --force-confnew --only-upgrade hornet 
+                        sudo apt update && sudo apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install hornet
                         echo -e $text_yellow " Starting Hornet node..."
                         sudo systemctl start hornet
                         echo -e $text_yellow " Updating Hornet version finished!"
@@ -474,10 +480,10 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "5" ] ; then
                 if [ ! -f "$pwdcmd/ressources/config.cfg" ]; then
                     echo -e $text_yellow && echo " No config file found...Downloading config file!" && echo -e $text_reset
-                    sudo -u $user wget -q -O $pwdcmd/ressources/config.cfg $githubrepo/$hlm/ressources/config.cfg
+                    sudo -u $user wget -q -O $pwdcmd/config.cfg $githubrepo/$hlm/config.cfg
                     echo -e $text_yellow && echo " Please try again!" && echo -e $text_reset
                 else
-                    sudo nano $pwdcmd/ressources/config.cfg
+                    sudo nano $pwdcmd/config.cfg
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
                 fi
             fi
