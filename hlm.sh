@@ -55,7 +55,7 @@ fi
 
 if [ "$version" != "$latesthlm" ]; then
     echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $text_reset
-    ( cd /var/lib/hornet-light-manager ; sudo git reset --hard origin/master )
+    ( cd /var/lib/hornet-light-manager ; sudo git reset --hard origin/$branch )
     sudo chmod +x $pwdcmd/hlm.sh
     sudo chmod +x $pwdcmd/watchdog.sh
     ScriptLoc=$(readlink -f "$0")
@@ -253,7 +253,7 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "r" ] || [ "$selector" = "R" ]; then
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to reset HLM (y/N): " selector_hlmreset
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
-                    ( cd $pwdcmd ; sudo git reset --hard origin/master )
+                    ( cd $pwdcmd ; sudo git reset --hard origin/$branch )
                     sudo chmod +x $pwdcmd/hlm.sh
                     sudo chmod +x $pwdcmd/watchdog.sh
                     echo -e $text_red " HLM was successfully reset!"
