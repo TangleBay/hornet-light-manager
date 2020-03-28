@@ -455,7 +455,7 @@ while [ $counter -lt 1 ]; do
                 fi
             fi
             if [ "$selector" = "3" ] ; then
-                if [ ! -f "/var/lib/hornet/neighbors.json" ]; then
+                if [ ! -f "/var/lib/hornet/peering.json" ]; then
                     echo -e $text_yellow && echo " No peering.json found...Downloading config file!" && echo -e $text_reset
                     sudo -u hornet wget -q -O /var/lib/hornet/peering.json https://raw.githubusercontent.com/gohornet/hornet/master/peering.json
                 fi
