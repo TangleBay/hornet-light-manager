@@ -231,7 +231,7 @@ while [ $counter -lt 1 ]; do
                     echo -e $text_yellow && echo " Enable hornet watchdog..." && echo -e $text_reset
                     sudo mkdir -p $pwdcmd/log
                     sudo echo "0" > $pwdcmd/log/watchdog.log
-                    sudo chmod 700 $pwdcmd/watchdog.sh
+                    sudo chmod +x $pwdcmd/watchdog.sh
                     ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
                 fi
                 if [ "$selector_watchdog" = "2" ]; then
@@ -354,7 +354,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_reset
                 if [ "$selector6" = "y" ] || [ "$selector6" = "Y" ]; then
                     echo -e $text_yellow && echo " Downloading snapshot file..." && echo -e $text_reset
-                    sudo -u $user wget -O /var/lib/hornet/export.bin $snapshot
+                    sudo -u hornet wget -O /var/lib/hornet/export.bin $snapshot
                 fi
                 sudo systemctl restart hornet
                 echo -e $text_yellow && echo " Reset of the database finished and hornet restarted!" && echo -e $text_reset
@@ -428,6 +428,7 @@ while [ $counter -lt 1 ]; do
             echo " 3) Edit Hornet peering.json"
             echo " 4) Edit Hornet ComNet config"
             echo " 5) Edit HLM config.cfg"
+            echo " 6) Edit ICNP config"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
             echo ""
@@ -460,7 +461,7 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "3" ] ; then
                 if [ ! -f "/var/lib/hornet/neighbors.json" ]; then
                     echo -e $text_yellow && echo " No peering.json found...Downloading config file!" && echo -e $text_reset
-                    sudo -u $user wget -q -O /var/lib/hornet/peering.json https://raw.githubusercontent.com/gohornet/hornet/master/peering.json
+                    sudo -u hornet wget -q -O /var/lib/hornet/peering.json https://raw.githubusercontent.com/gohornet/hornet/master/peering.json
                 fi
                 sudo nano /var/lib/hornet/peering.json
                 echo -e $text_yellow && echo " New peering configuration loaded!" && echo -e $text_reset
@@ -478,9 +479,19 @@ while [ $counter -lt 1 ]; do
                 fi
             fi
             if [ "$selector" = "5" ] ; then
-                if [ ! -f "$pwdcmd/ressources/config.cfg" ]; then
+                if [ ! -f "$pwdcmd/config.cfg" ]; then
                     echo -e $text_yellow && echo " No config file found...Downloading config file!" && echo -e $text_reset
-                    sudo -u $user wget -q -O $pwdcmd/config.cfg $githubrepo/$hlm/config.cfg
+                    sudo wget -q -O $pwdcmd/config.cfg $githubrepo/$hlm/config.cfg
+                    echo -e $text_yellow && echo " Please try again!" && echo -e $text_reset
+                else
+                    sudo nano $pwdcmd/config.cfg
+                    echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
+                fi
+            fi
+            if [ "$selector" = "5" ] ; then
+                if [ ! -f "$pwdcmd/icnp.cfg" ]; then
+                    echo -e $text_yellow && echo " No config file found...Downloading config file!" && echo -e $text_reset
+                    sudo wget -q -O $pwdcmd/icnp.cfg $hlmcfgs/icnp.cfg
                     echo -e $text_yellow && echo " Please try again!" && echo -e $text_reset
                 else
                     sudo nano $pwdcmd/config.cfg
