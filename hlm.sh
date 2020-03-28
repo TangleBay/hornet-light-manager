@@ -10,26 +10,44 @@ version=0.0.1
 
 ############################################################################################################################################################
 
+pwdcmd=`dirname "$BASH_SOURCE"`
+source $pwdcmd/config.cfg
+
 TEXT_RED_B='\e[1;31m'
 text_yellow='\e[33m'
 text_green='\e[32m'
 text_red='\e[31m'
 text_reset='\e[0m'
 
+hornetdir="/var/lib/hornet"
 githubrepo="https://raw.githubusercontent.com/TangleBay/hornet-light-manager"
 hlmcfgs="https://raw.githubusercontent.com/TangleBay/hlm-cfgs/master"
 snapshot="$(curl -s $hlmcfgs/snapshot.cfg)"
-latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
-latesthornet="${latesthornet:1}"
 latesthlm="$(curl -s https://api.github.com/repos/TangleBay/hornet-light-manager/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
-pwdcmd=`dirname "$BASH_SOURCE"`
-source $pwdcmd/config.cfg
-clear
+
+if [ "$release" = "stable" ]; then
+    latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
+    latesthornet="${latesthornet:1}"
+fi
+if [ "$release" = "testing" ]; then
+    latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases | grep -oP '"tag_name": "\K(.*)(?=")' | head -n 1)"
+    latesthornet="${latesthornet:1}"
+fi
+
+
 ############################################################################################################################################################
 
+clear
 function pause(){
    read -p "$*"
 }
+
+if [ $(id -u) -ne 0 ]; then
+    echo -e $TEXT_RED_B "Please run HLM with sudo or as root"
+    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+    echo -e $text_reset
+    exit 0
+fi
 
 if ! [ -x "$(command -v curl)" ]; then
     echo -e $text_yellow && echo "Installing necessary packages curl..." && echo -e $text_reset
@@ -46,18 +64,13 @@ if ! [ -x "$(command -v nano)" ]; then
     sudo apt install nano -y > /dev/null
     clear
 fi
-if [ $(id -u) -ne 0 ]; then
-    echo -e $TEXT_RED_B "Please run HLM with sudo or as root"
-    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-    echo -e $text_reset
-    exit 0
-fi
 
 if [ "$version" != "$latesthlm" ]; then
     echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $text_reset
     ( cd $pwdcmd ; sudo git pull > /dev/null )
     ( cd $pwdcmd ; sudo git reset --hard origin/$branch )
     sudo chmod +x $pwdcmd/hlm.sh $pwdcmd/watchdog.sh
+    sudo nano $pwdcmd/config.cfg
     ScriptLoc=$(readlink -f "$0")
     exec "$ScriptLoc"
     exit 0
@@ -73,14 +86,11 @@ while [ $counter -lt 1 ]; do
     clear
     source $pwdcmd/config.cfg
     source $pwdcmd/icnp.cfg
-    nodetempv="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.appVersion')"
-    lmi="$(curl -s https://nodes.tanglebay.org -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestMilestoneIndex')"
-    lsmi="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestSolidSubtangleMilestoneIndex')"
 
+    nodetempv="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.appVersion')"
     nodev="${nodetempv%\"}"
     nodev="${nodev#\"}"
-    let lmi=lmi+0
-    let lsmi=lsmi+0
+    sync="$(curl -s https://nodes.tanglebay.org -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.isSynced')"
 
     sudo crontab -l | grep -q $pwdcmd/watchdog.sh && watchdog=active || watchdog=inactive
     if [ -f "$pwdcmd/log/watchdog.log" ]; then
@@ -103,14 +113,11 @@ while [ $counter -lt 1 ]; do
         echo -e "$text_yellow Version:$text_red N/A"
     fi
     echo ""
-    if [ -n "$nodev" ]; then
-        let milestone=$lmi-$lsmi
-        if [ $milestone -gt 4 ]; then
+    if [ "-n "$nodev"" ]; then
+        if [ "$sync" = "false" ]; then
             echo -e "$text_yellow Status:$text_red not synced"
-            echo -e "$text_yellow Delay: $text_red$milestone$text_yellow milestone(s)"
         else
             echo -e "$text_yellow Status:$text_green synced"
-            echo -e "$text_yellow Delay: $milestone$text_yellow milestone(s)"
         fi
     else
         echo -e "$text_yellow Status:$text_red offline"
@@ -132,11 +139,11 @@ while [ $counter -lt 1 ]; do
     echo -e $text_red "\033[1m\033[4mManagement\033[0m"
     echo ""
     echo -e $text_yellow
-    echo " 1) Installations"
+    echo " 1) Install Management"
     echo ""
-    echo " 2) Hornet Node"
+    echo " 2) Hornet Management"
     echo ""
-    echo " 3) Node Pool"
+    echo " 3) IOTA Community Node Pool"
     echo ""
     echo " 4) Edit Configurations"
     echo ""
@@ -155,10 +162,13 @@ while [ $counter -lt 1 ]; do
             echo ""
             echo -e $text_red "\033[1m\033[4mInstaller Manager\033[0m"
             echo -e $text_yellow ""
-            echo " 1) Install for hornet"
-            echo " 2) Install nginx reverse proxy"
+            echo " 1) Install Hornet"
+            echo " 2) Install HTTPS proxy"
             echo " 3) Install Watchdog"
-            echo " 4) Remove Hornet"
+            echo ""
+            echo " 5) Remove Hornet"
+            echo " 6) Remove Hornet"
+            echo ""
             echo " r) Reset Hornet-Light-Manager"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
@@ -169,17 +179,26 @@ while [ $counter -lt 1 ]; do
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
-                sudo wget -qO - https://ppa.hornet.zone/pubkey.txt | sudo apt-key add -
-                sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
-                sudo apt update
-                sudo apt install hornet -y
-                check="$(systemctl show -p ActiveState --value hornet)"
-                if [ "$check" != "active" ]; then
-                    sudo systemctl restart hornet
-                fi
-                echo -e $text_yellow && echo " Hornet installation finished!" && echo -e $text_reset
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $text_reset
+                if [ ! -f "$hornetdir/hornet" ]; then
+                    sudo wget -qO - https://ppa.hornet.zone/pubkey.txt | sudo apt-key add -
+                    sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
+                    sudo apt update
+                    sudo apt install hornet -y
+                    check="$(systemctl show -p ActiveState --value hornet)"
+                    if [ "$check" != "active" ]; then
+                        sudo systemctl restart hornet
+                    fi
+                    echo ""
+                    echo -e $TEXT_RED_B
+                    echo " You need to open the follow ports in your home router for peering"
+                    echo " Ports: 14626/UDP & 15600/tcp"
+                    echo ""
+                    echo -e $text_yellow
+                    echo " Hornet installation finished!"
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
+                else
+                    echo -e $text_red " Hornet already installed. Please remove first!"
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
             fi
 
             if [ "$selector" = "2" ]; then
@@ -243,6 +262,18 @@ while [ $counter -lt 1 ]; do
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to remove Hornet (y/N): " selector_hornetremove
                 if [ "$selector_hornetremove" = "y" ] || [ "$selector_hornetremove" = "Y" ]; then
                     sudo systemctl stop hornet
+                    sudo apt update && sudo apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install hornet
+                    sudo systemctl start hornet
+                    echo -e $text_red " Hornet was successfully removed!"
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
+                fi
+            fi
+
+            if [ "$selector" = "5" ]; then
+                echo -e $TEXT_RED_B && read -p " Are you sure you want to remove Hornet (y/N): " selector_hornetremove
+                if [ "$selector_hornetremove" = "y" ] || [ "$selector_hornetremove" = "Y" ]; then
+                    sudo systemctl stop hornet
                     sudo apt purge hornet -y
                     echo -e $text_red " Hornet was successfully removed!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
@@ -253,7 +284,7 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "r" ] || [ "$selector" = "R" ]; then
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to reset HLM (y/N): " selector_hlmreset
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
-                    ( cd $pwdcmd ; sudo git pull > /dev/null )
+                    ( cd $pwdcmd ; sudo git pull )
                     ( cd $pwdcmd ; sudo git reset --hard origin/$branch )
                     sudo chmod +x $pwdcmd/hlm.sh $pwdcmd/watchdog.sh
                     echo -e $text_red " HLM was successfully reset!"
@@ -282,7 +313,7 @@ while [ $counter -lt 1 ]; do
             echo -e $text_yellow ""
             echo " 1) Control Hornet (start/stop)"
             echo " 2) Show latest node log"
-            echo " 3) Update the Hornet version"
+            echo " 3) Update Hornet version"
             echo " 4) Reset mainnet database"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
@@ -324,7 +355,7 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "3" ] ; then
                 if [ -n "$nodev" ]; then
                     echo -e $text_yellow " Checking if a new version is available..."
-                    if [ "$nodev" == "$latesthornet" ]; then
+                    if [ "$nodev" = "$latesthornet" ]; then
                         echo -e "$text_green Already up to date."
                     else
                         echo -e $text_red " New Hornet version found... $text_red(v$latesthornet)"
@@ -345,12 +376,12 @@ while [ $counter -lt 1 ]; do
 
             if [ "$selector" = "4" ]; then
                 sudo systemctl stop hornet
-                sudo rm -rf /var/lib/hornet/mainnetdb/
+                sudo rm -rf $hornetdir/mainnetdb/
                 echo -e $TEXT_RED_B && read -p " Would you like to download the latest snapshot (y/N): " selector6
                 echo -e $text_reset
                 if [ "$selector6" = "y" ] || [ "$selector6" = "Y" ]; then
                     echo -e $text_yellow && echo " Downloading snapshot file..." && echo -e $text_reset
-                    sudo -u hornet wget -O /var/lib/hornet/export.bin $snapshot
+                    sudo -u hornet wget -O $hornetdir/export.bin $snapshot
                 fi
                 sudo systemctl restart hornet
                 echo -e $text_yellow && echo " Reset of the database finished and hornet restarted!" && echo -e $text_reset
@@ -445,7 +476,7 @@ while [ $counter -lt 1 ]; do
                 fi
             fi
             if [ "$selector" = "2" ] ; then
-                sudo nano /var/lib/hornet/config.json
+                sudo nano $hornetdir/config.json
                 echo -e $TEXT_RED_B && read -p " Would you like to restart hornet now (y/N): " selector4
                 if [ "$selector4" = "y" ] || [ "$selector4" = "y" ]; then
                     sudo systemctl restart hornet
@@ -457,7 +488,7 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "3" ] ; then
                 if [ ! -f "/var/lib/hornet/peering.json" ]; then
                     echo -e $text_yellow && echo " No peering.json found...Downloading config file!" && echo -e $text_reset
-                    sudo -u hornet wget -q -O /var/lib/hornet/peering.json https://raw.githubusercontent.com/gohornet/hornet/master/peering.json
+                    sudo -u hornet wget -q -O $hornetdir/peering.json https://raw.githubusercontent.com/gohornet/hornet/master/peering.json
                 fi
                 sudo nano /var/lib/hornet/peering.json
                 echo -e $text_yellow && echo " New peering configuration loaded!" && echo -e $text_reset
@@ -465,7 +496,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_reset
             fi
             if [ "$selector" = "4" ] ; then
-                sudo nano /var/lib/hornet/config_comnet.json
+                sudo nano $hornetdir/config_comnet.json
                 echo -e $TEXT_RED_B && read -p " Would you like to restart hornet now (y/N): " selector4
                 if [ "$selector4" = "y" ] || [ "$selector4" = "y" ]; then
                     sudo systemctl restart hornet
