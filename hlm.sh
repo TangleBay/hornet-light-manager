@@ -369,6 +369,7 @@ while [ $counter -lt 1 ]; do
                 if [ -f "/etc/nginx/.htpasswd" ]; then
                     dashpw="$(mkpasswd -m sha-512 $dashpw)"
                     echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
+                    sudo systemctl reload nginx
                     echo -e $text_yellow && echo " Hornet Dashboard login updated!" && echo -e $text_reset
                 else
                     echo -e $text_red "Please install nginx first!"
