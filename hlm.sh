@@ -488,13 +488,13 @@ while [ $counter -lt 1 ]; do
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
                 fi
             fi
-            if [ "$selector" = "5" ] ; then
+            if [ "$selector" = "6" ] ; then
                 if [ ! -f "$pwdcmd/icnp.cfg" ]; then
                     echo -e $text_yellow && echo " No config file found...Downloading config file!" && echo -e $text_reset
                     sudo wget -q -O $pwdcmd/icnp.cfg $hlmcfgs/icnp.cfg
                     echo -e $text_yellow && echo " Please try again!" && echo -e $text_reset
                 else
-                    sudo nano $pwdcmd/config.cfg
+                    sudo nano $pwdcmd/icnp.cfg
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
                 fi
             fi
