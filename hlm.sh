@@ -72,16 +72,16 @@ if ! [ -x "$(command -v whois)" ]; then
     clear
 fi
 
-if [ "$version" != "$latesthlm" ]; then
-    echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $text_reset
-    ( cd $pwdcmd ; sudo git pull > /dev/null )
-    ( cd $pwdcmd ; sudo git reset --hard origin/$branch )
-    sudo chmod +x $pwdcmd/hlm.sh $pwdcmd/watchdog.sh
-    sudo nano $pwdcmd/config.cfg
-    ScriptLoc=$(readlink -f "$0")
-    exec "$ScriptLoc"
-    exit 0
-fi
+#if [ "$version" != "$latesthlm" ]; then
+#    echo -e $TEXT_RED_B && echo " New version available (v$latesthlm)! Downloading new version..." && echo -e $text_reset
+#    ( cd $pwdcmd ; sudo git pull > /dev/null )
+#    ( cd $pwdcmd ; sudo git reset --hard origin/$branch )
+#    sudo chmod +x $pwdcmd/hlm.sh $pwdcmd/watchdog.sh
+#    sudo nano $pwdcmd/config.cfg
+#    ScriptLoc=$(readlink -f "$0")
+#    exec "$ScriptLoc"
+#    exit 0
+#fi
 
 if [ ! -f "$pwdcmd/icnp.cfg" ]; then
     echo -e $text_yellow && echo " No ICNP.cfg detected...Downloading pool config file!" && echo -e $text_reset
@@ -323,7 +323,7 @@ while [ $counter -lt 1 ]; do
             echo -e $text_yellow ""
             echo " 1) Control Hornet (start/stop)"
             echo " 2) Show latest node log"
-            echo " 3) Reset mainnet database"
+            echo " 3) Reset database"
             echo ""
             echo " 4) Update Dashboard login"
             echo " 5) Update Hornet version"
@@ -365,18 +365,27 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "3" ]; then
-                sudo systemctl stop hornet
-                sudo rm -rf $hornetdir/mainnetdb/
-                echo -e $TEXT_RED_B && read -p " Would you like to download the latest snapshot (y/N): " selector6
+                echo -e $TEXT_RED_B && read -p " Are you sure to delete the database (y/N): " selector6
                 echo -e $text_reset
                 if [ "$selector6" = "y" ] || [ "$selector6" = "Y" ]; then
-                    echo -e $text_yellow && echo " Downloading snapshot file..." && echo -e $text_reset
-                    sudo -u hornet wget -O $hornetdir/export.bin $snapshot
+                    sudo systemctl stop hornet
+                    if [ -d "$hornetdir/mainnetdb" ]; then
+                        sudo rm -rf $hornetdir/mainnetdb
+                    fi
+                    if [ -d "$hornetdir/comnetdb" ]; then
+                        sudo rm -rf $hornetdir/comnetdir
+                    fi
+                    if [ -f "$hornetdir/export.bin" ]; then
+                        sudo rm -rf $hornetdir/export.bin
+                    fi
+                    if [ -f "$hornetdir/export_comnet.bin" ]; then
+                        sudo rm -rf $hornetdir/export_comnet.bin
+                    fi                    
+                    sudo systemctl restart hornet
+                    echo -e $text_yellow && echo " Reset of the database finished and hornet restarted!" && echo -e $text_reset
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
                 fi
-                sudo systemctl restart hornet
-                echo -e $text_yellow && echo " Reset of the database finished and hornet restarted!" && echo -e $text_reset
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $text_reset
             fi
 
             if [ "$selector" = "4" ]; then
