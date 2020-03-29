@@ -1,6 +1,6 @@
 #!/bin/bash
 pwdcmd=`dirname "$BASH_SOURCE"`
-source $pwdcmd/config.cfg
+source $pwdcmd/hornet.cfg
 check="$(systemctl show -p ActiveState --value hornet)"
 
 if [ "$check" = "active" ]; then
@@ -32,7 +32,9 @@ fi
 
 if [ "$check" != "active" ]; then
     dt=`date '+%m/%d/%Y %H:%M:%S'`
-    sudo systemctl restart hornet
+    sudo systemctl stop hornet
+    sudo rm -rf /var/lib/hornet/mainnetdb /var/lib/hornet/export.bin
+    sudo systemctl start hornet
     counter="$(cat $pwdcmd/../log/watchdog.log | sed -n -e '1{p;q}')"
     let counter=counter+1
     {
