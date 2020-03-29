@@ -12,6 +12,7 @@ version=0.0.1
 
 pwdcmd=`dirname "$BASH_SOURCE"`
 source $pwdcmd/config.cfg
+source $pwdcmd/hornet.cfg
 
 TEXT_RED_B='\e[1;31m'
 text_yellow='\e[33m'
@@ -83,8 +84,14 @@ if [ "$version" != "$latesthlm" ]; then
 fi
 
 if [ ! -f "$pwdcmd/icnp.cfg" ]; then
-    echo -e $text_yellow && echo " No pool config detected...Downloading pool config file!" && echo -e $text_reset
+    echo -e $text_yellow && echo " No ICNP.cfg detected...Downloading pool config file!" && echo -e $text_reset
     sudo wget -q -O $pwdcmd/icnp.cfg $hlmcfgs/icnp.cfg
+fi
+
+if [ ! -f "$pwdcmd/hornet.cfg" ]; then
+    echo -e $text_yellow && echo " No Hornet.cfg detected...Downloading HLM hornet config file!" && echo -e $text_reset
+    sudo wget -q -O $pwdcmd/hornet.cfg $hlmcfgs/hornet.cfg
+    sudo nano $pwdcmd/hornet.cfg
 fi
 
 counter=0
@@ -92,6 +99,7 @@ while [ $counter -lt 1 ]; do
     clear
     source $pwdcmd/config.cfg
     source $pwdcmd/icnp.cfg
+    source $pwdcmd/hornet.cfg
 
     nodetempv="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.appVersion')"
     nodev="${nodetempv%\"}"
@@ -469,12 +477,13 @@ while [ $counter -lt 1 ]; do
             echo ""
             echo -e $text_red "\033[1m\033[4mEdit Configurations\033[0m"
             echo -e $text_yellow ""
-            echo " 1) Edit Hornet service"
-            echo " 2) Edit Hornet config"
-            echo " 3) Edit Hornet peering.json"
-            echo " 4) Edit Hornet ComNet config"
-            echo " 5) Edit HLM config.cfg"
-            echo " 6) Edit ICNP config"
+            echo " 1) Edit Hornet.Service"
+            echo " 2) Edit Hornet Config.json"
+            echo " 3) Edit Hornet Peering.json"
+            echo " 4) Edit Hornet Config_Comnet.json"
+            echo " 5) Edit HLM Config.cfg"
+            echo " 7) Edit HLM Hornet.cfg"
+            echo " 6) Edit HLM ICNP.cfg"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
             echo ""
@@ -535,6 +544,16 @@ while [ $counter -lt 1 ]; do
                 fi
             fi
             if [ "$selector" = "6" ] ; then
+                if [ ! -f "$pwdcmd/hornet.cfg" ]; then
+                    echo -e $text_yellow && echo " No config file found...Downloading config file!" && echo -e $text_reset
+                    sudo wget -q -O $pwdcmd/hornet.cfg $hlmcfgs/hornet.cfg
+                    echo -e $text_yellow && echo " Please try again!" && echo -e $text_reset
+                else
+                    sudo nano $pwdcmd/hornet.cfg
+                    echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
+                fi
+            fi
+            if [ "$selector" = "7" ] ; then
                 if [ ! -f "$pwdcmd/icnp.cfg" ]; then
                     echo -e $text_yellow && echo " No config file found...Downloading config file!" && echo -e $text_reset
                     sudo wget -q -O $pwdcmd/icnp.cfg $hlmcfgs/icnp.cfg
