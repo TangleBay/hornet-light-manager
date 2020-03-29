@@ -106,8 +106,8 @@ while [ $counter -lt 1 ]; do
     nodev="${nodev#\"}"
     sync="$(curl -s https://nodes.tanglebay.org -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.isSynced')"
 
-    sudo crontab -l | grep -q $pwdcmd/watchdog.sh && watchdog=active || watchdog=inactive
     if [ -f "$pwdcmd/log/watchdog.log" ]; then
+        sudo crontab -l | grep -q $pwdcmd/watchdog.sh && watchdog=active || watchdog=inactive
         watchdogcount="$(cat $pwdcmd/log/watchdog.log | sed -n -e '1{p;q}')"
         watchdogtime="$(cat $pwdcmd/log/watchdog.log | sed -n -e '2{p;q}')"
     fi
@@ -196,17 +196,23 @@ while [ $counter -lt 1 ]; do
                     sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
                     sudo apt update
                     sudo apt install hornet -y
-                    check="$(systemctl show -p ActiveState --value hornet)"
-                    if [ "$check" != "active" ]; then
-                        sudo systemctl restart hornet
+                    if [ -f $hornetdir/hornet ]; then
+                        check="$(systemctl show -p ActiveState --value hornet)"
+                        if [ "$check" != "active" ]; then
+                            sudo systemctl restart hornet
+                        fi
+                        echo ""
+                        echo -e $TEXT_RED_B
+                        echo " You need to open the following ports in your home router for peering"
+                        echo " Ports: 14626/UDP & 15600/tcp"
+                        echo ""
+                        echo -e $text_yellow
+                        echo " Hornet installation finished!"
+                    else
+                        echo -e $TEXT_RED_B ""
+                        echo " Error while installing Hornet. Please check hornet.cfg and try again!"
+                        echo ""
                     fi
-                    echo ""
-                    echo -e $TEXT_RED_B
-                    echo " You need to open the follow ports in your home router for peering"
-                    echo " Ports: 14626/UDP & 15600/tcp"
-                    echo ""
-                    echo -e $text_yellow
-                    echo " Hornet installation finished!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
                 else
                     echo -e $text_red " Hornet already installed. Please remove first!"
@@ -482,8 +488,8 @@ while [ $counter -lt 1 ]; do
             echo " 3) Edit Hornet Peering.json"
             echo " 4) Edit Hornet Config_Comnet.json"
             echo " 5) Edit HLM Config.cfg"
-            echo " 7) Edit HLM Hornet.cfg"
-            echo " 6) Edit HLM ICNP.cfg"
+            echo " 6) Edit HLM Hornet.cfg"
+            echo " 7) Edit HLM ICNP.cfg"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
             echo ""
