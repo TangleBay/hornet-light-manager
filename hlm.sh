@@ -67,7 +67,7 @@ fi
 
 if ! [ -x "$(command -v whois)" ]; then
     echo -e $text_yellow && echo "Installing necessary package whois..." && echo -e $text_reset
-    sudo apt install nano -y > /dev/null
+    sudo apt install whois -y > /dev/null
     clear
 fi
 
