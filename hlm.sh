@@ -198,12 +198,12 @@ while [ $counter -lt 1 ]; do
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
-                if [ ! -f "$hornetdir/hornet" ]; then
+                if [ ! -f "/usr/bin/hornet" ]; then
                     sudo wget -qO - https://ppa.hornet.zone/pubkey.txt | sudo apt-key add -
                     sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
                     sudo apt update && apt dist-upgrade -y && apt upgrade -y
                     sudo apt install hornet -y
-                    if [ -f $hornetdir/hornet ]; then
+                    if [ -f /usr/bin/hornet ]; then
                         check="$(systemctl show -p ActiveState --value hornet)"
                         if [ "$check" != "active" ]; then
                             sudo systemctl restart hornet
