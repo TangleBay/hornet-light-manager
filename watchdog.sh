@@ -1,6 +1,7 @@
 #!/bin/bash
-pwdcmd=`dirname "$BASH_SOURCE"`
-source $pwdcmd/hornet.cfg
+hlmcfgdir=/etc/hlm-cfgs
+hlmdir=/var/lib/hornet-light-manager
+source $hlmcfgdir/hornet.cfg
 check="$(systemctl show -p ActiveState --value hornet)"
 
 if [ "$check" = "active" ]; then
@@ -35,12 +36,12 @@ if [ "$check" != "active" ]; then
     sudo systemctl stop hornet
     sudo rm -rf /var/lib/hornet/mainnetdb /var/lib/hornet/export.bin
     sudo systemctl start hornet
-    counter="$(cat $pwdcmd/../log/watchdog.log | sed -n -e '1{p;q}')"
+    counter="$(cat $hlmdir/log/watchdog.log | sed -n -e '1{p;q}')"
     let counter=counter+1
     {
     echo $counter
     echo $dt
-    } > $pwdcmd/../log/watchdog.log
+    } > $hlmdir/log/watchdog.log
     counter=0
 fi
 exit 0
