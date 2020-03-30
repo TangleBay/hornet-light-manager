@@ -26,6 +26,8 @@ hornetdir="/var/lib/hornet"
 hlmgit="https://github.com/TangleBay/hornet-light-manager.git"
 hlmcfggit="https://github.com/TangleBay/hlm-cfgs.git"
 latesthlm="$(curl -s https://api.github.com/repos/TangleBay/hornet-light-manager/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
+croncmd="$hlmdir/watchdog.sh"
+cronjob="*/15 * * * * $croncmd"
 
 if [ "$release" = "stable" ]; then
     latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
@@ -229,6 +231,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to remove Hornet (y/N): " selector_hornetremove
                 echo -e $text_reset
                 if [ "$selector_hornetremove" = "y" ] || [ "$selector_hornetremove" = "Y" ]; then
+                    ( crontab -l | grep -v -F "$croncmd" ) | crontab -
                     sudo systemctl stop hornet
                     sudo apt purge hornet -y
                     echo -e $text_red " Hornet was successfully removed!"
@@ -278,8 +281,6 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "4" ]; then
                 echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel hornet watchdog: " selector_watchdog
                 echo -e $text_reset
-                croncmd="$hlmdir/watchdog.sh"
-                cronjob="*/15 * * * * $croncmd"
                 if [ "$selector_watchdog" = "1" ]; then
                     echo -e $text_yellow && echo " Enable hornet watchdog..." && echo -e $text_reset
                     sudo mkdir -p $hlmdir/log
