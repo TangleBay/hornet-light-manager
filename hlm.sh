@@ -183,6 +183,7 @@ while [ $counter -lt 1 ]; do
             echo ""
             echo " 4) Install Watchdog"
             echo " 5) Update Hornet-Light-Manager"
+            echo " 6) Reset all HLM configs"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
             echo ""
@@ -292,12 +293,25 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "5" ]; then
-                echo -e $TEXT_RED_B && read -p " Are you sure you want to reset HLM (y/N): " selector_hlmreset
+                echo -e $TEXT_RED_B && read -p " Are you sure you want to update HLM (y/N): " selector_hlmreset
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
                     ( cd $hlmdir ; sudo git pull )
                     ( cd $hlmdir ; sudo git reset --hard origin/master )
                     sudo chmod +x $hlmdir/hlm.sh $hlmdir/watchdog.sh
-                    echo -e $text_red " HLM was successfully reset!"
+                    echo -e $text_red " HLM update successfully!"
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
+                    ScriptLoc=$(readlink -f "$0")
+                    exec "$ScriptLoc"
+                    exit 0
+                fi
+            fi
+
+            if [ "$selector" = "6" ]; then
+                echo -e $TEXT_RED_B && read -p " Are you sure you want to reset all HLM configs (y/N): " selector_hlmreset
+                if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
+                    ( cd $hlmcfgdir ; sudo git pull )
+                    ( cd $hlmcfgdir ; sudo git reset --hard origin/master )
+                    echo -e $text_red " HLM configs reset successfully!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
                     ScriptLoc=$(readlink -f "$0")
                     exec "$ScriptLoc"
