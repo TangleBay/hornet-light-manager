@@ -11,7 +11,6 @@ version=0.0.1
 ############################################################################################################################################################
 
 source /etc/hlm-cfgs/hornet.cfg
-source /etc/hlm-cfgs/nginx.cfg
 
 #pwdcmd=`dirname "$BASH_SOURCE"`
 
@@ -40,7 +39,7 @@ fi
 if [ "$latesthlm" != "$version" ]; then
     up2date=v$text_red$version
 else
-    up2date=v$text_green$version
+    up2date=$text_green"v"$version
 fi
 
 ############################################################################################################################################################
@@ -105,7 +104,7 @@ while [ $counter -lt 1 ]; do
     nodetempv="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.appVersion')"
     nodev="${nodetempv%\"}"
     nodev="${nodev#\"}"
-    sync="$(curl -s https://nodes.tanglebay.org -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.isSynced')"
+    sync="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.isSynced')"
 
     if [ -f "$hlmdir/log/watchdog.log" ]; then
         sudo crontab -l | grep -q $hlmdir/watchdog.sh && watchdog=active || watchdog=inactive
