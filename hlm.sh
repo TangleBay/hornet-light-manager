@@ -39,7 +39,7 @@ if [ "$release" = "testing" ]; then
 fi
 
 if [ "$latesthlm" != "$version" ]; then
-    up2date=v$text_red$version
+    up2date=$text_red"v"$version
 else
     up2date=$text_green"v"$version
 fi
