@@ -156,7 +156,7 @@ while [ $counter -lt 1 ]; do
     echo -e $text_red "\033[1m\033[4mManagement\033[0m"
     echo ""
     echo -e $text_yellow
-    echo " 1) Install Management"
+    echo " 1) HLM Tools"
     echo ""
     echo " 2) Hornet Management"
     echo ""
@@ -177,14 +177,14 @@ while [ $counter -lt 1 ]; do
         while [ $counter1 -lt 1 ]; do
             clear
             echo ""
-            echo -e $text_red "\033[1m\033[4mInstaller Manager\033[0m"
+            echo -e $text_red "\033[1m\033[4mHLM Tools\033[0m"
             echo -e $text_yellow ""
             echo " 1) Install Hornet"
             echo " 2) Remove Hornet"
             echo ""
             echo " 3) Install HTTPS proxy"
+            echo " 4) Manage Watchdog"
             echo ""
-            echo " 4) Install Watchdog"
             echo " 5) Update Hornet-Light-Manager"
             echo " 6) Reset all HLM configs"
             echo ""
