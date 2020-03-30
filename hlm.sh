@@ -137,17 +137,20 @@ while [ $counter -lt 1 ]; do
         echo -e "$text_yellow Hornet Status:$text_red offline"
     fi
     echo ""
-    if [ "$watchdog" != "active" ]; then
-        echo -e "$text_yellow Watchdog:$text_red $watchdog"
-    else
-        echo -e "$text_yellow Watchdog:$text_green $watchdog"
-        echo -e "$text_yellow Restarts:$text_red $watchdogcount"
-        if [ -n "$watchdogtime" ]; then
-            echo -e "$text_yellow Last restart: $watchdogtime"
+    if [ "$watchdog" = "active" ] || [ "$watchdog" = "inactive" ]; then
+        if [ "$watchdog" != "active" ]; then
+            echo -e "$text_yellow Watchdog:$text_red $watchdog"
+        else
+            echo -e "$text_yellow Watchdog:$text_green $watchdog"
+            echo -e "$text_yellow Restarts:$text_red $watchdogcount"
+            if [ -n "$watchdogtime" ]; then
+                echo -e "$text_yellow Last restart: $watchdogtime"
+            fi
         fi
+    else
+        echo -e "$text_yellow Watchdog:$text_red inactive"
     fi
     echo ""
-
     echo -e "\e[90m==========================================================="
     echo ""
     echo -e $text_red "\033[1m\033[4mManagement\033[0m"
