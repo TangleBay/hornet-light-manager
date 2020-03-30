@@ -578,10 +578,13 @@ while [ $counter -lt 1 ]; do
                     echo -e $TEXT_RED_B " Release change detected!!!" && echo -e $text_reset
                     echo ""
                     echo -e $text_yellow && read -p " Would you like to re-install hornet now (y/N): " selector_releasechange
+                    echo -e $text_reset
                     if [ "$selector_releasechange" = "y" ] || [ "$selector_releasechange" = "Y" ]; then
-                        sudo apt purge hornet* -y && apt update && sudo apt install -y hornet
+                        sudo apt purge hornet* -y && apt update && sudo apt install hornet -y
                         echo ""
                         echo -e $text_red " Hornet re-installation finished!"
+                        echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                        echo -e $text_reset
                     fi
                 echo ""
                 fi
