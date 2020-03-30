@@ -513,6 +513,7 @@ while [ $counter -lt 1 ]; do
             echo " 2) Edit Hornet Config.json"
             echo " 3) Edit Hornet Peering.json"
             echo " 4) Edit Hornet Config_Comnet.json"
+            echo ""
             echo " 5) Edit HLM Hornet.cfg"
             echo " 6) Edit HLM Nginx.cfg"
             echo " 7) Edit HLM ICNP.cfg"
@@ -567,6 +568,7 @@ while [ $counter -lt 1 ]; do
             fi
             if [ "$selector" = "5" ] ; then
                 sudo nano $hlmcfgdir/hornet.cfg
+                sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
                 echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
             fi
             if [ "$selector" = "6" ] ; then
