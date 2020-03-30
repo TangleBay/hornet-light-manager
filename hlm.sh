@@ -201,7 +201,7 @@ while [ $counter -lt 1 ]; do
                 if [ ! -f "/usr/bin/hornet" ]; then
                     sudo wget -qO - https://ppa.hornet.zone/pubkey.txt | sudo apt-key add -
                     sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
-                    sudo apt update && apt dist-upgrade -y && apt upgrade -y
+                    sudo apt update && sudo apt dist-upgrade -y && sudo apt upgrade -y
                     sudo apt install hornet -y
                     if [ -f /usr/bin/hornet ]; then
                         check="$(systemctl show -p ActiveState --value hornet)"
@@ -580,7 +580,9 @@ while [ $counter -lt 1 ]; do
                     echo -e $text_yellow && read -p " Would you like to re-install hornet now (y/N): " selector_releasechange
                     echo -e $text_reset
                     if [ "$selector_releasechange" = "y" ] || [ "$selector_releasechange" = "Y" ]; then
-                        sudo apt purge hornet* -y && apt update && sudo apt install hornet -y
+                        sudo apt purge hornet -y
+                        sudo apt update && sudo apt dist-upgrade -y && sudo apt upgrade -y
+                        sudo apt install hornet -y
                         echo ""
                         echo -e $text_red " Hornet re-installation finished!"
                         echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
