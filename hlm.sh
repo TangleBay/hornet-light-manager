@@ -583,6 +583,10 @@ while [ $counter -lt 1 ]; do
                         sudo apt purge hornet -y
                         sudo apt update && sudo apt dist-upgrade -y && sudo apt upgrade -y
                         sudo apt install hornet -y
+                        check="$(systemctl show -p ActiveState --value hornet)"
+                        if [ "$check" != "active" ]; then
+                            sudo systemctl restart hornet
+                        fi
                         echo ""
                         echo -e $text_red " Hornet re-installation finished!"
                         echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
