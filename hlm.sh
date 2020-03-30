@@ -127,14 +127,14 @@ while [ $counter -lt 1 ]; do
     else
         echo -e "$text_yellow Hornet Version:$text_red N/A"
     fi
-    if [ "-n "$nodev"" ]; then
-        if [ "$sync" = "false" ]; then
-            echo -e "$text_yellow Hornet Status:$text_red not synced"
-        else
+    if [ "$sync" = "true" ] || [ "$sync" = "false" ]; then
+        if [ "$sync" = "true" ]; then
             echo -e "$text_yellow Hornet Status:$text_green synced"
+        else
+            echo -e "$text_yellow Hornet Status:$text_red not synced"
         fi
     else
-        echo -e "$text_yellow Hornet Status:$text_red offline"
+        echo -e "$text_yellow Hornet Status:$text_red N/A"
     fi
     echo ""
     if [ "$watchdog" = "active" ] || [ "$watchdog" = "inactive" ]; then
@@ -199,7 +199,7 @@ while [ $counter -lt 1 ]; do
                 if [ ! -f "$hornetdir/hornet" ]; then
                     sudo wget -qO - https://ppa.hornet.zone/pubkey.txt | sudo apt-key add -
                     sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
-                    sudo apt update
+                    sudo apt update && apt dist-upgrade -y && apt upgrade -y
                     sudo apt install hornet -y
                     if [ -f $hornetdir/hornet ]; then
                         check="$(systemctl show -p ActiveState --value hornet)"
@@ -227,6 +227,7 @@ while [ $counter -lt 1 ]; do
 
             if [ "$selector" = "2" ]; then
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to remove Hornet (y/N): " selector_hornetremove
+                echo -e $text_reset
                 if [ "$selector_hornetremove" = "y" ] || [ "$selector_hornetremove" = "Y" ]; then
                     sudo systemctl stop hornet
                     sudo apt purge hornet -y
