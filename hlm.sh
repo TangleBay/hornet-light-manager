@@ -569,8 +569,22 @@ while [ $counter -lt 1 ]; do
                 fi
             fi
             if [ "$selector" = "5" ] ; then
+                currentrelease=$release
                 sudo nano $hlmcfgdir/hornet.cfg
-                sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
+                source $hlmcfgdir/hornet.cfg
+                if [ "$release" != "$currentrelease" ]; then
+                    sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
+                    echo ""
+                    echo -e $TEXT_RED_B " Release change detected!!!" && echo -e $text_reset
+                    echo ""
+                    echo -e $text_yellow && read -p " Would you like to re-install hornet now (y/N): " selector_releasechange
+                    if [ "$selector_releasechange" = "y" ] || [ "$selector_releasechange" = "Y" ]; then
+                        sudo apt purge hornet* -y && apt update && sudo apt install -y hornet
+                        echo ""
+                        echo -e $text_red " Hornet re-installation finished!"
+                    fi
+                echo ""
+                fi
                 echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
             fi
             if [ "$selector" = "6" ] ; then
