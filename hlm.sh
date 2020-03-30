@@ -38,9 +38,9 @@ if [ "$release" = "testing" ]; then
 fi
 
 if [ "$latesthlm" != "$version" ]; then
-    up2date=$text_red$version
+    up2date=v$text_red$version
 else
-    up2date=$text_green$version
+    up2date=v$text_green$version
 fi
 
 ############################################################################################################################################################
@@ -116,7 +116,7 @@ while [ $counter -lt 1 ]; do
     ############################################################################################################################################################
 
     echo ""
-    echo -e $text_yellow "\033[1m\033[4mWelcome to the Hornet lightweight manager! [v$up2date]\033[0m"
+    echo -e $text_yellow "\033[1m\033[4mWelcome to the Hornet lightweight manager! [$up2date$text_yellow]\033[0m"
     echo ""
     if [ -n "$nodev" ]; then
         if [ "$nodev" = "$latesthornet" ]; then
@@ -245,7 +245,7 @@ while [ $counter -lt 1 ]; do
                 sudo systemctl daemon-reload
 
                 echo -e $text_yellow && echo " Copying Nginx configuration..." && echo -e $text_reset
-                sudo cp $pwdcmd/nginx-config.template /etc/nginx/sites-available/default
+                sudo cp $hlmdir/nginx-config.template /etc/nginx/sites-available/default
                 sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
                 sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
                 sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
@@ -549,15 +549,15 @@ while [ $counter -lt 1 ]; do
                 fi
             fi
             if [ "$selector" = "5" ] ; then
-                sudo nano $pwdcmd/hornet.cfg
+                sudo nano $hlmcfgdir/hornet.cfg
                 echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
             fi
             if [ "$selector" = "6" ] ; then
-                sudo nano $pwdcmd/nginx.cfg
+                sudo nano $hlmcfgdir/nginx.cfg
                 echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
             fi
             if [ "$selector" = "7" ] ; then
-                sudo nano $pwdcmd/icnp.cfg
+                sudo nano $hlmcfgdir/icnp.cfg
                 echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
             fi
 
