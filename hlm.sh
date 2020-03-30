@@ -92,6 +92,7 @@ fi
 if [ ! -d "$hlmcfgdir" ]; then
     echo -e $text_yellow && echo " No config dir detected...Downloading config files!" && echo -e $text_reset
     ( cd /etc ; sudo git clone $hlmcfggit )
+    sudo nano $hlmcfgdir/hornet.cfg
 fi
 
 counter=0
