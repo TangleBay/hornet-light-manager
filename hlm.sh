@@ -249,7 +249,7 @@ while [ $counter -lt 1 ]; do
                 fi
                 sudo apt update && sudo apt install python-certbot-nginx -y
 
-                if [ "$nginxservice" = "repair"]; then
+                if [ "$nginxservice" = "repair" ]; then
                     sudo mkdir /etc/systemd/system/nginx.service.d
                     sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
                     sudo systemctl daemon-reload
