@@ -257,7 +257,7 @@ while [ $counter -lt 1 ]; do
 
                 echo -e $text_yellow && echo " Copying Nginx configuration..." && echo -e $text_reset
                 rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default
-                sudo cp $hlmdir/nginx-config.template /etc/nginx/sites-available/default
+                sudo cp $hlmdir/nginx.template /etc/nginx/sites-available/default
                 sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
                 sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
                 sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
@@ -270,7 +270,7 @@ while [ $counter -lt 1 ]; do
                 sudo certbot --nginx -d $domain
 
                 if [ -f "/etc/letsencrypt/live/$domain/fullchain.pem" ]; then
-                    sudo cp $hlmdir/nginx-config.template /etc/nginx/sites-enabled/default
+                    sudo cp $hlmdir/nginx.template /etc/nginx/sites-enabled/default
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
@@ -310,6 +310,7 @@ while [ $counter -lt 1 ]; do
                     ( cd $hlmdir ; sudo git pull ) > /dev/null 2>&1
                     ( cd $hlmdir ; sudo git reset --hard origin/master ) > /dev/null 2>&1
                     sudo chmod +x $hlmdir/hlm.sh $hlmdir/watchdog.sh
+                    echo ""
                     echo -e $text_red " HLM update successfully!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
                     ScriptLoc=$(readlink -f "$0")
@@ -323,6 +324,7 @@ while [ $counter -lt 1 ]; do
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
                     ( cd $hlmcfgdir ; sudo git pull ) > /dev/null 2>&1
                     ( cd $hlmcfgdir ; sudo git reset --hard origin/master ) > /dev/null 2>&1
+                    echo ""
                     echo -e $text_red " HLM configs reset successfully!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
                     ScriptLoc=$(readlink -f "$0")

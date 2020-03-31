@@ -46,8 +46,8 @@ server {
 
     listen [::]:14266 ssl http2;
     listen 14266 ssl http2;
-    #RjtV27dwssl_certificate /etc/letsencrypt/live/domain.tld/fullchain.pem;
-    #RjtV27dwssl_certificate_key /etc/letsencrypt/live/domain.tld/privkey.pem;
+    #NGINXssl_certificate /etc/letsencrypt/live/domain.tld/fullchain.pem;
+    #NGINXssl_certificate_key /etc/letsencrypt/live/domain.tld/privkey.pem;
 }	
 
 server {	
@@ -79,8 +79,8 @@ server {
 
     listen [::]:14267 ssl http2;
     listen 14267 ssl http2;
-    #RjtV27dwssl_certificate /etc/letsencrypt/live/domain.tld/fullchain.pem;
-    #RjtV27dwssl_certificate_key /etc/letsencrypt/live/domain.tld/privkey.pem;
+    #NGINXssl_certificate /etc/letsencrypt/live/domain.tld/fullchain.pem;
+    #NGINXssl_certificate_key /etc/letsencrypt/live/domain.tld/privkey.pem;
 }	
 
 server {	
