@@ -256,8 +256,8 @@ while [ $counter -lt 1 ]; do
                 fi
 
                 echo -e $text_yellow && echo " Copying Nginx configuration..." && echo -e $text_reset
-                rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default
-                sudo cp $hlmdir/nginx.template /etc/nginx/sites-available/default
+                rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
+                sudo cp $hlmdir/nginx.template /etc/nginx/sites-enabled/default
                 sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
                 sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
                 sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
