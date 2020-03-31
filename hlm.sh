@@ -243,6 +243,7 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "3" ]; then
                 echo -e $text_yellow && echo " Installing necessary packages..." && echo -e $text_reset
                 sudo apt install software-properties-common -y
+                sudo add-apt-repository universe -y > /dev/null
                 sudo add-apt-repository ppa:certbot/certbot -y > /dev/null
                 sudo apt update && sudo apt install python-certbot-nginx -y
                 sudo apt update && sudo apt dist-upgrade -y && sudo apt upgrade -y && apt autoremove -y
