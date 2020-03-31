@@ -242,22 +242,25 @@ while [ $counter -lt 1 ]; do
 
             if [ "$selector" = "3" ]; then
                 echo -e $text_yellow && echo " Installing necessary packages..." && echo -e $text_reset
+                certbot="certbot/certbot"  # e.g. the_ppa="ondrej/apache2"
                 sudo apt install software-properties-common -y
-                sudo add-apt-repository universe -y > /dev/null
-                sudo add-apt-repository ppa:certbot/certbot -y > /dev/null
+                if ! grep -q "^deb .*$certbot" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
+                    sudo add-apt-repository ppa:certbot/certbot -y
+                fi
                 sudo apt update && sudo apt install python-certbot-nginx -y
-                sudo apt update && sudo apt dist-upgrade -y && sudo apt upgrade -y && apt autoremove -y
 
-                echo -e $text_yellow && echo " Updating Nginx..." && echo -e $text_reset
-                sudo mkdir /etc/systemd/system/nginx.service.d
-                sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
-                sudo systemctl daemon-reload
+                if [ "$nginxservice" = "repair"]; then
+                    sudo mkdir /etc/systemd/system/nginx.service.d
+                    sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
+                    sudo systemctl daemon-reload
+                fi
 
                 echo -e $text_yellow && echo " Copying Nginx configuration..." && echo -e $text_reset
+                rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default
                 sudo cp $hlmdir/nginx-config.template /etc/nginx/sites-available/default
-                sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
-                sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
-                sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
+                sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
+                sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
+                sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
                 sudo find /etc/nginx/nginx.conf -type f -exec sed -i 's/\# server_names_hash_bucket_size 64;/server_names_hash_bucket_size 64;/g' {} \;
                 dashpw="$(mkpasswd -m sha-512 $dashpw)"
                 sudo echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
@@ -267,12 +270,15 @@ while [ $counter -lt 1 ]; do
                 sudo certbot --nginx -d $domain
 
                 if [ -f "/etc/letsencrypt/live/$domain/fullchain.pem" ]; then
-                    sudo cp $hlmdir/nginx-config.template /etc/nginx/sites-available/default
-                    sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
-                    sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
-                    sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
-                    sudo find /etc/nginx/sites-available/default -type f -exec sed -i 's/\#RjtV27dw/''/g' {} \;
+                    sudo cp $hlmdir/nginx-config.template /etc/nginx/sites-enabled/default
+                    sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
+                    sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
+                    sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
+                    sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/\#NGINX/''/g' {} \;
                     sudo systemctl restart nginx
+                    echo -e $text_yellow && echo " SSL Certificate installed!" && echo -e $text_reset
+                else
+                    echo -e $text_red " Error! SSL Certificate not found!"
                 fi
                 echo -e $text_yellow && echo " Reverse proxy installation finished!" && echo -e $text_reset
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
