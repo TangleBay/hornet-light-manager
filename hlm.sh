@@ -309,7 +309,7 @@ while [ $counter -lt 1 ]; do
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
                     ( cd $hlmdir ; sudo git pull ) > /dev/null 2>&1
                     ( cd $hlmdir ; sudo git reset --hard origin/master ) > /dev/null 2>&1
-                    sudo chmod +x $hlmdir/hlm.sh $hlmdir/watchdog.sh
+                    sudo chmod +x $hlmdir/hlm.sh $hlmdir/watchdog.sh $hlmdir/icnp-autoseason.sh
                     echo ""
                     echo -e $text_red " HLM update successfully!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
