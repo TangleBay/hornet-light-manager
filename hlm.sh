@@ -307,8 +307,8 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "5" ]; then
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to update HLM (y/N): " selector_hlmreset
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
-                    ( cd $hlmdir ; sudo git pull )
-                    ( cd $hlmdir ; sudo git reset --hard origin/master )
+                    ( cd $hlmdir ; sudo git pull ) > /dev/null 2>&1
+                    ( cd $hlmdir ; sudo git reset --hard origin/master ) > /dev/null 2>&1
                     sudo chmod +x $hlmdir/hlm.sh $hlmdir/watchdog.sh
                     echo -e $text_red " HLM update successfully!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
@@ -321,8 +321,8 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "6" ]; then
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to reset all HLM configs (y/N): " selector_hlmreset
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
-                    ( cd $hlmcfgdir ; sudo git pull )
-                    ( cd $hlmcfgdir ; sudo git reset --hard origin/master )
+                    ( cd $hlmcfgdir ; sudo git pull ) > /dev/null 2>&1
+                    ( cd $hlmcfgdir ; sudo git reset --hard origin/master ) > /dev/null 2>&1
                     echo -e $text_red " HLM configs reset successfully!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
                     ScriptLoc=$(readlink -f "$0")
