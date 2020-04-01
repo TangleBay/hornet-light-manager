@@ -515,7 +515,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_reset
                 if [ "$selector_autoicnp" = "1" ]; then
                     echo -e $text_yellow && echo " Enable Auto-ICNP..." && echo -e $text_reset
-                    sudo chmod +x $hlmdir/auto.sh
+                    sudo chmod +x $hlmdir/auto-icnp.sh
                     ( crontab -l | grep -v -F "$croncmdicnp" ; echo "$cronjobicnp" ) | crontab -
                 fi
                 if [ "$selector_autoicnp" = "2" ]; then
