@@ -15,7 +15,7 @@ server {
                 proxy_set_header        X-Real-IP $remote_addr;
                 proxy_set_header        X-Forwarded-Proto $scheme;
                 proxy_set_header        X-Real-SslId $ssl_session_id;
-                proxy_pass              http://127.0.0.1:14265;
+                proxy_pass              http://localhost:14265;
                 proxy_ignore_client_abort on;
 
                 if ($request_method = 'OPTIONS') {
@@ -73,7 +73,7 @@ server {
                 proxy_set_header        X-Real-IP $remote_addr;
                 proxy_set_header        X-Forwarded-Proto $scheme;
                 proxy_set_header        X-Real-SslId $ssl_session_id;
-                proxy_pass              http://127.0.0.1:8081;
+                proxy_pass              http://localhost:8081;
                 proxy_ignore_client_abort on;
         }	
 
