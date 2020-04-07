@@ -34,7 +34,7 @@ fi
 if [ "$check" != "active" ]; then
     dt=`date '+%m/%d/%Y %H:%M:%S'`
     sudo systemctl stop hornet
-    sudo rm -rf /var/lib/hornet/mainnetdb /var/lib/hornet/export.bin /var/lib/hornet/comnetdb /var/lib/hornet/comnet_export.bin
+    sudo rm -rf /var/lib/hornet/mainnetdb /var/lib/hornet/export.bin /var/lib/hornet/comnetdb /var/lib/hornet/export_comnet.bin
     sudo systemctl start hornet
     counter="$(cat $hlmdir/log/watchdog.log | sed -n -e '1{p;q}')"
     let counter=counter+1
