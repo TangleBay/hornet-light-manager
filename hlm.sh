@@ -411,7 +411,7 @@ while [ $counter -lt 1 ]; do
                     fi
                     if [ -f "$hornetdir/export_comnet.bin" ]; then
                         sudo rm -rf $hornetdir/export_comnet.bin
-                    fi                    
+                    fi
                     sudo systemctl restart hornet
                     echo -e $text_yellow && echo " Reset of the database finished and hornet restarted!" && echo -e $text_reset
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
@@ -476,7 +476,7 @@ while [ $counter -lt 1 ]; do
         while [ $counter3 -lt 1 ]; do
             clear
             echo ""
-            echo -e $text_red "\033[1m\033[4IOTA Community Node Pool\033[0m"
+            echo -e $text_red "\033[1m\033[4 IOTA Community Node Pool\033[0m"
             echo ""
             echo -e $text_yellow " Pool: https://pool.einfachiota.de"
             echo -e $text_yellow " Status: https://status.tanglebay.org"
@@ -495,18 +495,18 @@ while [ $counter -lt 1 ]; do
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
-                curl -X POST "https://register.tanglebay.org/nodes" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq
+                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
             if [ "$selector" = "2" ]; then
-                curl -X DELETE https://register.tanglebay.org/nodes/$nodepassword |jq
+                curl -X DELETE https://register.tanglebay.org/$nodepassword |jq
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
             if [ "$selector" = "3" ]; then
-                curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/nodes/$nodepassword
-                curl -X POST "https://register.tanglebay.org/nodes" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
+                curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/$nodepassword
+                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
