@@ -29,7 +29,7 @@ latesthlm="$(curl -s https://api.github.com/repos/TangleBay/hornet-light-manager
 croncmd="$hlmdir/watchdog.sh"
 cronjob="*/15 * * * * $croncmd"
 icnptime="$(( ( RANDOM % 60 )  + 5 ))"
-croncmdicnp="$hlmdir/auto-icnp.sh"
+croncmdicnp="$hlmdir/auto-swarm.sh"
 cronjobicnp="$icnptime 0 1 * * $croncmdicnp"
 
 if [ "$release" = "stable" ]; then
@@ -165,7 +165,7 @@ while [ $counter -lt 1 ]; do
     echo ""
     echo " 2) Hornet Management"
     echo ""
-    echo " 3) IOTA Community Node Pool"
+    echo " 3) Project SWARM"
     echo ""
     echo " 4) Edit Configurations"
     echo ""
@@ -312,7 +312,7 @@ while [ $counter -lt 1 ]; do
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
                     ( cd $hlmdir ; sudo git pull ) > /dev/null 2>&1
                     ( cd $hlmdir ; sudo git reset --hard origin/master ) > /dev/null 2>&1
-                    sudo chmod +x $hlmdir/hlm.sh $hlmdir/watchdog.sh $hlmdir/auto-icnp.sh
+                    sudo chmod +x $hlmdir/hlm.sh $hlmdir/watchdog.sh $hlmdir/auto-swarm.sh
                     echo ""
                     echo -e $text_red " HLM update successfully!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
@@ -528,7 +528,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_reset
                 if [ "$selector_autoicnp" = "1" ]; then
                     echo -e $text_yellow && echo " Enable SWARM Auto-Season..." && echo -e $text_reset
-                    sudo chmod +x $hlmdir/auto-icnp.sh
+                    sudo chmod +x $hlmdir/auto-swarm.sh
                     ( crontab -l | grep -v -F "$croncmdicnp" ; echo "$cronjobicnp" ) | crontab -
                 fi
                 if [ "$selector_autoicnp" = "2" ]; then
