@@ -516,6 +516,7 @@ while [ $counter -lt 1 ]; do
                     sudo -u hornet nano /var/lib/hornet-light-manager/log/swarm.log
                 else
                     echo -e $text_red " No SWARM.log found!"
+                fi
             fi
             if [ "$selector" = "5" ]; then
                 echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel Auto-ICNP: " selector_autoicnp
