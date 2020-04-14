@@ -121,7 +121,7 @@ while [ $counter -lt 1 ]; do
     ############################################################################################################################################################
 
     echo ""
-    echo -e $text_yellow " \033[1m\033[4mWelcome to the Hornet lightweight manager! [$up2date$text_yellow]\033[0m"
+    echo -e $text_yellow "\033[1m\033[4mWelcome to the Hornet lightweight manager! [$up2date$text_yellow]\033[0m"
     echo ""
     if [ -n "$nodev" ]; then
         if [ "$nodev" = "$latesthornet" ]; then
@@ -156,7 +156,7 @@ while [ $counter -lt 1 ]; do
         echo -e "$text_yellow Watchdog:$text_red inactive"
     fi
     echo ""
-    echo -e " \e[90m==========================================================="
+    echo -e "\e[90m==========================================================="
     echo ""
     echo -e $text_red "\033[1m\033[4mManagement\033[0m"
     echo ""
@@ -169,11 +169,11 @@ while [ $counter -lt 1 ]; do
     echo ""
     echo " 4) Edit Configurations"
     echo ""
-    echo -e " \e[90m-----------------------------------------------------------"
+    echo -e "\e[90m-----------------------------------------------------------"
     echo ""
-    echo -e $text_yellow " x) Exit"
+    echo -e $text_yellow "x) Exit"
     echo ""
-    echo -e " \e[90m==========================================================="
+    echo -e "\e[90m==========================================================="
     echo -e $text_yellow && read -t 60 -p " Please type in your option: " selector
     echo -e $text_reset
 
@@ -350,7 +350,7 @@ while [ $counter -lt 1 ]; do
         while [ $counter2 -lt 1 ]; do
             clear
             echo ""
-            echo -e $text_red " \033[1m\033[4mHornet Management\033[0m"
+            echo -e $text_red "\033[1m\033[4mHornet Management\033[0m"
             echo -e $text_yellow ""
             echo " 1) Control Hornet (start/stop)"
             echo " 2) Show latest node log"
@@ -359,11 +359,11 @@ while [ $counter -lt 1 ]; do
             echo " 4) Update Dashboard login"
             echo " 5) Update Hornet version"
             echo ""
-            echo -e " \e[90m-----------------------------------------------------------"
+            echo -e "\e[90m-----------------------------------------------------------"
             echo ""
             echo -e $text_yellow "x) Back"
             echo ""
-            echo -e " \e[90m==========================================================="
+            echo -e "\e[90m==========================================================="
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
             if [ "$selector" = "1" ] ; then
@@ -476,7 +476,7 @@ while [ $counter -lt 1 ]; do
         while [ $counter3 -lt 1 ]; do
             clear
             echo ""
-            echo -e $text_red " \033[1m\033[4Project SWARM\033[0m"
+            echo -e $text_red "\033[1m\033[4mProject SWARM\033[0m"
             echo ""
             echo -e $text_yellow " Pool: https://pool.einfachiota.de"
             echo -e $text_yellow " Status: https://status.tanglebay.org"
@@ -488,17 +488,22 @@ while [ $counter -lt 1 ]; do
             echo " 4) Show SWARM.log"
             echo " 5) Manage SWARM Auto-Season"
             echo ""
-            echo -e " \e[90m-----------------------------------------------------------"
+            echo -e "\e[90m-----------------------------------------------------------"
             echo ""
-            echo -e $text_yellow " x) Back"
+            echo -e $text_yellow "x) Back"
             echo ""
             echo -e " \e[90m==========================================================="
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
-                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq > $hlmdir/log/swarm.log
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $text_reset
+                counterpw=0
+                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq
+                while [ $counterpw -lt 1 ]; do
+                    echo -e $text_yellow && read -p " If you have saved the password please type 'Yes' or 'yes': " selector_password
+                    if [ "$selector_password" = "yes" ] || [ "$selector_password" = "Yes" ]; then
+                        counterpw=1
+                    fi
+                done
             fi
             if [ "$selector" = "2" ]; then
                 curl -X DELETE https://register.tanglebay.org/$nodepassword |jq
@@ -507,7 +512,7 @@ while [ $counter -lt 1 ]; do
             fi
             if [ "$selector" = "3" ]; then
                 curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/$nodepassword
-                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq > $hlmdir/log/swarm.log
+                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
@@ -553,7 +558,7 @@ while [ $counter -lt 1 ]; do
         while [ $counter4 -lt 1 ]; do
             clear
             echo ""
-            echo -e $text_red " \033[1m\033[4mEdit Configurations\033[0m"
+            echo -e $text_red "\033[1m\033[4mEdit Configurations\033[0m"
             echo -e $text_yellow ""
             echo " 1) Edit Hornet.Service"
             echo " 2) Edit Hornet Config.json"
@@ -564,11 +569,11 @@ while [ $counter -lt 1 ]; do
             echo " 6) Edit HLM Nginx.cfg"
             echo " 7) Edit HLM SWARM.cfg"
             echo ""
-            echo -e " \e[90m-----------------------------------------------------------"
+            echo -e "\e[90m-----------------------------------------------------------"
             echo ""
             echo -e $text_yellow "x) Back"
             echo ""
-            echo -e " \e[90m==========================================================="
+            echo -e "\e[90m==========================================================="
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
 
