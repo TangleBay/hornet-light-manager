@@ -28,9 +28,9 @@ hlmcfggit="https://github.com/TangleBay/hlm-cfgs.git"
 latesthlm="$(curl -s https://api.github.com/repos/TangleBay/hornet-light-manager/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
 croncmd="$hlmdir/watchdog.sh"
 cronjob="*/15 * * * * $croncmd"
-icnptime="$(( ( RANDOM % 60 )  + 5 ))"
-croncmdicnp="$hlmdir/auto-swarm.sh"
-cronjobicnp="$icnptime 0 1 * * $croncmdicnp"
+swarmtime="$(( ( RANDOM % 60 )  + 5 ))"
+croncmdswarm="$hlmdir/auto-swarm.sh"
+cronjobswarm="$swarmtime 0 1 * * $croncmdswarm"
 
 if [ "$release" = "stable" ]; then
     latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
@@ -524,16 +524,16 @@ while [ $counter -lt 1 ]; do
                 fi
             fi
             if [ "$selector" = "5" ]; then
-                echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel SWARM Auto-Season: " selector_autoicnp
+                echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel SWARM Auto-Season: " selector_autoswarm
                 echo -e $text_reset
-                if [ "$selector_autoicnp" = "1" ]; then
+                if [ "$selector_autoswarm" = "1" ]; then
                     echo -e $text_yellow && echo " Enable SWARM Auto-Season..." && echo -e $text_reset
                     sudo chmod +x $hlmdir/auto-swarm.sh
-                    ( crontab -l | grep -v -F "$croncmdicnp" ; echo "$cronjobicnp" ) | crontab -
+                    ( crontab -l | grep -v -F "$croncmdswarm" ; echo "$cronjobswarm" ) | crontab -
                 fi
-                if [ "$selector_autoicnp" = "2" ]; then
+                if [ "$selector_autoswarm" = "2" ]; then
                     echo -e $text_yellow && echo " Disable SWARM Auto-Season..." && echo -e $text_reset
-                    ( crontab -l | grep -v -F "$croncmdicnp" ) | crontab -
+                    ( crontab -l | grep -v -F "$croncmdswarm" ) | crontab -
                 fi
                 echo -e $text_yellow && echo " SWARM Auto-Season configuration finished!" && echo -e $text_reset
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
