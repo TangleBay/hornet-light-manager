@@ -512,15 +512,13 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_reset
             fi
             if [ "$selector" = "4" ]; then
-                if [ -f $hlmdir/log/swarm.log ]; then
+                if [ -f "$hlmdir/log/swarm.log" ]; then
                     cat $hlmdir/log/swarm.log
-                    echo -e $text_yellow && echo " SWARM Auto-Season configuration finished!" && echo -e $text_reset
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $text_reset
                 else
                     echo -e $text_red " No SWARM.log found!"
                     echo ""
-                    echo -e $text_yellow && echo " SWARM Auto-Season configuration finished!" && echo -e $text_reset
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $text_reset
                 fi
@@ -647,11 +645,11 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
             fi
             if [ "$selector" = "7" ] ; then
-                if [ -f $hlmcfgdir/swarm.cfg]; then
+                if [ -f "$hlmcfgdir/swarm.cfg" ]; then
                     sudo nano $hlmcfgdir/swarm.cfg
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
                 fi
-                if [ -f $hlmcfgdir/icnp.cfg]; then
+                if [ -f "$hlmcfgdir/icnp.cfg" ]; then
                     sudo nano $hlmcfgdir/icnp.cfg
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
                 fi
