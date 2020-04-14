@@ -55,7 +55,7 @@ function pause(){
 }
 
 if [ $(id -u) -ne 0 ]; then
-    echo -e $TEXT_RED_B "Please run HLM with sudo or as root"
+    echo -e $TEXT_RED_B " Please run HLM with sudo or as root"
     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
     echo -e $text_reset
     exit 0
@@ -121,7 +121,7 @@ while [ $counter -lt 1 ]; do
     ############################################################################################################################################################
 
     echo ""
-    echo -e $text_yellow "\033[1m\033[4mWelcome to the Hornet lightweight manager! [$up2date$text_yellow]\033[0m"
+    echo -e $text_yellow " \033[1m\033[4mWelcome to the Hornet lightweight manager! [$up2date$text_yellow]\033[0m"
     echo ""
     if [ -n "$nodev" ]; then
         if [ "$nodev" = "$latesthornet" ]; then
@@ -156,24 +156,24 @@ while [ $counter -lt 1 ]; do
         echo -e "$text_yellow Watchdog:$text_red inactive"
     fi
     echo ""
-    echo -e "\e[90m==========================================================="
+    echo -e " \e[90m==========================================================="
     echo ""
-    echo -e $text_red "\033[1m\033[4mManagement\033[0m"
+    echo -e $text_red " \033[1m\033[4mManagement\033[0m"
     echo ""
     echo -e $text_yellow
     echo " 1) HLM Tools"
     echo ""
     echo " 2) Hornet Management"
     echo ""
-    echo " 3) IOTA Community Node Pool"
+    echo " 3) Project SWARM"
     echo ""
     echo " 4) Edit Configurations"
     echo ""
-    echo -e "\e[90m-----------------------------------------------------------"
+    echo -e " \e[90m-----------------------------------------------------------"
     echo ""
     echo -e $text_yellow "x) Exit"
     echo ""
-    echo -e "\e[90m==========================================================="
+    echo -e " \e[90m==========================================================="
     echo -e $text_yellow && read -t 60 -p " Please type in your option: " selector
     echo -e $text_reset
 
@@ -182,7 +182,7 @@ while [ $counter -lt 1 ]; do
         while [ $counter1 -lt 1 ]; do
             clear
             echo ""
-            echo -e $text_red "\033[1m\033[4mHLM Tools\033[0m"
+            echo -e $text_red " \033[1m\033[4mHLM Tools\033[0m"
             echo -e $text_yellow ""
             echo " 1) Install Hornet"
             echo " 2) Remove Hornet"
@@ -350,7 +350,7 @@ while [ $counter -lt 1 ]; do
         while [ $counter2 -lt 1 ]; do
             clear
             echo ""
-            echo -e $text_red "\033[1m\033[4mHornet Management\033[0m"
+            echo -e $text_red " \033[1m\033[4mHornet Management\033[0m"
             echo -e $text_yellow ""
             echo " 1) Control Hornet (start/stop)"
             echo " 2) Show latest node log"
@@ -359,11 +359,11 @@ while [ $counter -lt 1 ]; do
             echo " 4) Update Dashboard login"
             echo " 5) Update Hornet version"
             echo ""
-            echo -e "\e[90m-----------------------------------------------------------"
+            echo -e " \e[90m-----------------------------------------------------------"
             echo ""
-            echo -e $text_yellow "x) Back"
+            echo -e $text_yellow " x) Back"
             echo ""
-            echo -e "\e[90m==========================================================="
+            echo -e " \e[90m==========================================================="
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
             if [ "$selector" = "1" ] ; then
@@ -426,7 +426,7 @@ while [ $counter -lt 1 ]; do
                     sudo systemctl reload nginx
                     echo -e $text_yellow && echo " Hornet Dashboard login updated!" && echo -e $text_reset
                 else
-                    echo -e $text_red "Please install nginx first!"
+                    echo -e $text_red " Please install nginx first!"
                 fi
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
@@ -476,26 +476,27 @@ while [ $counter -lt 1 ]; do
         while [ $counter3 -lt 1 ]; do
             clear
             echo ""
-            echo -e $text_red "\033[1m\033[4 IOTA Community Node Pool\033[0m"
+            echo -e $text_red " \033[1m\033[4Project SWARM\033[0m"
             echo ""
             echo -e $text_yellow " Pool: https://pool.einfachiota.de"
             echo -e $text_yellow " Status: https://status.tanglebay.org"
             echo -e $text_yellow ""
-            echo " 1) Add your node to the pool"
-            echo " 2) Remove your node from the pool"
-            echo " 3) Update node on the pool"
+            echo " 1) Add your node to SWARM"
+            echo " 2) Remove your node from SWARM"
+            echo " 3) Update node on SWARM"
             echo ""
-            echo " 4) Manage Auto-Adding"
+            echo " 4) Show SWARM.log"
+            echo " 5) Manage Auto-Season SWARM"
             echo ""
-            echo -e "\e[90m-----------------------------------------------------------"
+            echo -e " \e[90m-----------------------------------------------------------"
             echo ""
-            echo -e $text_yellow "x) Back"
+            echo -e $text_yellow " x) Back"
             echo ""
-            echo -e "\e[90m==========================================================="
+            echo -e " \e[90m==========================================================="
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
-                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq
+                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq > /var/lib/hornet-light-manager/log/swarm.log
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
@@ -506,11 +507,17 @@ while [ $counter -lt 1 ]; do
             fi
             if [ "$selector" = "3" ]; then
                 curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/$nodepassword
-                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
+                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq > /var/lib/hornet-light-manager/log/swarm.log
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
             if [ "$selector" = "4" ]; then
+                if [ -f /var/lib/hornet-light-manager/log/swarm.log ]; then
+                    sudo -u hornet nano /var/lib/hornet-light-manager/log/swarm.log
+                else
+                    echo -e $text_red " No SWARM.log found!"
+            fi
+            if [ "$selector" = "5" ]; then
                 echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel Auto-ICNP: " selector_autoicnp
                 echo -e $text_reset
                 if [ "$selector_autoicnp" = "1" ]; then
@@ -540,7 +547,7 @@ while [ $counter -lt 1 ]; do
         while [ $counter4 -lt 1 ]; do
             clear
             echo ""
-            echo -e $text_red "\033[1m\033[4mEdit Configurations\033[0m"
+            echo -e $text_red " \033[1m\033[4mEdit Configurations\033[0m"
             echo -e $text_yellow ""
             echo " 1) Edit Hornet.Service"
             echo " 2) Edit Hornet Config.json"
@@ -549,13 +556,13 @@ while [ $counter -lt 1 ]; do
             echo ""
             echo " 5) Edit HLM Hornet.cfg"
             echo " 6) Edit HLM Nginx.cfg"
-            echo " 7) Edit HLM ICNP.cfg"
+            echo " 7) Edit HLM SWARM.cfg"
             echo ""
-            echo -e "\e[90m-----------------------------------------------------------"
+            echo -e " \e[90m-----------------------------------------------------------"
             echo ""
-            echo -e $text_yellow "x) Back"
+            echo -e $text_yellow " x) Back"
             echo ""
-            echo -e "\e[90m==========================================================="
+            echo -e " \e[90m==========================================================="
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
 
@@ -632,8 +639,14 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
             fi
             if [ "$selector" = "7" ] ; then
-                sudo nano $hlmcfgdir/icnp.cfg
-                echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
+                if [ -f $hlmcfgdir/icnp.cfg ];
+                    sudo nano $hlmcfgdir/icnp.cfg
+                    echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
+                fi
+                if [ -f $hlmcfgdir/swarm.cfg ];
+                    sudo nano $hlmcfgdir/swarm.cfg
+                    echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
+                fi                
             fi
 
             if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
