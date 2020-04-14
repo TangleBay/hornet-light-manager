@@ -35,7 +35,7 @@ echo "alias hlm='sudo /var/lib/hornet-light-manager/hlm.sh'" >> ~/.bashrc && . ~
 
 # IOTA Community Node Pool #
 
-**I would be very happy if you would join the IOTA Community Node Pool so that together we can provide a strong and reliable node to the ecosystem and thus the Trinity users.**
+**I would be very happy if you would join the [IOTA Community Node Pool](https://pool.einfachiota.de) so that together we can provide a strong and reliable node to the ecosystem and thus the Trinity users.**
 
 **To add your node to the ICNP please follow these steps:**
 1. Set your node name and pow option in the pool config over the HLM itself (icnp.cfg)
