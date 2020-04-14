@@ -55,7 +55,7 @@ function pause(){
 }
 
 if [ $(id -u) -ne 0 ]; then
-    echo -e $TEXT_RED_B " Please run HLM with sudo or as root"
+    echo -e $TEXT_RED_B "Please run HLM with sudo or as root"
     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
     echo -e $text_reset
     exit 0
@@ -158,20 +158,20 @@ while [ $counter -lt 1 ]; do
     echo ""
     echo -e " \e[90m==========================================================="
     echo ""
-    echo -e $text_red " \033[1m\033[4mManagement\033[0m"
+    echo -e $text_red "\033[1m\033[4mManagement\033[0m"
     echo ""
     echo -e $text_yellow
     echo " 1) HLM Tools"
     echo ""
     echo " 2) Hornet Management"
     echo ""
-    echo " 3) Project SWARM"
+    echo " 3) IOTA Community Node Pool"
     echo ""
     echo " 4) Edit Configurations"
     echo ""
     echo -e " \e[90m-----------------------------------------------------------"
     echo ""
-    echo -e $text_yellow "x) Exit"
+    echo -e $text_yellow " x) Exit"
     echo ""
     echo -e " \e[90m==========================================================="
     echo -e $text_yellow && read -t 60 -p " Please type in your option: " selector
@@ -193,11 +193,11 @@ while [ $counter -lt 1 ]; do
             echo " 5) Update Hornet-Light-Manager"
             echo " 6) Reset all HLM configs"
             echo ""
-            echo -e "\e[90m-----------------------------------------------------------"
+            echo -e " \e[90m-----------------------------------------------------------"
             echo ""
             echo -e $text_yellow "x) Back"
             echo ""
-            echo -e "\e[90m==========================================================="
+            echo -e " \e[90m==========================================================="
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
@@ -361,7 +361,7 @@ while [ $counter -lt 1 ]; do
             echo ""
             echo -e " \e[90m-----------------------------------------------------------"
             echo ""
-            echo -e $text_yellow " x) Back"
+            echo -e $text_yellow "x) Back"
             echo ""
             echo -e " \e[90m==========================================================="
             echo -e $text_yellow && read -p " Please type in your option: " selector
@@ -486,7 +486,7 @@ while [ $counter -lt 1 ]; do
             echo " 3) Update node on SWARM"
             echo ""
             echo " 4) Show SWARM.log"
-            echo " 5) Manage Auto-Season SWARM"
+            echo " 5) Manage SWARM Auto-Season"
             echo ""
             echo -e " \e[90m-----------------------------------------------------------"
             echo ""
@@ -496,7 +496,7 @@ while [ $counter -lt 1 ]; do
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
-                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq > /var/lib/hornet-light-manager/log/swarm.log
+                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq > $hlmdir/log/swarm.log
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
@@ -507,30 +507,37 @@ while [ $counter -lt 1 ]; do
             fi
             if [ "$selector" = "3" ]; then
                 curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/$nodepassword
-                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq > /var/lib/hornet-light-manager/log/swarm.log
+                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq > $hlmdir/log/swarm.log
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
             if [ "$selector" = "4" ]; then
                 if [ -f $hlmdir/log/swarm.log ]; then
-                    sudo -u hornet nano /var/lib/hornet-light-manager/log/swarm.log
+                    cat $hlmdir/log/swarm.log
+                    echo -e $text_yellow && echo " SWARM Auto-Season configuration finished!" && echo -e $text_reset
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
                 else
                     echo -e $text_red " No SWARM.log found!"
+                    echo ""
+                    echo -e $text_yellow && echo " SWARM Auto-Season configuration finished!" && echo -e $text_reset
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
                 fi
             fi
             if [ "$selector" = "5" ]; then
-                echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel Auto-ICNP: " selector_autoicnp
+                echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel SWARM Auto-Season: " selector_autoicnp
                 echo -e $text_reset
                 if [ "$selector_autoicnp" = "1" ]; then
-                    echo -e $text_yellow && echo " Enable Auto-ICNP..." && echo -e $text_reset
+                    echo -e $text_yellow && echo " Enable SWARM Auto-Season..." && echo -e $text_reset
                     sudo chmod +x $hlmdir/auto-icnp.sh
                     ( crontab -l | grep -v -F "$croncmdicnp" ; echo "$cronjobicnp" ) | crontab -
                 fi
                 if [ "$selector_autoicnp" = "2" ]; then
-                    echo -e $text_yellow && echo " Disable Auto-ICNP..." && echo -e $text_reset
+                    echo -e $text_yellow && echo " Disable SWARM Auto-Season..." && echo -e $text_reset
                     ( crontab -l | grep -v -F "$croncmdicnp" ) | crontab -
                 fi
-                echo -e $text_yellow && echo " Auto-ICNP configuration finished!" && echo -e $text_reset
+                echo -e $text_yellow && echo " SWARM Auto-Season configuration finished!" && echo -e $text_reset
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
@@ -561,7 +568,7 @@ while [ $counter -lt 1 ]; do
             echo ""
             echo -e " \e[90m-----------------------------------------------------------"
             echo ""
-            echo -e $text_yellow " x) Back"
+            echo -e $text_yellow "x) Back"
             echo ""
             echo -e " \e[90m==========================================================="
             echo -e $text_yellow && read -p " Please type in your option: " selector
@@ -640,15 +647,16 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
             fi
             if [ "$selector" = "7" ] ; then
-                if [ -f $hlmcfgdir/icnp.cfg ]; then
+                if [ -f $hlmcfgdir/swarm.cfg]; then
+                    sudo nano $hlmcfgdir/swarm.cfg
+                    echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
+                fi
+                if [ -f $hlmcfgdir/icnp.cfg]; then
                     sudo nano $hlmcfgdir/icnp.cfg
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
                 fi
-                if [ -f $hlmcfgdir/swarm.cfg ]; then
-                    sudo nano $hlmcfgdir/swarm.cfg
-                    echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
-                fi                
             fi
+
             if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
                 counter4=1
             fi
