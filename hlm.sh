@@ -512,7 +512,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_reset
             fi
             if [ "$selector" = "4" ]; then
-                if [ -f /var/lib/hornet-light-manager/log/swarm.log ]; then
+                if [ -f $hlmdir/log/swarm.log ]; then
                     sudo -u hornet nano /var/lib/hornet-light-manager/log/swarm.log
                 else
                     echo -e $text_red " No SWARM.log found!"
@@ -640,16 +640,15 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
             fi
             if [ "$selector" = "7" ] ; then
-                if [ -f $hlmcfgdir/icnp.cfg ];
+                if [ -f $hlmcfgdir/icnp.cfg ]; then
                     sudo nano $hlmcfgdir/icnp.cfg
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
                 fi
-                if [ -f $hlmcfgdir/swarm.cfg ];
+                if [ -f $hlmcfgdir/swarm.cfg ]; then
                     sudo nano $hlmcfgdir/swarm.cfg
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
                 fi                
             fi
-
             if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
                 counter4=1
             fi
