@@ -105,7 +105,7 @@ while [ $counter -lt 1 ]; do
     clear
     source $hlmcfgdir/hornet.cfg
     source $hlmcfgdir/nginx.cfg
-    source $hlmcfgdir/icnp.cfg
+    source $hlmcfgdir/swarm.cfg
 
     nodetempv="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.appVersion')"
     nodev="${nodetempv%\"}"
