@@ -511,10 +511,15 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_reset
             fi
             if [ "$selector" = "3" ]; then
-                curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/$nodepassword
-                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                echo -e $text_red " A node should only be updated in an emergency, as it can lead to the total loss of the current points!"
+                echo -e $text_yellow && read -p " Are you sure that you want to update your node (y/N): " selector_swarm_update
                 echo -e $text_reset
+                if [ "$selector_swarm_update" = "y" ] || [ "$selector_swarm_update" = "Y" ]; then
+                    curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/$nodepassword
+                    curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
+                fi
             fi
             if [ "$selector" = "4" ]; then
                 if [ -f "$hlmdir/log/swarm.log" ]; then
