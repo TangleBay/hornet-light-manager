@@ -499,6 +499,9 @@ while [ $counter -lt 1 ]; do
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
+                if [ ! -d "$hlmdir/log" ]; then
+                    sudo mkdir -p $hlmdir/log
+                fi
                 if [ ! -f "$hlmdir/log/swarm.log" ]; then
                     sudo touch $hlmdir/log/swarm.log
                 fi
