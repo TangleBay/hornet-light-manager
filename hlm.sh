@@ -499,22 +499,15 @@ while [ $counter -lt 1 ]; do
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
-                counterpw=0
-                (curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq '.') > $hlmdir/log/swarm.log
-                if [ ! -n "$swarmerror" ]; then
-                    swarmpwd="$(sudo cat $hlmdir/log/swarm.log |jq '.password')"
-                    if [ -n "$swarmpwd" ]; then
-                        sudo sed -i 's/nodepassword.*/nodepassword='$swarmpwd'/' $hlmcfgdir/swarm.cfg
-                    fi
-                    sudo cat $hlmdir/log/swarm.log |jq
-                else
-                    echo -e $text_red "The following error has occurred..."
-                    echo ""
-                    echo -e $text_yellow "Error: $swarmerror"
-                    if [ -n "$swarmmsg" ]; then
-                        echo -e $text_yellow "Detail: $swarmmsg"
-                    fi
+                if [ ! -f "$hlmdir/log/swarm.log" ]; then
+                    sudo touch $hlmdir/log/swarm.log
                 fi
+                (curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq '.') > $hlmdir/log/swarm.log
+                swarmpwd="$(sudo cat $hlmdir/log/swarm.log |jq '.password')"
+                if [ -n "$swarmpwd" ]; then
+                    sudo sed -i 's/nodepassword.*/nodepassword='$swarmpwd'/' $hlmcfgdir/swarm.cfg
+                fi
+                sudo cat $hlmdir/log/swarm.log |jq
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
