@@ -105,6 +105,9 @@ while [ $counter -lt 1 ]; do
     clear
     source $hlmcfgdir/hornet.cfg
     source $hlmcfgdir/nginx.cfg
+    if [ ! -f "$hlmcfgdir/swarm.cfg" ]; then
+        sudo mv $hlmcfgdir/icnp.cfg $hlmcfgdir/swarm.cfg
+    fi
     source $hlmcfgdir/swarm.cfg
 
     nodetempv="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.appVersion')"
@@ -497,16 +500,26 @@ while [ $counter -lt 1 ]; do
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
                 counterpw=0
-                curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq
-                while [ $counterpw -lt 1 ]; do
-                    echo -e $text_yellow && read -p " If you have saved the password please type 'Yes' or 'yes': " selector_password
-                    if [ "$selector_password" = "yes" ] || [ "$selector_password" = "Yes" ]; then
-                        counterpw=1
+                (curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq '.') > $hlmdir/log/swarm.log
+                if [ ! -n "$swarmerror" ]; then
+                    swarmpwd="$(sudo cat $hlmdir/log/swarm.log |jq '.password')"
+                    if [ -n "$swarmpwd" ]; then
+                        sudo sed -i 's/nodepassword.*/nodepassword='$swarmpwd'/' $hlmcfgdir/swarm.cfg
                     fi
-                done
+                    sudo cat $hlmdir/log/swarm.log |jq
+                else
+                    echo -e $text_red "The following error has occurred..."
+                    echo ""
+                    echo -e $text_yellow "Error: $swarmerror"
+                    if [ -n "$swarmmsg" ]; then
+                        echo -e $text_yellow "Detail: $swarmmsg"
+                    fi
+                fi
+                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                echo -e $text_reset
             fi
             if [ "$selector" = "2" ]; then
-                curl -X DELETE https://register.tanglebay.org/$nodepassword |jq
+                curl --silent -X DELETE https://register.tanglebay.org/$nodepassword |jq
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
@@ -516,14 +529,14 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_reset
                 if [ "$selector_swarm_update" = "y" ] || [ "$selector_swarm_update" = "Y" ]; then
                     curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/$nodepassword
-                    curl -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
+                    curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $text_reset
                 fi
             fi
             if [ "$selector" = "4" ]; then
                 if [ -f "$hlmdir/log/swarm.log" ]; then
-                    cat $hlmdir/log/swarm.log
+                    sudo cat $hlmdir/log/swarm.log |jq
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $text_reset
                 else
@@ -660,7 +673,8 @@ while [ $counter -lt 1 ]; do
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
                 fi
                 if [ -f "$hlmcfgdir/icnp.cfg" ]; then
-                    sudo nano $hlmcfgdir/icnp.cfg
+                    sudo mv $hlmcfgdir/icnp.cfg $hlmcfgdir/swarm.cfg
+                    sudo nano $hlmcfgdir/swarm.cfg
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
                 fi
             fi
