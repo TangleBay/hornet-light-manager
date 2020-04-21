@@ -33,9 +33,9 @@ echo "alias hlm='sudo /var/lib/hornet-light-manager/hlm.sh'" >> ~/.bashrc && . ~
 **Also if you want to reach you dashboard from an external IP (outside of your local network) you need to open the TCP port which is selected in the installer script (dashport).**
 
 
-# IOTA Community Node Pool #
+# Project SWARM #
 
-**I would be very happy if you would join the IOTA Community Node Pool so that together we can provide a strong and reliable node to the ecosystem and thus the Trinity users.**
+**I would be very happy if you would join the [IOTA Community Node Pool](https://pool.einfachiota.de) so that together we can provide a strong and reliable node to the ecosystem and thus the Trinity users.**
 
 **To add your node to the ICNP please follow these steps:**
 1. Set your node name and pow option in the SWARM config over the HLM itself (SWARM.cfg)
@@ -44,11 +44,13 @@ echo "alias hlm='sudo /var/lib/hornet-light-manager/hlm.sh'" >> ~/.bashrc && . ~
 4. You're done, welcome to SWARM!
 **Important: If you got already a password and you want to re-add your node please use the update option (only node is actually removed)!**
 
+
 **To remove your node from the ICNP please follow these steps:**
 1. Set your password in the SWARM config over the HLM itself (SWARM.cfg)
 2. Choose the option "2"
 3. If your node details shows up, your node was successfully removed.
 4. Thank you very much for your participation in the SWARM!
+
 
 **To udpdate your node on the ICNP please follow these steps:**
 1. Set your donation address and make sure you have your password set in the SWARM config (SWARM.cfg)
