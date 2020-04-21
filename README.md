@@ -37,25 +37,28 @@ echo "alias hlm='sudo /var/lib/hornet-light-manager/hlm.sh'" >> ~/.bashrc && . ~
 
 **I would be very happy if you would join the [IOTA Community Node Pool](https://pool.einfachiota.de) so that together we can provide a strong and reliable node to the ecosystem and thus the Trinity users.**
 
-**To add your node to SWARM please follow these steps:**
-1. Set your node name and pow option in the pool config over the HLM itself (SWARMp.cfg)
+**To add your node to the ICNP please follow these steps:**
+1. Set your node name and pow option in the SWARM config over the HLM itself (SWARM.cfg)
 2. Choose the option "1" and add your node
-3. You get now a password! Please copy the password and save it in the config.sh (and also write it down!).
-4. You're done, welcome to the pool party!
+3. You get now a password! Please write it down! The password should be automatically copied to the SWARM.cfg.
+4. You're done, welcome to SWARM!
+**Important: If you got already a password and you want to re-add your node please use the update option (only node is actually removed)!**
 
-**To remove your node from SWARM please follow these steps:**
-1. Set your password in the pool config over the HLM itself (SWARM.cfg)
+
+**To remove your node from the ICNP please follow these steps:**
+1. Set your password in the SWARM config over the HLM itself (SWARM.cfg)
 2. Choose the option "2"
 3. If your node details shows up, your node was successfully removed.
-4. Thank you very much for your participation in the ICNP!
+4. Thank you very much for your participation in the SWARM!
 
-**To udpdate your node on SWARM please follow these steps:**
-1. Set your donation address and make sure you have your password set in the pool config (SWARM.cfg)
+
+**To udpdate your node on the ICNP please follow these steps:**
+1. Set your donation address and make sure you have your password set in the SWARM config (SWARM.cfg)
 2. Choose the option "3"
 3. If your node details shows up, your node was successfully updated.
-4. Thank you very much for your participation in the ICNP!
+4. Thank you very much for your participation in the SWARM!
 
 
 # Support #
 
-`CP9LDJQPBNRBRWWNPI9XSUSLCTWZEBG9NMANXDWDJHMFSHSBVRIWGKVOCFWVETVBWBAKOZURNZE9NSCGDWEZXAXSFW`
+IOTA Address: `CP9LDJQPBNRBRWWNPI9XSUSLCTWZEBG9NMANXDWDJHMFSHSBVRIWGKVOCFWVETVBWBAKOZURNZE9NSCGDWEZXAXSFW`
