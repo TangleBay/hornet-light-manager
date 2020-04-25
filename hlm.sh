@@ -76,10 +76,14 @@ if ! [ -x "$(command -v nano)" ]; then
     sudo apt install nano -y > /dev/null
     clear
 fi
-
 if ! [ -x "$(command -v whois)" ]; then
     echo -e $text_yellow && echo "Installing necessary package whois..." && echo -e $text_reset
     sudo apt install whois -y > /dev/null
+    clear
+fi
+if ! [ -x "$(command -v snap)" ]; then
+    echo -e $text_yellow && echo "Installing necessary package snap..." && echo -e $text_reset
+    sudo apt install snap -y > /dev/null
     clear
 fi
 
@@ -205,6 +209,9 @@ while [ $counter -lt 1 ]; do
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
                 if [ ! -f "/usr/bin/hornet" ]; then
+                    sudo snap install --classic --channel=1.14/stable go
+                    echo "PATH=\"$PATH:/snap/bin\"" > /etc/environment
+                    source /etc/environment
                     sudo wget -qO - https://ppa.hornet.zone/pubkey.txt | sudo apt-key add -
                     sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
                     sudo apt update && sudo apt dist-upgrade -y && sudo apt upgrade -y
