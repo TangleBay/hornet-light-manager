@@ -326,8 +326,8 @@ while [ $counter -lt 1 ]; do
                     echo ""
                     echo -e $text_red " HLM update successfully!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
-                    ScriptLoc=$(readlink -f "$0")
-                    exec "$ScriptLoc"
+                    #ScriptLoc=$(readlink -f "$0")
+                    #exec "$ScriptLoc"
                     exit 0
                 fi
             fi
