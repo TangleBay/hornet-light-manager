@@ -84,11 +84,14 @@ fi
 if ! [ -x "$(command -v snap)" ]; then
     echo -e $text_yellow && echo "Installing necessary package snap..." && echo -e $text_reset
     sudo apt install snapd -y > /dev/null
-    snapcheck="$(echo $PATH | grep -oF '/snap/bin')"
-    if [ "$snapcheck" != "/snap/bin" ]; then
-        snappath="$(cat /etc/environment | sed 's/.$//')"
-        echo "PATH=$snappath:/snap/bin\"" > /etc/environment
-        source /etc/environment
+    envfile=/etc/environment
+    if ! grep -q /snap/bin "$envfile"; then
+        envpath="$(cat /etc/environment | sed 's/.$//')"
+        echo "$envpath:/snap/bin\"" > /etc/environment
+        echo -e $text_red " Packages successfully installed! System needs to be rebooted..."
+        echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+        echo -e $text_reset
+        sudo reboot
     fi
     clear
 fi
