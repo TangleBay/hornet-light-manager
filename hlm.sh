@@ -116,7 +116,7 @@ while [ $counter -lt 1 ]; do
     source $hlmcfgdir/hornet.cfg
     source $hlmcfgdir/nginx.cfg
     source $envfile
-    
+
     if [ ! -f "$hlmcfgdir/swarm.cfg" ]; then
         sudo mv $hlmcfgdir/icnp.cfg $hlmcfgdir/swarm.cfg
     fi
@@ -261,13 +261,18 @@ while [ $counter -lt 1 ]; do
 
             if [ "$selector" = "3" ]; then
                 echo -e $text_yellow && echo " Installing necessary packages..." && echo -e $text_reset
-                sudo apt install software-properties-common nginx -y
-                sudo snap install --beta --classic certbot
-                #certbot="certbot/certbot"
-                #if ! grep -q "^deb .*$certbot" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
-                #    sudo add-apt-repository ppa:certbot/certbot -y
-                #fi
-                #sudo apt update && sudo apt install python-certbot-nginx -y
+
+                systemv="$(uname -m)"
+                if [ "$systemv" = "x86_64" ]; then
+                    sudo apt install software-properties-common nginx -y
+                    sudo snap install --beta --classic certbot
+                else
+                    certbot="certbot/certbot"
+                    if ! grep -q "^deb .*$certbot" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
+                        sudo add-apt-repository ppa:certbot/certbot -y
+                    fi
+                    sudo apt update && sudo apt install python-certbot-nginx -y
+                fi
 
                 if [ "$nginxservice" = "repair" ]; then
                     sudo mkdir /etc/systemd/system/nginx.service.d
