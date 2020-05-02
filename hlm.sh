@@ -320,8 +320,12 @@ while [ $counter -lt 1 ]; do
                 if [ -f "/root/.acme.sh/$domain/fullchain.cer" ]; then
                     sudo wget -O /root/acme.sh https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh && sudo chmod +x /root/acme.sh
                     sudo /root/acme.sh --renew -d $domain --force
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
                 else
                     echo -e $text_red " Error! No SSL Certificate installed!"
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
                 fi
             fi
 
