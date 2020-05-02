@@ -317,8 +317,12 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "4" ]; then
-                sudo wget -O /root/acme.sh https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh && sudo chmod +x /root/acme.sh
-                sudo /root/acme.sh --renew -d $domain --force
+                if [ -f "/root/.acme.sh/$domain/fullchain.cer" ]; then
+                    sudo wget -O /root/acme.sh https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh && sudo chmod +x /root/acme.sh
+                    sudo /root/acme.sh --renew -d $domain --force
+                else
+                    echo -e $text_red " Error! No SSL Certificate installed!"
+                fi
             fi
 
             if [ "$selector" = "5" ]; then
