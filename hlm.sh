@@ -203,10 +203,12 @@ while [ $counter -lt 1 ]; do
             echo " 2) Remove Hornet"
             echo ""
             echo " 3) Install HTTPS proxy"
-            echo " 4) Manage Watchdog"
+            echo " 4) Renew SSL"
             echo ""
-            echo " 5) Update Hornet-Light-Manager"
-            echo " 6) Reset all HLM configs"
+            echo " 5) Manage Watchdog"
+            echo ""
+            echo " 6) Update Hornet-Light-Manager"
+            echo " 7) Reset all HLM configs"
             echo ""
             echo -e " \e[90m-----------------------------------------------------------"
             echo ""
@@ -294,7 +296,7 @@ while [ $counter -lt 1 ]; do
                 sudo echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
 
                 echo -e $text_yellow && echo " Starting SSL-Certificate installation..." && echo -e $text_reset
-                sudo /etc/letsencrypt/live/acme.sh --issue --nginx -d $domain
+                sudo /root/acme.sh --issue --nginx -d $domain
 
                 if [ -f "/root/.acme.sh/$domain/fullchain.cer" ]; then
                     echo -e $text_yellow && echo " Copying Nginx configuration..." && echo -e $text_reset
@@ -315,6 +317,11 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "4" ]; then
+                sudo wget -O /root/acme.sh https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh && sudo chmod +x /root/acme.sh
+                sudo /root/acme.sh --renew -d $domain --force
+            fi
+
+            if [ "$selector" = "5" ]; then
                 echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel hornet watchdog: " selector_watchdog
                 echo -e $text_reset
                 if [ "$selector_watchdog" = "1" ]; then
@@ -333,7 +340,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_reset
             fi
 
-            if [ "$selector" = "5" ]; then
+            if [ "$selector" = "6" ]; then
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to update HLM (y/N): " selector_hlmreset
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
                     ( cd $hlmdir ; sudo git pull ) > /dev/null 2>&1
@@ -349,7 +356,7 @@ while [ $counter -lt 1 ]; do
                 fi
             fi
 
-            if [ "$selector" = "6" ]; then
+            if [ "$selector" = "7" ]; then
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to reset all HLM configs (y/N): " selector_hlmreset
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
                     ( cd $hlmcfgdir ; sudo git pull ) > /dev/null 2>&1
