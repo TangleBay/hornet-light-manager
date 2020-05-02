@@ -83,7 +83,9 @@ if ! [ -x "$(command -v whois)" ]; then
 fi
 if ! [ -x "$(command -v snap)" ]; then
     echo -e $text_yellow && echo "Installing necessary package snap..." && echo -e $text_reset
-    sudo apt install snap -y > /dev/null
+    sudo apt install snapd -y > /dev/null
+    echo "PATH=\"$PATH:/snap/bin\"" > /etc/environment
+    source /etc/environment
     clear
 fi
 
@@ -210,8 +212,6 @@ while [ $counter -lt 1 ]; do
             if [ "$selector" = "1" ]; then
                 if [ ! -f "/usr/bin/hornet" ]; then
                     sudo snap install --classic --channel=1.14/stable go
-                    echo "PATH=\"$PATH:/snap/bin\"" > /etc/environment
-                    source /etc/environment
                     sudo wget -qO - https://ppa.hornet.zone/pubkey.txt | sudo apt-key add -
                     sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
                     sudo apt update && sudo apt dist-upgrade -y && sudo apt upgrade -y
@@ -255,12 +255,13 @@ while [ $counter -lt 1 ]; do
 
             if [ "$selector" = "3" ]; then
                 echo -e $text_yellow && echo " Installing necessary packages..." && echo -e $text_reset
-                certbot="certbot/certbot"
-                sudo apt install software-properties-common -y
-                if ! grep -q "^deb .*$certbot" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
-                    sudo add-apt-repository ppa:certbot/certbot -y
-                fi
-                sudo apt update && sudo apt install python-certbot-nginx -y
+                sudo apt install software-properties-common nginx -y
+                sudo snap install --beta --classic certbot
+                #certbot="certbot/certbot"
+                #if ! grep -q "^deb .*$certbot" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
+                #    sudo add-apt-repository ppa:certbot/certbot -y
+                #fi
+                #sudo apt update && sudo apt install python-certbot-nginx -y
 
                 if [ "$nginxservice" = "repair" ]; then
                     sudo mkdir /etc/systemd/system/nginx.service.d
@@ -280,7 +281,7 @@ while [ $counter -lt 1 ]; do
                 sudo systemctl restart nginx
 
                 echo -e $text_yellow && echo " Starting SSL-Certificate installation..." && echo -e $text_reset
-                sudo certbot --nginx -d $domain
+                sudo certbot certonly --nginx -d $domain
 
                 if [ -f "/etc/letsencrypt/live/$domain/fullchain.pem" ]; then
                     sudo cp $hlmdir/nginx.template /etc/nginx/sites-enabled/default
