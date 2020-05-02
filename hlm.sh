@@ -31,6 +31,7 @@ cronjob="*/15 * * * * $croncmd"
 swarmtime="$(( ( RANDOM % 60 )  + 5 ))"
 croncmdswarm="$hlmdir/auto-swarm.sh"
 cronjobswarm="$swarmtime 0 1 * * $croncmdswarm"
+envfile=/etc/environment
 
 if [ "$release" = "stable" ]; then
     latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
@@ -84,16 +85,12 @@ fi
 if ! [ -x "$(command -v snap)" ]; then
     echo -e $text_yellow && echo "Installing necessary package snap..." && echo -e $text_reset
     sudo apt install snapd -y > /dev/null
-    envfile=/etc/environment
-    if ! grep -q /snap/bin "$envfile"; then
-        envpath="$(cat /etc/environment | sed 's/.$//')"
-        echo "$envpath:/snap/bin\"" > /etc/environment
-        echo -e $text_red " Packages successfully installed! System needs to be rebooted..."
-        echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-        echo -e $text_reset
-        sudo reboot
-    fi
     clear
+fi
+
+if ! grep -q /snap/bin "$envfile"; then
+    envpath="$(cat /etc/environment | sed 's/.$//')"
+    echo "$envpath:/snap/bin\"" > /etc/environment
 fi
 
 #if [ "$version" != "$latesthlm" ]; then
@@ -118,6 +115,8 @@ while [ $counter -lt 1 ]; do
     clear
     source $hlmcfgdir/hornet.cfg
     source $hlmcfgdir/nginx.cfg
+    source $envfile
+    
     if [ ! -f "$hlmcfgdir/swarm.cfg" ]; then
         sudo mv $hlmcfgdir/icnp.cfg $hlmcfgdir/swarm.cfg
     fi
@@ -276,13 +275,6 @@ while [ $counter -lt 1 ]; do
                     sudo systemctl daemon-reload
                 fi
 
-                echo -e $text_yellow && echo " Copying Nginx configuration..." && echo -e $text_reset
-                rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
-                sudo cp $hlmdir/nginx.template /etc/nginx/sites-enabled/default
-                sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
-                sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
-                sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
-                sudo find /etc/nginx/nginx.conf -type f -exec sed -i 's/\# server_names_hash_bucket_size 64;/server_names_hash_bucket_size 64;/g' {} \;
                 dashpw="$(mkpasswd -m sha-512 $dashpw)"
                 sudo echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
                 sudo systemctl restart nginx
@@ -291,6 +283,8 @@ while [ $counter -lt 1 ]; do
                 sudo certbot certonly --nginx -d $domain
 
                 if [ -f "/etc/letsencrypt/live/$domain/fullchain.pem" ]; then
+                    echo -e $text_yellow && echo " Copying Nginx configuration..." && echo -e $text_reset
+                    rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
                     sudo cp $hlmdir/nginx.template /etc/nginx/sites-enabled/default
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
