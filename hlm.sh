@@ -84,8 +84,11 @@ fi
 if ! [ -x "$(command -v snap)" ]; then
     echo -e $text_yellow && echo "Installing necessary package snap..." && echo -e $text_reset
     sudo apt install snapd -y > /dev/null
-    echo "PATH=\"$PATH:/snap/bin\"" > /etc/environment
-    source /etc/environment
+    snapcheck="$(echo $PATH | grep -oF '/snap/bin')"
+    if [ "$snapcheck" != "/snap/bin" ]; then
+        echo "PATH=\"$PATH:/snap/bin\"" > /etc/environment
+        source /etc/environment
+    fi
     clear
 fi
 
