@@ -261,9 +261,12 @@ while [ $counter -lt 1 ]; do
 
             if [ "$selector" = "3" ]; then
                 echo -e $text_yellow && echo " Installing necessary packages..." && echo -e $text_reset
-                sudo mkdir -p /etc/letsencrypt/live
-                sudo wget -O /etc/letsencrypt/live/acme.sh https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh
-                sudo chmod +x /etc/letsencrypt/live/acme.sh
+                sudo apt install software-properties-common nginx -y
+                sudo wget -O /root/acme.sh https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh && sudo chmod +x /root/acme.sh
+                rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
+                sudo cp $hlmdir/pre-nginx.template /etc/nginx/sites-enabled/default
+                sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
+                sudo systemctl restart nginx
 
                 # ignore it
                 if [ "1" = "0" ]; then
@@ -289,12 +292,11 @@ while [ $counter -lt 1 ]; do
 
                 dashpw="$(mkpasswd -m sha-512 $dashpw)"
                 sudo echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
-                sudo systemctl restart nginx
 
                 echo -e $text_yellow && echo " Starting SSL-Certificate installation..." && echo -e $text_reset
-                sudo /etc/letsencrypt/live/acme.sh --issue -d $domain --nginx /etc/nginx/nginx.conf
+                sudo /etc/letsencrypt/live/acme.sh --issue --nginx -d $domain
 
-                if [ -f "/etc/letsencrypt/live/$domain/fullchain.crt" ]; then
+                if [ -f "/root/.acme.sh/$domain/fullchain.crt" ]; then
                     echo -e $text_yellow && echo " Copying Nginx configuration..." && echo -e $text_reset
                     rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
                     sudo cp $hlmdir/nginx.template /etc/nginx/sites-enabled/default
