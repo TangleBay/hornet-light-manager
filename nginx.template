@@ -46,7 +46,7 @@ server {
 
     listen [::]:14266 ssl http2;
     listen 14266 ssl http2;
-    #NGINXssl_certificate /root/.acme.sh/domain.tld/fullchain.crt;
+    #NGINXssl_certificate /root/.acme.sh/domain.tld/fullchain.cer;
     #NGINXssl_certificate_key /root/.acme.sh/domain.tld/domain.tld.key;
 }	
 
@@ -79,7 +79,7 @@ server {
 
     listen [::]:14267 ssl http2;
     listen 14267 ssl http2;
-    #NGINXssl_certificate /root/.acme.sh/domain.tld/fullchain.crt;
+    #NGINXssl_certificate /root/.acme.sh/domain.tld/fullchain.cer;
     #NGINXssl_certificate_key /root/.acme.sh/domain.tld/domain.tld.key;
 }	
 

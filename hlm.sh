@@ -296,7 +296,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_yellow && echo " Starting SSL-Certificate installation..." && echo -e $text_reset
                 sudo /etc/letsencrypt/live/acme.sh --issue --nginx -d $domain
 
-                if [ -f "/root/.acme.sh/$domain/fullchain.crt" ]; then
+                if [ -f "/root/.acme.sh/$domain/fullchain.cer" ]; then
                     echo -e $text_yellow && echo " Copying Nginx configuration..." && echo -e $text_reset
                     rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
                     sudo cp $hlmdir/nginx.template /etc/nginx/sites-enabled/default
