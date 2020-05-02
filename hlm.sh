@@ -86,7 +86,8 @@ if ! [ -x "$(command -v snap)" ]; then
     sudo apt install snapd -y > /dev/null
     snapcheck="$(echo $PATH | grep -oF '/snap/bin')"
     if [ "$snapcheck" != "/snap/bin" ]; then
-        echo "PATH=\"$PATH:/snap/bin\"" > /etc/environment
+        snappath="$(cat /etc/environment | sed 's/.$//')"
+        echo "PATH=$snappath:/snap/bin\"" > /etc/environment
         source /etc/environment
     fi
     clear
