@@ -204,8 +204,7 @@ while [ $counter -lt 1 ]; do
             echo ""
             echo " 3) Install HTTPS proxy"
             echo " 4) Renew SSL"
-            echo ""
-            echo " 5) Manage Watchdog"
+            echo " 5) Update Dashboard login"
             echo ""
             echo " 6) Update Hornet-Light-Manager"
             echo " 7) Reset all HLM configs"
@@ -330,20 +329,14 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "5" ]; then
-                echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel hornet watchdog: " selector_watchdog
-                echo -e $text_reset
-                if [ "$selector_watchdog" = "1" ]; then
-                    echo -e $text_yellow && echo " Enable hornet watchdog..." && echo -e $text_reset
-                    sudo mkdir -p $hlmdir/log
-                    sudo echo "0" > $hlmdir/log/watchdog.log
-                    sudo chmod +x $hlmdir/watchdog.sh
-                    ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
+                if [ -f "/etc/nginx/.htpasswd" ]; then
+                    dashpw="$(mkpasswd -m sha-512 $dashpw)"
+                    echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
+                    sudo systemctl reload nginx
+                    echo -e $text_yellow && echo " Hornet Dashboard login updated!" && echo -e $text_reset
+                else
+                    echo -e $text_red " Please install nginx first!"
                 fi
-                if [ "$selector_watchdog" = "2" ]; then
-                    echo -e $text_yellow && echo " Disable hornet watchdog..." && echo -e $text_reset
-                    ( crontab -l | grep -v -F "$croncmd" ) | crontab -
-                fi
-                echo -e $text_yellow && echo " Hornet watchdog configuration finished!" && echo -e $text_reset
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
@@ -372,8 +365,6 @@ while [ $counter -lt 1 ]; do
                     echo ""
                     echo -e $text_red " HLM configs reset successfully!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
-                    ScriptLoc=$(readlink -f "$0")
-                    exec "$ScriptLoc"
                     exit 0
                 fi
             fi
@@ -398,7 +389,7 @@ while [ $counter -lt 1 ]; do
             echo " 2) Show latest node log"
             echo " 3) Reset database"
             echo ""
-            echo " 4) Update Dashboard login"
+            echo " 4) Manage Watchdog"
             echo " 5) Update Hornet version"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
@@ -462,14 +453,20 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "4" ]; then
-                if [ -f "/etc/nginx/.htpasswd" ]; then
-                    dashpw="$(mkpasswd -m sha-512 $dashpw)"
-                    echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
-                    sudo systemctl reload nginx
-                    echo -e $text_yellow && echo " Hornet Dashboard login updated!" && echo -e $text_reset
-                else
-                    echo -e $text_red " Please install nginx first!"
+                echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel hornet watchdog: " selector_watchdog
+                echo -e $text_reset
+                if [ "$selector_watchdog" = "1" ]; then
+                    echo -e $text_yellow && echo " Enable hornet watchdog..." && echo -e $text_reset
+                    sudo mkdir -p $hlmdir/log
+                    sudo echo "0" > $hlmdir/log/watchdog.log
+                    sudo chmod +x $hlmdir/watchdog.sh
+                    ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
                 fi
+                if [ "$selector_watchdog" = "2" ]; then
+                    echo -e $text_yellow && echo " Disable hornet watchdog..." && echo -e $text_reset
+                    ( crontab -l | grep -v -F "$croncmd" ) | crontab -
+                fi
+                echo -e $text_yellow && echo " Hornet watchdog configuration finished!" && echo -e $text_reset
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
