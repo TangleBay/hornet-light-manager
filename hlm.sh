@@ -203,10 +203,11 @@ while [ $counter -lt 1 ]; do
             echo " 2) Remove Hornet"
             echo ""
             echo " 3) Install HTTPS proxy"
-            echo " 4) Manage Watchdog"
+            echo " 4) Renew SSL"
+            echo " 5) Update Dashboard login"
             echo ""
-            echo " 5) Update Hornet-Light-Manager"
-            echo " 6) Reset all HLM configs"
+            echo " 6) Update Hornet-Light-Manager"
+            echo " 7) Reset all HLM configs"
             echo ""
             echo -e " \e[90m-----------------------------------------------------------"
             echo ""
@@ -261,7 +262,15 @@ while [ $counter -lt 1 ]; do
 
             if [ "$selector" = "3" ]; then
                 echo -e $text_yellow && echo " Installing necessary packages..." && echo -e $text_reset
+                sudo apt install software-properties-common nginx -y
+                sudo wget -O /root/acme.sh https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh && sudo chmod +x /root/acme.sh
+                rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
+                sudo cp $hlmdir/pre-nginx.template /etc/nginx/sites-enabled/default
+                sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
+                sudo systemctl restart nginx
 
+                # ignore it
+                if [ "1" = "0" ]; then
                 systemv="$(uname -m)"
                 if [ "$systemv" = "x86_64" ]; then
                     sudo apt install software-properties-common nginx -y
@@ -279,15 +288,16 @@ while [ $counter -lt 1 ]; do
                     sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
                     sudo systemctl daemon-reload
                 fi
+                fi
+                ###########
 
                 dashpw="$(mkpasswd -m sha-512 $dashpw)"
                 sudo echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
-                sudo systemctl restart nginx
 
                 echo -e $text_yellow && echo " Starting SSL-Certificate installation..." && echo -e $text_reset
-                sudo certbot certonly --nginx -d $domain
+                sudo /root/acme.sh --issue --nginx -d $domain
 
-                if [ -f "/etc/letsencrypt/live/$domain/fullchain.pem" ]; then
+                if [ -f "/root/.acme.sh/$domain/fullchain.cer" ]; then
                     echo -e $text_yellow && echo " Copying Nginx configuration..." && echo -e $text_reset
                     rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
                     sudo cp $hlmdir/nginx.template /etc/nginx/sites-enabled/default
@@ -306,25 +316,32 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "4" ]; then
-                echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel hornet watchdog: " selector_watchdog
-                echo -e $text_reset
-                if [ "$selector_watchdog" = "1" ]; then
-                    echo -e $text_yellow && echo " Enable hornet watchdog..." && echo -e $text_reset
-                    sudo mkdir -p $hlmdir/log
-                    sudo echo "0" > $hlmdir/log/watchdog.log
-                    sudo chmod +x $hlmdir/watchdog.sh
-                    ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
+                if [ -f "/root/.acme.sh/$domain/fullchain.cer" ]; then
+                    sudo wget -O /root/acme.sh https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh && sudo chmod +x /root/acme.sh
+                    sudo /root/acme.sh --renew -d $domain --force
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
+                else
+                    echo -e $text_red " Error! No SSL Certificate installed!"
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
                 fi
-                if [ "$selector_watchdog" = "2" ]; then
-                    echo -e $text_yellow && echo " Disable hornet watchdog..." && echo -e $text_reset
-                    ( crontab -l | grep -v -F "$croncmd" ) | crontab -
+            fi
+
+            if [ "$selector" = "5" ]; then
+                if [ -f "/etc/nginx/.htpasswd" ]; then
+                    dashpw="$(mkpasswd -m sha-512 $dashpw)"
+                    echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
+                    sudo systemctl reload nginx
+                    echo -e $text_yellow && echo " Hornet Dashboard login updated!" && echo -e $text_reset
+                else
+                    echo -e $text_red " Please install nginx first!"
                 fi
-                echo -e $text_yellow && echo " Hornet watchdog configuration finished!" && echo -e $text_reset
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
 
-            if [ "$selector" = "5" ]; then
+            if [ "$selector" = "6" ]; then
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to update HLM (y/N): " selector_hlmreset
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
                     ( cd $hlmdir ; sudo git pull ) > /dev/null 2>&1
@@ -340,7 +357,7 @@ while [ $counter -lt 1 ]; do
                 fi
             fi
 
-            if [ "$selector" = "6" ]; then
+            if [ "$selector" = "7" ]; then
                 echo -e $TEXT_RED_B && read -p " Are you sure you want to reset all HLM configs (y/N): " selector_hlmreset
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
                     ( cd $hlmcfgdir ; sudo git pull ) > /dev/null 2>&1
@@ -348,8 +365,6 @@ while [ $counter -lt 1 ]; do
                     echo ""
                     echo -e $text_red " HLM configs reset successfully!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
-                    ScriptLoc=$(readlink -f "$0")
-                    exec "$ScriptLoc"
                     exit 0
                 fi
             fi
@@ -374,7 +389,7 @@ while [ $counter -lt 1 ]; do
             echo " 2) Show latest node log"
             echo " 3) Reset database"
             echo ""
-            echo " 4) Update Dashboard login"
+            echo " 4) Manage Watchdog"
             echo " 5) Update Hornet version"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
@@ -438,14 +453,20 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "4" ]; then
-                if [ -f "/etc/nginx/.htpasswd" ]; then
-                    dashpw="$(mkpasswd -m sha-512 $dashpw)"
-                    echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
-                    sudo systemctl reload nginx
-                    echo -e $text_yellow && echo " Hornet Dashboard login updated!" && echo -e $text_reset
-                else
-                    echo -e $text_red " Please install nginx first!"
+                echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel hornet watchdog: " selector_watchdog
+                echo -e $text_reset
+                if [ "$selector_watchdog" = "1" ]; then
+                    echo -e $text_yellow && echo " Enable hornet watchdog..." && echo -e $text_reset
+                    sudo mkdir -p $hlmdir/log
+                    sudo echo "0" > $hlmdir/log/watchdog.log
+                    sudo chmod +x $hlmdir/watchdog.sh
+                    ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
                 fi
+                if [ "$selector_watchdog" = "2" ]; then
+                    echo -e $text_yellow && echo " Disable hornet watchdog..." && echo -e $text_reset
+                    ( crontab -l | grep -v -F "$croncmd" ) | crontab -
+                fi
+                echo -e $text_yellow && echo " Hornet watchdog configuration finished!" && echo -e $text_reset
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
