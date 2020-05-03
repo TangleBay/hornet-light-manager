@@ -24,10 +24,6 @@ echo "alias hlm='sudo /var/lib/hornet-light-manager/hlm.sh'" >> ~/.bashrc && . ~
 
 1. Set your domain over HLM in the nginx.cfg (Edit configuration -> nginx.cfg)
 2. Choose the option "Installer Manager" and "3"
-3. Enter your e-mail address for notifications from LetsEncrypt
-4. Agree the terms with `A`
-5. Choose `N` next
-6. Select `1` for installing the certificate
 
 **If you want to reach your node from an external IP (outside of your local network) you need to open the TCP port which is selected in the installer script (apiport).**
 **Also if you want to reach you dashboard from an external IP (outside of your local network) you need to open the TCP port which is selected in the installer script (dashport).**
@@ -35,7 +31,7 @@ echo "alias hlm='sudo /var/lib/hornet-light-manager/hlm.sh'" >> ~/.bashrc && . ~
 
 # Project SWARM #
 
-**I would be very happy if you would join the [IOTA Community Node Pool](https://pool.einfachiota.de) so that together we can provide a strong and reliable node to the ecosystem and thus the Trinity users.**
+**I would be very happy if you would join the [SWARM](https://tanglebay.org/swarm) so that together we can provide a strong and reliable node to the ecosystem and thus the Trinity users. If you want to donate to SWARM nodes, einfachIOTA offers a donation system for this purpose (https://pool.einfachiota.de/donate).**
 
 **To add your node to the ICNP please follow these steps:**
 1. Set your node name and pow option in the SWARM config over the HLM itself (SWARM.cfg)
