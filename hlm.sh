@@ -28,7 +28,7 @@ hlmcfggit="https://github.com/TangleBay/hlm-cfgs.git"
 latesthlm="$(curl -s https://api.github.com/repos/TangleBay/hornet-light-manager/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
 croncmd="$hlmdir/watchdog.sh"
 cronjob="*/15 * * * * $croncmd"
-swarmtime="$(( ( RANDOM % 60 )  + 5 ))"
+swarmtime="$(( ( RANDOM % 55 )  + 5 ))"
 croncmdswarm="$hlmdir/auto-swarm.sh"
 cronjobswarm="$swarmtime 0 1 * * $croncmdswarm"
 envfile=/etc/environment
