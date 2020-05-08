@@ -437,7 +437,7 @@ while [ $counter -lt 1 ]; do
                         sudo rm -rf $hornetdir/mainnetdb
                     fi
                     if [ -d "$hornetdir/comnetdb" ]; then
-                        sudo rm -rf $hornetdir/comnetdir
+                        sudo rm -rf $hornetdir/comnetdb
                     fi
                     if [ -f "$hornetdir/export.bin" ]; then
                         sudo rm -rf $hornetdir/export.bin
