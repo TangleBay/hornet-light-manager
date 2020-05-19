@@ -671,6 +671,7 @@ while [ $counter -lt 1 ]; do
                 currentrelease=$release
                 sudo nano $hlmcfgdir/hornet.cfg
                 source $hlmcfgdir/hornet.cfg
+                sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
                 if [ "$release" != "$currentrelease" ]; then
                     sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
                     echo ""
