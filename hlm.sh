@@ -227,6 +227,8 @@ while [ $counter -lt 1 ]; do
                     if [ "$neighborport" != "15600" ] || [ "$autopeeringport" != "14626" ]; then
                         sudo find $hornetdir/config.json -type f -exec sed -i 's/15600/'$neighborport'/g' {} \;
                         sudo find $hornetdir/config.json -type f -exec sed -i 's/14626/'$autopeeringport'/g' {} \;
+                        sudo find $hornetdir/config_comnet.json -type f -exec sed -i 's/15600/'$neighborport'/g' {} \;
+                        sudo find $hornetdir/config_comnet.json -type f -exec sed -i 's/14626/'$autopeeringport'/g' {} \;
                         sudo systemctl restart hornet
                     fi
                     if [ -f /usr/bin/hornet ]; then
