@@ -218,6 +218,7 @@ while [ $counter -lt 1 ]; do
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
                 if [ ! -f "/usr/bin/hornet" ]; then
+                    source $hlmcfgdir/hornet.cfg
                     sudo snap install --classic --channel=1.14/stable go
                     sudo wget -qO - https://ppa.hornet.zone/pubkey.txt | sudo apt-key add -
                     sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
