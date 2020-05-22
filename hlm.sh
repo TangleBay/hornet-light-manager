@@ -237,7 +237,7 @@ while [ $counter -lt 1 ]; do
                         echo ""
                         echo -e $TEXT_RED_B
                         echo " You need to open the following ports in your home router for peering"
-                        echo " Ports: 14626/UDP & 15600/tcp"
+                        echo " Ports: $autopeeringport/UDP & $neighborport/tcp"
                         echo ""
                         echo -e $text_yellow
                         echo " Hornet installation finished!"
