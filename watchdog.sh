@@ -47,11 +47,11 @@ if [ "$check" != "active" ]; then
     counter=0
 fi
 
-# Check
+# Check sync
 lmi="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestMilestoneIndex')"
 lsmi="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestSolidSubtangleMilestoneIndex')"
 let dlmi=$lmi-$lsmi
-if [ "$check" = "active" ] && [ $dlmi -gt 150 ]; then
+if [ "$check" = "active" ] && [ $dlmi -gt $maxlmi ]; then
     sudo systemctl stop hornet
     sudo rm -rf /var/lib/hornet/mainnetdb /var/lib/hornet/export.bin /var/lib/hornet/comnetdb /var/lib/hornet/export_comnet.bin
     sudo systemctl start hornet
