@@ -6,7 +6,7 @@
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-version=0.0.1
+version=0.0.2
 
 ############################################################################################################################################################
 
@@ -218,11 +218,17 @@ while [ $counter -lt 1 ]; do
             echo -e $text_reset
             if [ "$selector" = "1" ]; then
                 if [ ! -f "/usr/bin/hornet" ]; then
+                    source $hlmcfgdir/hornet.cfg
                     sudo snap install --classic --channel=1.14/stable go
                     sudo wget -qO - https://ppa.hornet.zone/pubkey.txt | sudo apt-key add -
                     sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
                     sudo apt update && sudo apt dist-upgrade -y && sudo apt upgrade -y
                     sudo apt install hornet -y
+                    if [ "$neighborport" != "15600" ] || [ "$autopeeringport" != "14626" ]; then
+                        sudo find $hornetdir/config.json -type f -exec sed -i 's/15600/'$neighborport'/g' {} \;
+                        sudo find $hornetdir/config.json -type f -exec sed -i 's/14626/'$autopeeringport'/g' {} \;
+                        sudo systemctl restart hornet
+                    fi
                     if [ -f /usr/bin/hornet ]; then
                         check="$(systemctl show -p ActiveState --value hornet)"
                         if [ "$check" != "active" ]; then
