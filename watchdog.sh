@@ -2,8 +2,9 @@
 hlmcfgdir=/etc/hlm-cfgs
 hlmdir=/var/lib/hornet-light-manager
 source $hlmcfgdir/hornet.cfg
-check="$(systemctl show -p ActiveState --value hornet)"
 
+# Update check
+check="$(systemctl show -p ActiveState --value hornet)"
 if [ "$check" = "active" ]; then
     if [ "$release" = "stable" ]; then
         latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
@@ -31,6 +32,7 @@ if [ "$check" = "active" ]; then
     fi
 fi
 
+# Service check
 if [ "$check" != "active" ]; then
     dt=`date '+%m/%d/%Y %H:%M:%S'`
     sudo systemctl stop hornet
@@ -43,5 +45,24 @@ if [ "$check" != "active" ]; then
     echo $dt
     } > $hlmdir/log/watchdog.log
     counter=0
+fi
+
+# Check
+lmi="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestMilestoneIndex')"
+lsmi="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestSolidSubtangleMilestoneIndex')"
+let dlmi=$lmi-$lsmi
+if [ "$check" = "active" ] && [ $dlmi -gt 150 ]; then
+    sudo systemctl stop hornet
+    sudo rm -rf /var/lib/hornet/mainnetdb /var/lib/hornet/export.bin /var/lib/hornet/comnetdb /var/lib/hornet/export_comnet.bin
+    sudo systemctl start hornet
+fi
+
+# Log Pruning
+if [ "$logpruning" = "true" ]; then
+    currentlogsize="$(wc -c /var/lib/hornet/hornet.log | awk '{print $1}')"
+    let logsize=$logsize*1000000
+    if [ $currentlogsize -gt $logsize ]; then
+        echo -n "" > /var/lib/hornet/hornet.log
+    fi
 fi
 exit 0
