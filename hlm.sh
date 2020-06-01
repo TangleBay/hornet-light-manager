@@ -260,6 +260,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_reset
                 if [ "$selector_hornetremove" = "y" ] || [ "$selector_hornetremove" = "Y" ]; then
                     ( crontab -l | grep -v -F "$croncmd" ) | crontab -
+                    ( crontab -l | grep -v -F "$croncmdswarm" ) | crontab -
                     sudo systemctl stop hornet
                     sudo apt purge hornet -y
                     echo -e $text_red " Hornet was successfully removed!"
@@ -269,41 +270,21 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "3" ]; then
-                echo -e $text_yellow && echo " Installing necessary packages..." && echo -e $text_reset
-                sudo apt install software-properties-common nginx -y
-                sudo wget -O /root/acme.sh https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh && sudo chmod +x /root/acme.sh
-                rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
-                sudo cp $hlmdir/pre-nginx.template /etc/nginx/sites-enabled/default
-                sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
-                sudo systemctl restart nginx
-
-                # ignore it
-                if [ "1" = "0" ]; then
-                systemv="$(uname -m)"
-                if [ "$systemv" = "x86_64" ]; then
+                if [ ! -d "/root/.acme.sh/$domain"]; then
+                    echo -e $text_yellow && echo " Installing necessary packages..." && echo -e $text_reset
                     sudo apt install software-properties-common nginx -y
-                    sudo snap install --beta --classic certbot
-                else
-                    certbot="certbot/certbot"
-                    if ! grep -q "^deb .*$certbot" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
-                        sudo add-apt-repository ppa:certbot/certbot -y
-                    fi
-                    sudo apt update && sudo apt install python-certbot-nginx -y
-                fi
+                    sudo wget -O /root/acme.sh https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh && sudo chmod +x /root/acme.sh
+                    rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
+                    sudo cp $hlmdir/pre-nginx.template /etc/nginx/sites-enabled/default
+                    sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
+                    sudo systemctl restart nginx
 
-                if [ "$nginxservice" = "repair" ]; then
-                    sudo mkdir /etc/systemd/system/nginx.service.d
-                    sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
-                    sudo systemctl daemon-reload
-                fi
-                fi
-                ###########
+                    dashpw="$(mkpasswd -m sha-512 $dashpw)"
+                    sudo echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
 
-                dashpw="$(mkpasswd -m sha-512 $dashpw)"
-                sudo echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
-
-                echo -e $text_yellow && echo " Starting SSL-Certificate installation..." && echo -e $text_reset
-                sudo /root/acme.sh --issue --nginx -d $domain
+                    echo -e $text_yellow && echo " Starting SSL-Certificate installation..." && echo -e $text_reset
+                    sudo -u root /root/acme.sh --issue --nginx -d $domain
+                fi
 
                 if [ -f "/root/.acme.sh/$domain/fullchain.cer" ]; then
                     echo -e $text_yellow && echo " Copying Nginx configuration..." && echo -e $text_reset
@@ -314,7 +295,7 @@ while [ $counter -lt 1 ]; do
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/\#NGINX/''/g' {} \;
                     sudo systemctl restart nginx
-                    echo -e $text_yellow && echo " SSL Certificate installed!" && echo -e $text_reset
+                    echo -e $text_yellow && echo " SSL certificate installed!" && echo -e $text_reset
                 else
                     echo -e $text_red " Error! SSL Certificate not found!"
                 fi
@@ -324,7 +305,7 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "4" ]; then
-                if [ -f "/root/.acme.sh/$domain/fullchain.cer" ]; then
+                if [ -f "/etc/ssl/letsencrypt/$domain/fullchain.cer" ]; then
                     sudo wget -O /root/acme.sh https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh && sudo chmod +x /root/acme.sh
                     sudo /root/acme.sh --renew -d $domain --force
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
@@ -437,26 +418,41 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "3" ]; then
-                echo -e $TEXT_RED_B && read -p " Are you sure to delete the database (y/N): " selector6
+                echo -e $TEXT_RED_B && read -p " Would you like to delete (1)mainnetdb or (2)comnetdb or (c)ancel: " selector_deletedb
                 echo -e $text_reset
-                if [ "$selector6" = "y" ] || [ "$selector6" = "Y" ]; then
-                    sudo systemctl stop hornet
-                    if [ -d "$hornetdir/mainnetdb" ]; then
-                        sudo rm -rf $hornetdir/mainnetdb
-                    fi
-                    if [ -d "$hornetdir/comnetdb" ]; then
-                        sudo rm -rf $hornetdir/comnetdb
-                    fi
-                    if [ -f "$hornetdir/export.bin" ]; then
-                        sudo rm -rf $hornetdir/export.bin
-                    fi
-                    if [ -f "$hornetdir/export_comnet.bin" ]; then
-                        sudo rm -rf $hornetdir/export_comnet.bin
-                    fi
-                    sudo systemctl restart hornet
-                    echo -e $text_yellow && echo " Reset of the database finished and hornet restarted!" && echo -e $text_reset
-                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                if [ "$selector_deletedb" = "1" ]; then
+                    echo -e $TEXT_RED_B && read -p " Are you sure to delete the database (y/N): " selector6
                     echo -e $text_reset
+                    if [ "$selector6" = "y" ] || [ "$selector6" = "Y" ]; then
+                        sudo systemctl stop hornet
+                        if [ -d "$hornetdir/mainnetdb" ]; then
+                            sudo rm -rf $hornetdir/mainnetdb
+                        fi
+                        if [ -f "$hornetdir/export.bin" ]; then
+                            sudo rm -rf $hornetdir/export.bin
+                        fi
+                        sudo systemctl start hornet
+                        echo -e $text_yellow && echo " Reset of the database finished and hornet restarted!" && echo -e $text_reset
+                        echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                        echo -e $text_reset
+                    fi
+                fi
+                if [ "$selector_deletedb" = "2" ]; then
+                    echo -e $TEXT_RED_B && read -p " Are you sure to delete the database (y/N): " selector6
+                    echo -e $text_reset
+                    if [ "$selector6" = "y" ] || [ "$selector6" = "Y" ]; then
+                        sudo systemctl stop hornet
+                        if [ -d "$hornetdir/comnetdb" ]; then
+                            sudo rm -rf $hornetdir/comnetdb
+                        fi
+                        if [ -f "$hornetdir/export_comnet.bin" ]; then
+                            sudo rm -rf $hornetdir/export_comnet.bin
+                        fi
+                        sudo systemctl start hornet
+                        echo -e $text_yellow && echo " Reset of the database finished and hornet restarted!" && echo -e $text_reset
+                        echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                        echo -e $text_reset
+                    fi
                 fi
             fi
 
@@ -526,7 +522,7 @@ while [ $counter -lt 1 ]; do
             echo -e $text_red "\033[1m\033[4mProject SWARM\033[0m"
             echo ""
             echo -e $text_yellow " SWARM: https://tanglebay.org/swarm"
-            echo -e $text_yellow " Donate: https://pool.einfachiota.de/donate"
+            #echo -e $text_yellow " Donate: https://pool.einfachiota.de/donate"
             echo -e $text_yellow ""
             echo " 1) Add your node to SWARM"
             echo " 2) Remove your node from SWARM"
@@ -620,8 +616,8 @@ while [ $counter -lt 1 ]; do
             echo -e $text_yellow ""
             echo " 1) Edit Hornet.Service"
             echo " 2) Edit Hornet Config.json"
-            echo " 3) Edit Hornet Peering.json"
-            echo " 4) Edit Hornet Config_Comnet.json"
+            echo " 3) Edit Hornet Config_Comnet.json"
+            echo " 4) Edit Hornet Peering.json"
             echo ""
             echo " 5) Edit HLM Hornet.cfg"
             echo " 6) Edit HLM Nginx.cfg"
@@ -656,16 +652,6 @@ while [ $counter -lt 1 ]; do
                 fi
             fi
             if [ "$selector" = "3" ] ; then
-                if [ ! -f "/var/lib/hornet/peering.json" ]; then
-                    echo -e $text_yellow && echo " No peering.json found...Downloading config file!" && echo -e $text_reset
-                    sudo -u hornet wget -q -O $hornetdir/peering.json https://raw.githubusercontent.com/gohornet/hornet/master/peering.json
-                fi
-                sudo nano /var/lib/hornet/peering.json
-                echo -e $text_yellow && echo " New peering configuration loaded!" && echo -e $text_reset
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $text_reset
-            fi
-            if [ "$selector" = "4" ] ; then
                 sudo nano $hornetdir/config_comnet.json
                 echo -e $TEXT_RED_B && read -p " Would you like to restart hornet now (y/N): " selector4
                 if [ "$selector4" = "y" ] || [ "$selector4" = "y" ]; then
@@ -674,6 +660,16 @@ while [ $counter -lt 1 ]; do
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $text_reset
                 fi
+            fi
+            if [ "$selector" = "4" ] ; then
+                if [ ! -f "/var/lib/hornet/peering.json" ]; then
+                    echo -e $text_yellow && echo " No peering.json found...Downloading config file!" && echo -e $text_reset
+                    sudo -u hornet wget -q -O $hornetdir/peering.json https://raw.githubusercontent.com/gohornet/hornet/master/peering.json
+                fi
+                sudo nano /var/lib/hornet/peering.json
+                echo -e $text_yellow && echo " New peering configuration loaded!" && echo -e $text_reset
+                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                echo -e $text_reset
             fi
             if [ "$selector" = "5" ] ; then
                 currentrelease=$release
