@@ -270,10 +270,9 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "3" ]; then
-                if [ ! -d "/root/.acme.sh/$domain"]; then
+                if [ ! -d "/etc/nginx" ]; then
                     echo -e $text_yellow && echo " Installing necessary packages..." && echo -e $text_reset
-                    sudo apt install software-properties-common nginx -y
-                    sudo wget -O /root/acme.sh https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh && sudo chmod +x /root/acme.sh
+                    sudo apt install software-properties-common certbot python3-certbot-nginx -y
                     rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
                     sudo cp $hlmdir/pre-nginx.template /etc/nginx/sites-enabled/default
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
@@ -281,12 +280,19 @@ while [ $counter -lt 1 ]; do
 
                     dashpw="$(mkpasswd -m sha-512 $dashpw)"
                     sudo echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
-
-                    echo -e $text_yellow && echo " Starting SSL-Certificate installation..." && echo -e $text_reset
-                    sudo -u root /root/acme.sh --issue --nginx -d $domain
                 fi
 
-                if [ -f "/root/.acme.sh/$domain/fullchain.cer" ]; then
+                if [ ! -d "/etc/letsencrypt/live/$domain" ]; then
+                    echo -e $text_yellow && echo " Starting SSL-Certificate installation..." && echo -e $text_reset
+                    sudo certbot --nginx -d $domain
+                    if [ -f "/etc/letsencrypt/live/$domain/fullchain.pem" ]; then
+                        echo -e $text_yellow && echo " SSL certificate installed!" && echo -e $text_reset
+                    else
+                        echo -e $text_red " Error! SSL Certificate not found!"
+                    fi
+                fi
+
+                if [ -f "/etc/letsencrypt/live/$domain/fullchain.pem" ]; then
                     echo -e $text_yellow && echo " Copying Nginx configuration..." && echo -e $text_reset
                     rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
                     sudo cp $hlmdir/nginx.template /etc/nginx/sites-enabled/default
@@ -295,19 +301,16 @@ while [ $counter -lt 1 ]; do
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/\#NGINX/''/g' {} \;
                     sudo systemctl restart nginx
-                    echo -e $text_yellow && echo " SSL certificate installed!" && echo -e $text_reset
-                else
-                    echo -e $text_red " Error! SSL Certificate not found!"
+                    echo -e $text_yellow && echo " Nginx configurationen updated!" && echo -e $text_reset
                 fi
-                echo -e $text_yellow && echo " Reverse proxy installation finished!" && echo -e $text_reset
+                echo -e $text_yellow && echo " Reverse proxy configuration finished!" && echo -e $text_reset
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
 
             if [ "$selector" = "4" ]; then
-                if [ -f "/etc/ssl/letsencrypt/$domain/fullchain.cer" ]; then
-                    sudo wget -O /root/acme.sh https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh && sudo chmod +x /root/acme.sh
-                    sudo /root/acme.sh --renew -d $domain --force
+                if [ -f "/etc/letsencrypt/live/$domain/fullchain.pem" ]; then
+                    sudo certbot renew
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $text_reset
                 else
