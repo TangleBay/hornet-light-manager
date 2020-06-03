@@ -270,7 +270,7 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "3" ]; then
-                if [ ! -d "/etc/nginx" ]; then
+                if [ ! -d "/etc/letsencrypt" ]; then
                     echo -e $text_yellow && echo " Installing necessary packages..." && echo -e $text_reset
                     sudo apt install software-properties-common certbot python3-certbot-nginx -y
                     rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
