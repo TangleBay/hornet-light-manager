@@ -343,6 +343,7 @@ while [ $counter -lt 1 ]; do
                     echo ""
                     echo -e $text_red " HLM configs reset successfully!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
+                    clear
                     exit 0
                 fi
             fi
