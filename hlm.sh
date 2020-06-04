@@ -204,10 +204,9 @@ while [ $counter -lt 1 ]; do
             echo ""
             echo " 3) Install HTTPS proxy"
             echo " 4) Renew SSL"
-            echo " 5) Update Dashboard login"
             echo ""
-            echo " 6) Update Hornet-Light-Manager"
-            echo " 7) Reset all HLM configs"
+            echo " 6) Update HLM"
+            echo " 7) Reset HLM configs"
             echo ""
             echo -e " \e[90m-----------------------------------------------------------"
             echo ""
@@ -297,8 +296,8 @@ while [ $counter -lt 1 ]; do
                     rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
                     sudo cp $hlmdir/nginx.template /etc/nginx/sites-enabled/default
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
-                    sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14266/'$apiport'/g' {} \;
-                    sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14267/'$dashport'/g' {} \;
+                    sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14266/'$nodeapiport'/g' {} \;
+                    sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14267/'$dashboardport'/g' {} \;
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/\#NGINX/''/g' {} \;
                     sudo systemctl restart nginx
                     echo -e $text_yellow && echo " Nginx configurationen updated!" && echo -e $text_reset
@@ -318,19 +317,6 @@ while [ $counter -lt 1 ]; do
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $text_reset
                 fi
-            fi
-
-            if [ "$selector" = "5" ]; then
-                if [ -f "/etc/nginx/.htpasswd" ]; then
-                    dashpw="$(mkpasswd -m sha-512 $dashpw)"
-                    echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
-                    sudo systemctl reload nginx
-                    echo -e $text_yellow && echo " Hornet Dashboard login updated!" && echo -e $text_reset
-                else
-                    echo -e $text_red " Please install nginx first!"
-                fi
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $text_reset
             fi
 
             if [ "$selector" = "6" ]; then
@@ -380,9 +366,10 @@ while [ $counter -lt 1 ]; do
             echo " 1) Control Hornet (start/stop)"
             echo " 2) Show latest node log"
             echo " 3) Reset database"
+            echo " 4) Update Hornet version"
             echo ""
-            echo " 4) Manage Watchdog"
-            echo " 5) Update Hornet version"
+            echo " 5) Update Dashboard login"
+            echo " 6) Manage Watchdog"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
             echo ""
@@ -459,26 +446,7 @@ while [ $counter -lt 1 ]; do
                 fi
             fi
 
-            if [ "$selector" = "4" ]; then
-                echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel hornet watchdog: " selector_watchdog
-                echo -e $text_reset
-                if [ "$selector_watchdog" = "1" ]; then
-                    echo -e $text_yellow && echo " Enable hornet watchdog..." && echo -e $text_reset
-                    sudo mkdir -p $hlmdir/log
-                    sudo echo "0" > $hlmdir/log/watchdog.log
-                    sudo chmod +x $hlmdir/watchdog.sh
-                    ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
-                fi
-                if [ "$selector_watchdog" = "2" ]; then
-                    echo -e $text_yellow && echo " Disable hornet watchdog..." && echo -e $text_reset
-                    ( crontab -l | grep -v -F "$croncmd" ) | crontab -
-                fi
-                echo -e $text_yellow && echo " Hornet watchdog configuration finished!" && echo -e $text_reset
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $text_reset
-            fi
-
-            if [ "$selector" = "5" ] ; then
+            if [ "$selector" = "4" ] ; then
                 if [ -n "$nodev" ]; then
                     echo -e $text_yellow " Checking if a new version is available..."
                     if [ "$release" = "stable" ]; then
@@ -506,6 +474,38 @@ while [ $counter -lt 1 ]; do
                 else
                     echo -e "$text_red Error! Please try again later."
                 fi
+            fi
+
+            if [ "$selector" = "5" ]; then
+                if [ -f "/etc/nginx/.htpasswd" ]; then
+                    dashpw="$(mkpasswd -m sha-512 $dashpw)"
+                    echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
+                    sudo systemctl reload nginx
+                    echo -e $text_yellow && echo " Hornet Dashboard login updated!" && echo -e $text_reset
+                else
+                    echo -e $text_red " Please install nginx first!"
+                fi
+                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                echo -e $text_reset
+            fi
+
+            if [ "$selector" = "6" ]; then
+                echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel hornet watchdog: " selector_watchdog
+                echo -e $text_reset
+                if [ "$selector_watchdog" = "1" ]; then
+                    echo -e $text_yellow && echo " Enable hornet watchdog..." && echo -e $text_reset
+                    sudo mkdir -p $hlmdir/log
+                    sudo echo "0" > $hlmdir/log/watchdog.log
+                    sudo chmod +x $hlmdir/watchdog.sh
+                    ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
+                fi
+                if [ "$selector_watchdog" = "2" ]; then
+                    echo -e $text_yellow && echo " Disable hornet watchdog..." && echo -e $text_reset
+                    ( crontab -l | grep -v -F "$croncmd" ) | crontab -
+                fi
+                echo -e $text_yellow && echo " Hornet watchdog configuration finished!" && echo -e $text_reset
+                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                echo -e $text_reset
             fi
 
             if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
@@ -548,7 +548,7 @@ while [ $counter -lt 1 ]; do
                 if [ ! -f "$hlmdir/log/swarm.log" ]; then
                     sudo touch $hlmdir/log/swarm.log
                 fi
-                (curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq '.') > $hlmdir/log/swarm.log
+                (curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$domain:$nodeapiport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq '.') > $hlmdir/log/swarm.log
                 swarmpwd="$(sudo cat $hlmdir/log/swarm.log |jq '.password')"
                 if [ -n "$swarmpwd" ]; then
                     sudo sed -i 's/nodepassword.*/nodepassword='$swarmpwd'/' $hlmcfgdir/swarm.cfg
@@ -568,7 +568,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_reset
                 if [ "$selector_swarm_update" = "y" ] || [ "$selector_swarm_update" = "Y" ]; then
                     curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/$nodepassword
-                    curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$nodeurl:$nodeport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
+                    curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$domain:$nodeapiport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $text_reset
                 fi
@@ -669,7 +669,7 @@ while [ $counter -lt 1 ]; do
                     echo -e $text_yellow && echo " No peering.json found...Downloading config file!" && echo -e $text_reset
                     sudo -u hornet wget -q -O $hornetdir/peering.json https://raw.githubusercontent.com/gohornet/hornet/master/peering.json
                 fi
-                sudo nano /var/lib/hornet/peering.json
+                sudo nano $hornetdir/peering.json
                 echo -e $text_yellow && echo " New peering configuration loaded!" && echo -e $text_reset
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
@@ -705,16 +705,19 @@ while [ $counter -lt 1 ]; do
             fi
             if [ "$selector" = "6" ] ; then
                 sudo nano $hlmcfgdir/nginx.cfg
+                source $hlmcfgdir/nginx.cfg
                 echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
             fi
             if [ "$selector" = "7" ] ; then
                 if [ -f "$hlmcfgdir/swarm.cfg" ]; then
                     sudo nano $hlmcfgdir/swarm.cfg
+                    source $hlmcfgdir/swarm.cfg
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
                 fi
                 if [ -f "$hlmcfgdir/icnp.cfg" ]; then
                     sudo mv $hlmcfgdir/icnp.cfg $hlmcfgdir/swarm.cfg
                     sudo nano $hlmcfgdir/swarm.cfg
+                    source $hlmcfgdir/swarm.cfg
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
                 fi
             fi
