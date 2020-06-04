@@ -531,9 +531,9 @@ while [ $counter -lt 1 ]; do
             echo " 1) Add your node to SWARM"
             echo " 2) Remove your node from SWARM"
             echo " 3) Update node on SWARM"
+            echo " 4) Manage SWARM auto-adding"
             echo ""
-            echo " 4) Show SWARM.log"
-            echo " 5) Manage SWARM Auto-Season"
+            echo " 5) Show SWARM.log"
             echo ""
             echo -e "\e[90m-----------------------------------------------------------"
             echo ""
@@ -575,19 +575,8 @@ while [ $counter -lt 1 ]; do
                     echo -e $text_reset
                 fi
             fi
+
             if [ "$selector" = "4" ]; then
-                if [ -f "$hlmdir/log/swarm.log" ]; then
-                    sudo cat $hlmdir/log/swarm.log |jq
-                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $text_reset
-                else
-                    echo -e $text_red " No SWARM.log found!"
-                    echo ""
-                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $text_reset
-                fi
-            fi
-            if [ "$selector" = "5" ]; then
                 echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel SWARM Auto-Season: " selector_autoswarm
                 echo -e $text_reset
                 if [ "$selector_autoswarm" = "1" ]; then
@@ -603,6 +592,20 @@ while [ $counter -lt 1 ]; do
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
+
+            if [ "$selector" = "5" ]; then
+                if [ -f "$hlmdir/log/swarm.log" ]; then
+                    sudo cat $hlmdir/log/swarm.log |jq
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
+                else
+                    echo -e $text_red " No SWARM.log found!"
+                    echo ""
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
+                fi
+            fi
+
             if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
                 counter3=1
             fi
