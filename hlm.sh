@@ -554,6 +554,7 @@ while [ $counter -lt 1 ]; do
                 if [ -n "$swarmpwd" ]; then
                     sudo sed -i 's/nodepassword.*/nodepassword='$swarmpwd'/' $hlmcfgdir/swarm.cfg
                 fi
+                sleep 1
                 sudo cat $hlmdir/log/swarm.log |jq
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
