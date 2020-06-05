@@ -1,4 +1,5 @@
 #!/bin/bash
+hornetdir=/var/lib/hornet
 hlmcfgdir=/etc/hlm-cfgs
 hlmdir=/var/lib/hornet-light-manager
 source $hlmcfgdir/hornet.cfg
@@ -15,6 +16,14 @@ if [ "$status" = "active" ]; then
         if [ "$version" != "$latesthornet" ]; then
             sudo systemctl stop hornet
             sudo apt update && sudo apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install hornet
+            if [ -f "$hornetdir/config.json.dpkg-dist" ]; then
+                sudo cp -r $hornetdir/config.json.dpkg-dist $hornetdir/config.json
+                sudo rm -rf $hornetdir/config.json.dpkg-dist
+            fi
+            if [ -f "$hornetdir/config_comnet.json.dpkg-dist" ]; then
+                sudo cp -r $hornetdir/config_comnet.json.dpkg-dist $hornetdir/config_comnet.json
+                sudo rm -rf $hornetdir/config_comnet.json.dpkg-dist
+            fi
             if [ "$neighborport" != "15600" ] || [ "$autopeeringport" != "14626" ]; then
                 sudo find $hornetdir/config.json -type f -exec sed -i 's/15600/'$neighborport'/g' {} \;
                 sudo find $hornetdir/config.json -type f -exec sed -i 's/14626/'$autopeeringport'/g' {} \;
@@ -33,6 +42,14 @@ if [ "$status" = "active" ]; then
         if [ "$version" != "$latesthornet" ]; then
             sudo systemctl stop hornet
             sudo apt update && sudo apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install hornet
+            if [ -f "$hornetdir/config.json.dpkg-dist" ]; then
+                sudo cp -r $hornetdir/config.json.dpkg-dist $hornetdir/config.json
+                sudo rm -rf $hornetdir/config.json.dpkg-dist
+            fi
+            if [ -f "$hornetdir/config_comnet.json.dpkg-dist" ]; then
+                sudo cp -r $hornetdir/config_comnet.json.dpkg-dist $hornetdir/config_comnet.json
+                sudo rm -rf $hornetdir/config_comnet.json.dpkg-dist
+            fi
             if [ "$neighborport" != "15600" ] || [ "$autopeeringport" != "14626" ]; then
                 sudo find $hornetdir/config.json -type f -exec sed -i 's/15600/'$neighborport'/g' {} \;
                 sudo find $hornetdir/config.json -type f -exec sed -i 's/14626/'$autopeeringport'/g' {} \;
@@ -48,7 +65,7 @@ fi
 if [ "$status" != "active" ]; then
     dt=`date '+%m/%d/%Y %H:%M:%S'`
     sudo systemctl stop hornet
-    sudo rm -rf /var/lib/hornet/mainnetdb /var/lib/hornet/export.bin /var/lib/hornet/comnetdb /var/lib/hornet/export_comnet.bin /var/lib/hornet/hornet.log
+    sudo rm -rf $hornetdir/mainnetdb $hornetdir/export.bin $hornetdir/comnetdb $hornetdir/export_comnet.bin
     sudo systemctl start hornet
     counter="$(cat $hlmdir/log/watchdog.log | sed -n -e '1{p;q}')"
     let counter=counter+1
@@ -66,7 +83,7 @@ let dlmi=$lmi-$lsmi
 if [ "$status" = "active" ] && [ $dlmi -gt $maxlmi ]; then
     dt=`date '+%m/%d/%Y %H:%M:%S'`
     sudo systemctl stop hornet
-    sudo rm -rf /var/lib/hornet/mainnetdb /var/lib/hornet/export.bin /var/lib/hornet/comnetdb /var/lib/hornet/export_comnet.bin /var/lib/hornet/hornet.log
+    sudo rm -rf $hornetdir/mainnetdb $hornetdir/export.bin $hornetdir/comnetdb $hornetdir/export_comnet.bin
     sudo systemctl start hornet
     counter="$(cat $hlmdir/log/watchdog.log | sed -n -e '1{p;q}')"
     let counter=counter+1
@@ -79,10 +96,10 @@ fi
 
 # Log Pruning
 if [ "$logpruning" = "true" ]; then
-    currentlogsize="$(wc -c /var/lib/hornet/hornet.log | awk '{print $1}')"
+    currentlogsize="$(wc -c $hornetdir/hornet.log | awk '{print $1}')"
     let logsize=$logsize*1000000
     if [ $currentlogsize -gt $logsize ]; then
-        echo -n "" > /var/lib/hornet/hornet.log
+        echo -n "" > $hornetdir/hornet.log
     fi
 fi
 exit 0
