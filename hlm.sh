@@ -275,6 +275,11 @@ while [ $counter -lt 1 ]; do
             fi
 
             if [ "$selector" = "3" ]; then
+                if [ ! -f "/etc/nginx/.htpasswd" ]; then
+                    dashpw="$(mkpasswd -m sha-512 $dashpw)"
+                    sudo echo "$dashuser:$dashpw" > /etc/nginx/.htpasswd
+                fi
+
                 if [ ! -d "/etc/letsencrypt" ]; then
                     echo -e $text_yellow && echo " Installing necessary packages..." && echo -e $text_reset
                     sudo apt install software-properties-common certbot python3-certbot-nginx -y
@@ -703,14 +708,14 @@ while [ $counter -lt 1 ]; do
                 currentrelease=$release
                 sudo nano $hlmcfgdir/hornet.cfg
                 source $hlmcfgdir/hornet.cfg
+                if [ "$release" = "stable" ]; then
+                    sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" > /etc/apt/sources.list.d/hornet.list'
+                fi
+                if [ "$release" = "testing" ]; then
+                    sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" > /etc/apt/sources.list.d/hornet.list'
+                    sudo sh -c 'echo "deb http://ppa.hornet.zone testing main" >> /etc/apt/sources.list.d/hornet.list'
+                fi
                 if [ "$release" != "$currentrelease" ]; then
-                    if [ "$release" = "stable" ]; then
-                        sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" > /etc/apt/sources.list.d/hornet.list'
-                    fi
-                    if [ "$release" = "testing" ]; then
-                        sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" > /etc/apt/sources.list.d/hornet.list'
-                        sudo sh -c 'echo "deb http://ppa.hornet.zone testing main" >> /etc/apt/sources.list.d/hornet.list'
-                    fi
                     echo ""
                     echo -e $TEXT_RED_B " Release change detected!!!" && echo -e $text_reset
                     echo ""
