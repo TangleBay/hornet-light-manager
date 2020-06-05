@@ -133,9 +133,9 @@ while [ $counter -lt 1 ]; do
     echo -e $text_yellow "\033[1m\033[4mWelcome to the Hornet lightweight manager! [v$version]\033[0m"
     echo ""
     if [ "$latesthlm" != "$version" ]; then
-        echo -n $text_red " #######################################################"
+        echo -n $text_red " ####################################################"
         echo -n $text_red " New version v$version available, please update HLM!"
-        echo -n $text_red " #######################################################"
+        echo -n $text_red " ####################################################"
         echo ""
     fi
     if [ -n "$nodev" ]; then
