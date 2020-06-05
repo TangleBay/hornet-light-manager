@@ -711,7 +711,6 @@ while [ $counter -lt 1 ]; do
                         sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" > /etc/apt/sources.list.d/hornet.list'
                         sudo sh -c 'echo "deb http://ppa.hornet.zone testing main" >> /etc/apt/sources.list.d/hornet.list'
                     fi
-                    sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
                     echo ""
                     echo -e $TEXT_RED_B " Release change detected!!!" && echo -e $text_reset
                     echo ""
