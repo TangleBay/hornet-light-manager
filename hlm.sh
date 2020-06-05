@@ -42,12 +42,6 @@ if [ "$release" = "testing" ]; then
     latesthornet="${latesthornet:1}"
 fi
 
-if [ "$latesthlm" != "$version" ]; then
-    up2date=$text_red"v"$version
-else
-    up2date=$text_green"v"$version
-fi
-
 ############################################################################################################################################################
 
 clear
@@ -136,8 +130,14 @@ while [ $counter -lt 1 ]; do
     ############################################################################################################################################################
 
     echo ""
-    echo -e $text_yellow "\033[1m\033[4mWelcome to the Hornet lightweight manager! [$up2date$text_yellow]\033[0m"
+    echo -e $text_yellow "\033[1m\033[4mWelcome to the Hornet lightweight manager! [v$version]\033[0m"
     echo ""
+    if [ "$latesthlm" != "$version" ]; then
+        echo -n $text_red " #######################################################"
+        echo -n $text_red " New version v$version available, please update HLM!"
+        echo -n $text_red " #######################################################"
+        echo ""
+    fi
     if [ -n "$nodev" ]; then
         if [ "$nodev" = "$latesthornet" ]; then
             echo -e "$text_yellow Hornet Version:$text_green $nodev"
