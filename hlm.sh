@@ -220,7 +220,13 @@ while [ $counter -lt 1 ]; do
                     source $hlmcfgdir/hornet.cfg
                     sudo snap install --classic --channel=1.14/stable go
                     sudo wget -qO - https://ppa.hornet.zone/pubkey.txt | sudo apt-key add -
-                    sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
+                    if [ "$release" = "stable" ]; then
+                        sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" > /etc/apt/sources.list.d/hornet.list'
+                    fi
+                    if [ "$release" = "testing" ]; then
+                        sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" > /etc/apt/sources.list.d/hornet.list'
+                        sudo sh -c 'echo "deb http://ppa.hornet.zone testing main" >> /etc/apt/sources.list.d/hornet.list'
+                    fi
                     sudo apt update && sudo apt dist-upgrade -y && sudo apt upgrade -y
                     sudo apt install hornet -y
                     if [ "$neighborport" != "15600" ] || [ "$autopeeringport" != "14626" ]; then
@@ -466,6 +472,20 @@ while [ $counter -lt 1 ]; do
                         sudo systemctl stop hornet
                         echo -e $text_yellow " Updating Hornet..."
                         sudo apt update && sudo apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install hornet
+                        if [ -f "$hornetdir/config.json.dpkg-dist" ]; then
+                            sudo cp -r $hornetdir/config.json.dpkg-dist $hornetdir/config.json
+                            sudo rm -rf $hornetdir/config.json.dpkg-dist
+                        fi
+                        if [ -f "$hornetdir/config_comnet.json.dpkg-dist" ]; then
+                            sudo cp -r $hornetdir/config_comnet.json.dpkg-dist $hornetdir/config_comnet.json
+                            sudo rm -rf $hornetdir/config_comnet.json.dpkg-dist
+                        fi
+                        if [ "$neighborport" != "15600" ] || [ "$autopeeringport" != "14626" ]; then
+                            sudo find $hornetdir/config.json -type f -exec sed -i 's/15600/'$neighborport'/g' {} \;
+                            sudo find $hornetdir/config.json -type f -exec sed -i 's/14626/'$autopeeringport'/g' {} \;
+                            sudo find $hornetdir/config_comnet.json -type f -exec sed -i 's/15600/'$neighborport'/g' {} \;
+                            sudo find $hornetdir/config_comnet.json -type f -exec sed -i 's/14626/'$autopeeringport'/g' {} \;
+                        fi
                         echo -e $text_yellow " Starting Hornet node..."
                         sudo systemctl start hornet
                         echo -e $text_yellow " Updating Hornet version finished!"
@@ -683,8 +703,14 @@ while [ $counter -lt 1 ]; do
                 currentrelease=$release
                 sudo nano $hlmcfgdir/hornet.cfg
                 source $hlmcfgdir/hornet.cfg
-                sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
                 if [ "$release" != "$currentrelease" ]; then
+                    if [ "$release" = "stable" ]; then
+                        sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" > /etc/apt/sources.list.d/hornet.list'
+                    fi
+                    if [ "$release" = "testing" ]; then
+                        sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" > /etc/apt/sources.list.d/hornet.list'
+                        sudo sh -c 'echo "deb http://ppa.hornet.zone testing main" >> /etc/apt/sources.list.d/hornet.list'
+                    fi
                     sudo sh -c 'echo "deb http://ppa.hornet.zone '$release' main" > /etc/apt/sources.list.d/hornet.list'
                     echo ""
                     echo -e $TEXT_RED_B " Release change detected!!!" && echo -e $text_reset
