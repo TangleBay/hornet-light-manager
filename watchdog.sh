@@ -64,9 +64,7 @@ fi
 # Service check
 if [ "$status" != "active" ]; then
     dt=`date '+%m/%d/%Y %H:%M:%S'`
-    sudo systemctl stop hornet
-    sudo rm -rf $hornetdir/mainnetdb $hornetdir/export.bin $hornetdir/comnetdb $hornetdir/export_comnet.bin
-    sudo systemctl start hornet
+    sudo systemctl restart hornet
     counter="$(cat $hlmdir/log/watchdog.log | sed -n -e '1{p;q}')"
     let counter=counter+1
     {
