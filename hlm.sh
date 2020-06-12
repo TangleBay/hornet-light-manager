@@ -132,10 +132,10 @@ while [ $counter -lt 1 ]; do
     echo ""
     echo -e $text_yellow "\033[1m\033[4mWelcome to the Hornet lightweight manager! [v$version]\033[0m"
     echo ""
-    if [ "$latesthlm" != "$version" ]; then
-        echo -e $text_red "#####################################################"
+    if [ "$latesthlm" != "$version" ] && [ "$latesthlm" != "" ]; then
+        echo -e $text_red "#######################################################"
         echo -e $text_red " New version v$latesthlm available, please update HLM!"
-        echo -e $text_red "#####################################################"
+        echo -e $text_red "#######################################################"
         echo ""
     fi
     if [ -n "$nodev" ]; then
@@ -307,8 +307,7 @@ while [ $counter -lt 1 ]; do
                     rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
                     sudo cp $hlmdir/nginx.template /etc/nginx/sites-enabled/default
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
-                    sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14266/'$nodeapiport'/g' {} \;
-                    sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14267/'$dashboardport'/g' {} \;
+                    sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/443/'$nodeport'/g' {} \;
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/\#NGINX/''/g' {} \;
                     sudo systemctl restart nginx
                     echo -e $text_yellow && echo " Nginx configurationen updated!" && echo -e $text_reset
@@ -336,6 +335,7 @@ while [ $counter -lt 1 ]; do
                     ( cd $hlmdir ; sudo git pull ) > /dev/null 2>&1
                     ( cd $hlmdir ; sudo git reset --hard origin/master ) > /dev/null 2>&1
                     sudo chmod +x $hlmdir/hlm.sh $hlmdir/watchdog.sh $hlmdir/auto-swarm.sh
+                    exec $hlmdir/cfg-updater.sh
                     echo ""
                     echo -e $text_red " HLM update successfully!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
@@ -574,7 +574,7 @@ while [ $counter -lt 1 ]; do
                 if [ ! -f "$hlmdir/log/swarm.log" ]; then
                     sudo touch $hlmdir/log/swarm.log
                 fi
-                (curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$domain:$nodeapiport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq '.') > $hlmdir/log/swarm.log
+                (curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$domain:$nodeport/api\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq '.') > $hlmdir/log/swarm.log
                 swarmpwd="$(sudo cat $hlmdir/log/swarm.log |jq '.password')"
                 if [ -n "$swarmpwd" ]; then
                     sudo sed -i 's/nodepassword.*/nodepassword='$swarmpwd'/' $hlmcfgdir/swarm.cfg
@@ -595,7 +595,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_reset
                 if [ "$selector_swarm_update" = "y" ] || [ "$selector_swarm_update" = "Y" ]; then
                     curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/$nodepassword
-                    curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$domain:$nodeapiport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
+                    curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$domain:$nodeport/api\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $text_reset
                 fi
