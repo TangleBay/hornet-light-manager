@@ -307,8 +307,7 @@ while [ $counter -lt 1 ]; do
                     rm -rf /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
                     sudo cp $hlmdir/nginx.template /etc/nginx/sites-enabled/default
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/domain.tld/'$domain'/g' {} \;
-                    sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14266/'$nodeapiport'/g' {} \;
-                    sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/14267/'$dashboardport'/g' {} \;
+                    sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/443/'$nodeport'/g' {} \;
                     sudo find /etc/nginx/sites-enabled/default -type f -exec sed -i 's/\#NGINX/''/g' {} \;
                     sudo systemctl restart nginx
                     echo -e $text_yellow && echo " Nginx configurationen updated!" && echo -e $text_reset
