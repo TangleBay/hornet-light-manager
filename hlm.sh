@@ -573,7 +573,7 @@ while [ $counter -lt 1 ]; do
                 if [ ! -f "$hlmdir/log/swarm.log" ]; then
                     sudo touch $hlmdir/log/swarm.log
                 fi
-                (curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$domain:$nodeapiport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq '.') > $hlmdir/log/swarm.log
+                (curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$domain:$nodeport/api\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq '.') > $hlmdir/log/swarm.log
                 swarmpwd="$(sudo cat $hlmdir/log/swarm.log |jq '.password')"
                 if [ -n "$swarmpwd" ]; then
                     sudo sed -i 's/nodepassword.*/nodepassword='$swarmpwd'/' $hlmcfgdir/swarm.cfg
@@ -594,7 +594,7 @@ while [ $counter -lt 1 ]; do
                 echo -e $text_reset
                 if [ "$selector_swarm_update" = "y" ] || [ "$selector_swarm_update" = "Y" ]; then
                     curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/$nodepassword
-                    curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$domain:$nodeapiport\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
+                    curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$domain:$nodeport/api\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                     echo -e $text_reset
                 fi
