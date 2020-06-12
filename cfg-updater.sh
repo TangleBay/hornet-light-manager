@@ -33,5 +33,3 @@ if [ "$swarmcfgversion" != "0.0.1" ] || [ "$swarmcfgversion" = "" ]; then
     sudo sed -i 's/donationaddress.*/donationaddress=\"'$donationaddress'\"/' $hlmcfgdir/swarm.cfg
     sudo sed -i 's/nodepassword.*/nodepassword=\"'$nodepassword'\"/' $hlmcfgdir/swarm.cfg
 fi
-
-exit 0
