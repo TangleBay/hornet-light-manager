@@ -9,7 +9,7 @@ source $hlmcfgdir/nginx.cfg
 source $hlmcfgdir/swarm.cfg
 
 if [ "$hornetcfgversion" != "0.0.1" ] || [ ! -n "$hornetcfgversion" ]; then
-    sudo wget -O $hlmcfgdir/hornet.cfg $dlhornetcfg
+    sudo wget -q -O $hlmcfgdir/hornet.cfg $dlhornetcfg
     sudo sed -i 's/release.*/release='$release'/' $hlmcfgdir/hornet.cfg
     sudo sed -i 's/dashuser.*/dashuser=\"'$dashuser'\"/' $hlmcfgdir/hornet.cfg
     sudo sed -i 's/dashpw.*/dashpw=\"'$dashpw'\"/' $hlmcfgdir/hornet.cfg
@@ -21,13 +21,13 @@ if [ "$hornetcfgversion" != "0.0.1" ] || [ ! -n "$hornetcfgversion" ]; then
 fi
 
 if [ "$nginxcfgversion" != "0.0.1" ] || [ ! -n "$nginxcfgversion" ]; then
-    sudo wget -O $hlmcfgdir/nginx.cfg $dlnginxcfg
+    sudo wget -q -O $hlmcfgdir/nginx.cfg $dlnginxcfg
     sudo sed -i 's/domain.*/domain=\"'$domain'\"/' $hlmcfgdir/nginx.cfg
     sudo sed -i 's/nodeport.*/nodeport='$nodeapiport'/' $hlmcfgdir/nginx.cfg
 fi
 
 if [ "$swarmcfgversion" != "0.0.1" ] || [ ! -n "$swarmcfgversion" ]; then
-    sudo wget -O $hlmcfgdir/swarm.cfg $dlswarmcfg
+    sudo wget -q -O $hlmcfgdir/swarm.cfg $dlswarmcfg
     sudo sed -i 's/nodename.*/nodename=\"'$nodename'\"/' $hlmcfgdir/swarm.cfg
     sudo sed -i 's/pownode.*/pownode='$pownode'/' $hlmcfgdir/swarm.cfg
     sudo sed -i 's/donationaddress.*/donationaddress=\"'$donationaddress'\"/' $hlmcfgdir/swarm.cfg
