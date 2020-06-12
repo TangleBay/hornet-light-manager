@@ -3,20 +3,18 @@ server {
 
         server_name domain.tld;
 
-        default_type application/json;
         server_tokens off;
         ssl_session_cache shared:SSL:32m;
         add_header Strict-Transport-Security 'max-age=63072000; includeSubdomains';
         add_header X-Content-Type-Options "nosniff";
         add_header X-XSS-Protection "1; mode=block";
 
-        location / {
+        location /api {
+                proxy_pass http://localhost:14265/;
                 proxy_set_header        Host $host;
                 proxy_set_header        X-Real-IP $remote_addr;
                 proxy_set_header        X-Forwarded-Proto $scheme;
                 proxy_set_header        X-Real-SslId $ssl_session_id;
-                proxy_pass              http://localhost:14265;
-                proxy_ignore_client_abort on;
 
                 if ($request_method = 'OPTIONS') {
                         add_header 'Access-Control-Allow-Origin' '*';
@@ -42,51 +40,42 @@ server {
                         add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,Proxy-Authorization,X-IOTA-API-Version';
                         add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range,WWW-Authenticate,Proxy-Authenticate';
                 }
-        }
+       }
 
-    listen [::]:14266 ssl http2;
-    listen 14266 ssl http2;
-    #NGINXssl_certificate /etc/letsencrypt/live/domain.tld/fullchain.pem;
-    #NGINXssl_certificate_key /etc/letsencrypt/live/domain.tld/privkey.pem;
-}	
-
-server {	
-        root /var/www/html/dashboard;
-
-        server_name domain.tld;
-
-        server_tokens off;
-        ssl_session_cache shared:SSL:32m;
-        add_header Strict-Transport-Security 'max-age=63072000; includeSubdomains';
-        add_header Strict-Transport-Security "max-age=31536000;includeSubDomains;preload";
-        add_header X-Frame-Options "SAMEORIGIN";
-        add_header X-Content-Type-Options "nosniff";
-        add_header X-XSS-Protection "1; mode=block";
-        add_header X-Robots-Tag none;
-        auth_basic "Hornet Node Dashboard Access";
-        auth_basic_user_file    /etc/nginx/.htpasswd;
-
-        location / {
-                proxy_set_header        Upgrade $http_upgrade;
-                proxy_set_header        Connection "Upgrade";
+        location /ws {
+                auth_basic "Authentication required";
+                auth_basic_user_file    /etc/nginx/.htpasswd;
+                proxy_pass http://localhost:8081/ws;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
                 proxy_set_header        Host $host;
                 proxy_set_header        X-Real-IP $remote_addr;
                 proxy_set_header        X-Forwarded-Proto $scheme;
                 proxy_set_header        X-Real-SslId $ssl_session_id;
-                proxy_pass              http://localhost:8081;
-                proxy_ignore_client_abort on;
-        }	
+                proxy_read_timeout 86400;
+        }
 
-    listen [::]:14267 ssl http2;
-    listen 14267 ssl http2;
+        location / {
+                auth_basic "Authentication required";
+                auth_basic_user_file    /etc/nginx/.htpasswd;
+                proxy_pass http://localhost:8081;
+                proxy_set_header        Host $host;
+                proxy_set_header        X-Real-IP $remote_addr;
+                proxy_set_header        X-Forwarded-Proto $scheme;
+                proxy_set_header        X-Real-SslId $ssl_session_id;
+        }
+
+    listen [::]:443 ssl http2 deferred;
+    listen 443 ssl http2 deferred;
     #NGINXssl_certificate /etc/letsencrypt/live/domain.tld/fullchain.pem;
     #NGINXssl_certificate_key /etc/letsencrypt/live/domain.tld/privkey.pem;
-}	
+}
 
-server {	
+server {
     listen 80 default_server;
     listen [::]:80 default_server;
     server_name _;
     server_tokens off;
-    return 403;
+    return 301 https://domain.tld$request_uri;
 }
