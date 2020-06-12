@@ -1,4 +1,3 @@
-#!/bin/bash
 hlmdir="/var/lib/hornet-light-manager"
 hlmcfgdir="/etc/hlm-cfgs"
 dlhornetcfg="https://raw.githubusercontent.com/TangleBay/hlm-cfgs/master/hornet.cfg"
@@ -28,7 +27,7 @@ fi
 
 if [ "$swarmcfgversion" != "0.0.1" ] || [ "$swarmcfgversion" = "" ]; then
     sudo wget -q -O $hlmcfgdir/swarm.cfg $dlswarmcfg
-    sudo sed -i 's/nodename.*/nodename=\"'$nodename'\"/' $hlmcfgdir/swarm.cfg
+    sudo sed -i "s/nodename.*/nodename=\"$nodename\"/g" $hlmcfgdir/swarm.cfg
     sudo sed -i 's/pownode.*/pownode='$pownode'/' $hlmcfgdir/swarm.cfg
     sudo sed -i 's/donationaddress.*/donationaddress=\"'$donationaddress'\"/' $hlmcfgdir/swarm.cfg
     sudo sed -i 's/nodepassword.*/nodepassword=\"'$nodepassword'\"/' $hlmcfgdir/swarm.cfg
