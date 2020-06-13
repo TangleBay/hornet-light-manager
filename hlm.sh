@@ -202,7 +202,7 @@ while [ $counter -lt 1 ]; do
             echo " 1) Install Hornet"
             echo " 2) Remove Hornet"
             echo ""
-            echo " 3) Install HTTPS proxy"
+            echo " 3) Deploy HTTPS proxy"
             echo " 4) Renew SSL"
             echo ""
             echo " 6) Update HLM"
