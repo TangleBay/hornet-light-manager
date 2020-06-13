@@ -6,7 +6,7 @@
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-version=0.0.5
+version=0.0.6
 
 ############################################################################################################################################################
 
@@ -335,7 +335,7 @@ while [ $counter -lt 1 ]; do
                     ( cd $hlmdir ; sudo git pull ) > /dev/null 2>&1
                     ( cd $hlmdir ; sudo git reset --hard origin/master ) > /dev/null 2>&1
                     sudo chmod +x $hlmdir/hlm.sh $hlmdir/watchdog.sh $hlmdir/auto-swarm.sh $hlmdir/cfg-updater.sh
-                    bash $hlmdir/cfg-updater.sh
+                    bash $hlmdir/updater.sh
                     echo ""
                     echo -e $text_red " HLM update successfully!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
