@@ -334,7 +334,7 @@ while [ $counter -lt 1 ]; do
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
                     ( cd $hlmdir ; sudo git pull ) > /dev/null 2>&1
                     ( cd $hlmdir ; sudo git reset --hard origin/master ) > /dev/null 2>&1
-                    sudo chmod +x $hlmdir/hlm.sh $hlmdir/watchdog.sh $hlmdir/auto-swarm.sh $hlmdir/cfg-updater.sh
+                    sudo chmod +x $hlmdir/hlm.sh $hlmdir/watchdog.sh $hlmdir/auto-swarm.sh $hlmdir/updater.sh
                     bash $hlmdir/updater.sh
                     echo ""
                     echo -e $text_red " HLM update successfully!"
