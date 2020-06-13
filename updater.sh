@@ -7,7 +7,7 @@ source $hlmcfgdir/hornet.cfg
 source $hlmcfgdir/nginx.cfg
 source $hlmcfgdir/swarm.cfg
 
-if [ "$hornetcfgversion" != "0.0.1" ] || [ "$hornetcfgversion" = "" ]; then
+if [ "$hornetcfgversion" != "0.0.2" ] || [ "$hornetcfgversion" = "" ]; then
     sudo wget -q -O $hlmcfgdir/hornet.cfg $dlhornetcfg
     sudo sed -i 's/release.*/release='$release'/' $hlmcfgdir/hornet.cfg
     sudo sed -i 's/dashuser.*/dashuser=\"'$dashuser'\"/' $hlmcfgdir/hornet.cfg
