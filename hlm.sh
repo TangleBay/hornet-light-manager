@@ -967,6 +967,8 @@ while [ $counter -lt 1 ]; do
                     restart=false
                 fi
                 echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
+                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                echo -e $text_reset
             fi
 
             # Change nginx.cfg
@@ -974,6 +976,8 @@ while [ $counter -lt 1 ]; do
                 sudo nano $hlmcfgdir/nginx.cfg
                 source $hlmcfgdir/nginx.cfg
                 echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
+                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                echo -e $text_reset
             fi
 
             # Change swarm.cfg
@@ -982,12 +986,16 @@ while [ $counter -lt 1 ]; do
                     sudo nano $hlmcfgdir/swarm.cfg
                     source $hlmcfgdir/swarm.cfg
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
                 fi
                 if [ -f "$hlmcfgdir/icnp.cfg" ]; then
                     sudo mv $hlmcfgdir/icnp.cfg $hlmcfgdir/swarm.cfg
                     sudo nano $hlmcfgdir/swarm.cfg
                     source $hlmcfgdir/swarm.cfg
                     echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
                 fi
             fi
 
