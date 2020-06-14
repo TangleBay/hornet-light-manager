@@ -297,7 +297,7 @@ while [ $counter -lt 1 ]; do
                         restart=true
                     fi
                     powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config_comnet.json)"
-                    f [ "$pow" = "true" ] && [ "$powstatus" != "true" ]; then
+                    if [ "$pow" = "true" ] && [ "$powstatus" != "true" ]; then
                          sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' config_comnet.json|sponge config_comnet.json
                          restart=true
                     fi
