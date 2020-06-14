@@ -279,6 +279,21 @@ while [ $counter -lt 1 ]; do
                     fi
                     sudo apt update && sudo apt dist-upgrade -y && sudo apt upgrade -y
                     sudo apt install hornet -y
+
+                    # Check which network
+                    if [ "$network" = "mainnet" ]; then
+                        echo "" > /etc/default/hornet
+                        sudo rm -rf $hornetdir/snapshots/mainnet/* $hornetdir/snapshots/comnet/* $hornetdir/export.bin $hornetdir/export_comnet.bin
+                        sudo rm -rf $hornetdir/snapshots/mainnet/* $hornetdir/snapshots/comnet/* $hornetdir/export.bin $hornetdir/export_comnet.bin
+                        restart=true
+                    fi
+                    if [ "$network" = "comnet" ]; then
+                        echo "OPTIONS=\"--config config_comnet --overwriteCooAddress\"" > /etc/default/hornet
+                        sudo rm -rf $hornetdir/snapshots/mainnet/* $hornetdir/snapshots/comnet/* $hornetdir/export.bin $hornetdir/export_comnet.bin
+                        sudo rm -rf $hornetdir/snapshots/mainnet/* $hornetdir/snapshots/comnet/* $hornetdir/export.bin $hornetdir/export_comnet.bin
+                        restart=true
+                    fi              
+
                     if [ "$neighborport" != "15600" ]; then
                         sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' config.json|sponge config.json
                         sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' config_comnet.json|sponge config_comnet.json
@@ -333,6 +348,7 @@ while [ $counter -lt 1 ]; do
                         fi
                         if [ "$restart" = "true" ]; then
                             sudo systemctl restart hornet
+                            restart=false
                         fi
                         echo ""
                         echo -e $TEXT_RED_B
@@ -893,7 +909,7 @@ while [ $counter -lt 1 ]; do
                     if [ "$network" = "comnet" ]; then
                         echo "OPTIONS=\"--config config_comnet --overwriteCooAddress\"" > /etc/default/hornet
                     fi
-                    sudo rm -rf $hornetdir/snapshots/*
+                    sudo rm -rf $hornetdir/snapshots/mainnet/* $hornetdir/snapshots/comnet/* $hornetdir/export.bin $hornetdir/export_comnet.bin
                     restart=true
                     echo ""
                     echo -e $text_red " Hornet network change finished!"
