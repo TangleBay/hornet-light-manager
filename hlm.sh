@@ -161,6 +161,14 @@ while [ $counter -lt 1 ]; do
         echo -e "$text_yellow Hornet Status:$text_red N/A"
     fi
     echo ""
+    if [ "$swarm" = "active" ] || [ "$swarm" = "inactive" ]; then
+        if [ "$swarm" = "active" ]; then
+            echo -e "$text_yellow Auto-Swarm:$text_green $swarm"
+        else
+            echo -e "$text_yellow Auto-Swarm:$text_red $swarm"
+        fi
+    fi
+    echo ""
     if [ "$watchdog" = "active" ] || [ "$watchdog" = "inactive" ]; then
         if [ "$watchdog" != "active" ]; then
             echo -e "$text_yellow Watchdog:$text_red $watchdog"
