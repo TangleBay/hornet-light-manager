@@ -30,44 +30,44 @@ if [ "$autoupdate" = "true" ]; then
 
                 # Check neighbor port
                 if [ "$neighborport" != "15600" ]; then
-                    sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' config.json|sponge config.json
-                    sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' config_comnet.json|sponge config_comnet.json
+                    sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config.json|sponge $hornetdir/config.json
+                    sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
                 fi
 
                 # Check autopeering port
                 if [ "$autopeeringport" != "14626" ]; then
-                    sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' config.json|sponge config.json
-                    sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' config_comnet.json|sponge config_comnet.json                
+                    sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config.json|sponge $hornetdir/config.json
+                    sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json                
                 fi
 
                 # Check if pow is enabled
                 powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config.json)"
                 if [ "$pow" = "true" ] && [ "$powstatus" != "true" ]; then
-                    sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' config.json|sponge config.json
+                    sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' $hornetdir/config.json|sponge $hornetdir/config.json
                 fi
                 powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config_comnet.json)"
                 if [ "$pow" = "true" ] && [ "$powstatus" != "true" ]; then
-                    sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' config_comnet.json|sponge config_comnet.json
+                    sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
                 fi
 
                 # Check pruning settings
                 pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config.json)"
                 if [ "$pruningsetting" != "$pruning" ]; then
-                    sudo jq '.snapshots.pruning.enabled = '$pruning'' config.json|sponge config.json
+                    sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config.json|sponge $hornetdir/config.json
                 fi
                 pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config_comnet.json)"
                 if [ "$pruningsetting" != "$pruning" ]; then
-                    sudo jq '.snapshots.pruning.enabled = '$pruning'' config_comnet.json|sponge config_comnet.json
+                    sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
                 fi
 
                 # Check pruning delay settings
                 pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config.json)"
                 if [ "$pruningsetting" != "$pruningdelay" ]; then
-                    sudo jq '.snapshots.pruning.delay = '$pruningdelay'' config.json|sponge config.json
+                    sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config.json|sponge $hornetdir/config.json
                 fi
                 pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config_comnet.json)"
                 if [ "$pruningsetting" != "$pruningdelay" ]; then
-                    sudo jq '.snapshots.pruning.delay = '$pruningdelay'' config_comnet.json|sponge config_comnet.json
+                    sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
                 fi
 
                 sudo systemctl start hornet
@@ -93,44 +93,44 @@ if [ "$autoupdate" = "true" ]; then
 
                 # Check neighbor port
                 if [ "$neighborport" != "15600" ]; then
-                    sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' config.json|sponge config.json
-                    sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' config_comnet.json|sponge config_comnet.json
+                    sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config.json|sponge $hornetdir/config.json
+                    sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
                 fi
 
                 # Check autopeering port
                 if [ "$autopeeringport" != "14626" ]; then
-                    sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' config.json|sponge config.json
-                    sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' config_comnet.json|sponge config_comnet.json                
+                    sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config.json|sponge $hornetdir/config.json
+                    sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json                
                 fi
 
                 # Check if pow is enabled
                 powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config.json)"
                 if [ "$pow" = "true" ] && [ "$powstatus" != "true" ]; then
-                    sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' config_comnet.json|sponge config.json
+                    sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' $hornetdir/config_comnet.json|sponge $hornetdir/config.json
                 fi
                 powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config_comnet.json)"
                 if [ "$pow" = "true" ] && [ "$powstatus" != "true" ]; then
-                    sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' config_comnet.json|sponge config_comnet.json
+                    sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
                 fi
 
                 # Check pruning settings
                 pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config.json)"
                 if [ "$pruningsetting" != "$pruning" ]; then
-                    sudo jq '.snapshots.pruning.enabled = '$pruning'' config.json|sponge config.json
+                    sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config.json|sponge $hornetdir/config.json
                 fi
                 pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config_comnet.json)"
                 if [ "$pruningsetting" != "$pruning" ]; then
-                    sudo jq '.snapshots.pruning.enabled = '$pruning'' config_comnet.json|sponge config_comnet.json
+                    sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
                 fi
 
                 # Check pruning delay settings
                 pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config.json)"
                 if [ "$pruningsetting" != "$pruningdelay" ]; then
-                    sudo jq '.snapshots.pruning.delay = '$pruningdelay'' config.json|sponge config.json
+                    sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config.json|sponge $hornetdir/config.json
                 fi
                 pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config_comnet.json)"
                 if [ "$pruningsetting" != "$pruningdelay" ]; then
-                    sudo jq '.snapshots.pruning.delay = '$pruningdelay'' config_comnet.json|sponge config_comnet.json
+                    sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
                 fi
 
                 sudo systemctl start hornet
