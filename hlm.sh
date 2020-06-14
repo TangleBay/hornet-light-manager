@@ -127,15 +127,19 @@ while [ $counter -lt 1 ]; do
         watchdogtime="$(cat $hlmdir/log/watchdog.log | sed -n -e '2{p;q}')"
     fi
 
+    if [ -f "$hlmdir/log/swarm.log" ]; then
+        sudo crontab -l | grep -q $hlmdir/auto-swarm.sh && swarm=active || swarm=inactive
+    fi
+
     ############################################################################################################################################################
 
     echo ""
     echo -e $text_yellow "\033[1m\033[4mWelcome to the Hornet lightweight manager! [v$version]\033[0m"
     echo ""
     if [ "$latesthlm" != "$version" ] && [ "$latesthlm" != "" ]; then
-        echo -e $text_red "#######################################################"
+        echo -e $text_red "#####################################################"
         echo -e $text_red " New version v$latesthlm available, please update HLM!"
-        echo -e $text_red "#######################################################"
+        echo -e $text_red "#####################################################"
         echo ""
     fi
     if [ -n "$nodev" ]; then
@@ -162,7 +166,26 @@ while [ $counter -lt 1 ]; do
             echo -e "$text_yellow Watchdog:$text_red $watchdog"
         else
             echo -e "$text_yellow Watchdog:$text_green $watchdog"
-            echo -e "$text_yellow Restarts:$text_red $watchdogcount"
+            # Autoupdate
+            if [ "$autoupdate" = "true" ]; then
+                echo -e "$text_yellow Autoupdate:$text_green enabled"
+            else
+                echo -e "$text_yellow Autoupdate:$text_red disabled"
+            fi
+            # Sync Check
+            if [ "$checksync" = "true" ]; then
+                echo -e "$text_yellow SyncCheck:$text_green enabled"
+            else
+                echo -e "$text_yellow SyncCheck:$text_red disabled"
+            fi
+            # Log Pruning
+            if [ "$logpruning" = "true" ]; then
+                echo -e "$text_yellow Log pruning:$text_green enabled"
+            else
+                echo -e "$text_yellow Log pruning:$text_red disabled"
+            fi
+            #
+            echo -e "$text_yellow WD-Restarts:$text_red $watchdogcount"
             if [ -n "$watchdogtime" ]; then
                 echo -e "$text_yellow Last restart: $watchdogtime"
             fi
