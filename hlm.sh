@@ -168,7 +168,6 @@ while [ $counter -lt 1 ]; do
             echo -e "$text_yellow Auto-Swarm:$text_red $swarm"
         fi
     fi
-    echo ""
     if [ "$watchdog" = "active" ] || [ "$watchdog" = "inactive" ]; then
         if [ "$watchdog" != "active" ]; then
             echo -e "$text_yellow Watchdog:$text_red $watchdog"
