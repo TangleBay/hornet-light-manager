@@ -619,6 +619,16 @@ while [ $counter -lt 1 ]; do
                             sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
                         fi
 
+                        # Check if pow is disabled
+                        powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config.json)"
+                        if [ "$pow" = "false" ] && [ "$powstatus" != "false" ]; then
+                            sudo jq '.httpAPI.permitRemoteAccess |= .- ["attachToTangle"]' $hornetdir/config_comnet.json|sponge $hornetdir/config.json
+                        fi
+                        powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config_comnet.json)"
+                        if [ "$pow" = "false" ] && [ "$powstatus" != "false" ]; then
+                            sudo jq '.httpAPI.permitRemoteAccess |= .- ["attachToTangle"]' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                        fi
+
                         # Check pruning settings
                         pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config.json)"
                         if [ "$pruningsetting" != "$pruning" ]; then
@@ -927,6 +937,18 @@ while [ $counter -lt 1 ]; do
                 powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config_comnet.json)"
                 if [ "$pow" = "true" ] && [ "$powstatus" != "true" ]; then
                     sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                    restart=true
+                fi
+
+                # Check if pow is disabled
+                powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config.json)"
+                if [ "$pow" = "false" ] && [ "$powstatus" != "false" ]; then
+                    sudo jq '.httpAPI.permitRemoteAccess |= .- ["attachToTangle"]' $hornetdir/config.json|sponge $hornetdir/config.json
+                    restart=true
+                fi
+                powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config_comnet.json)"
+                if [ "$pow" = "false" ] && [ "$powstatus" != "false" ]; then
+                    sudo jq '.httpAPI.permitRemoteAccess |= .- ["attachToTangle"]' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
                     restart=true
                 fi
 
