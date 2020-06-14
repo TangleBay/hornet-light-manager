@@ -956,7 +956,14 @@ while [ $counter -lt 1 ]; do
 
                 # check if a restart is required
                 if [ "$restart" = "true" ]; then
-                    sudo systemctl restart hornet
+                    echo ""
+                    echo -e $TEXT_RED_B " Hornet configuration changes detected!" && echo -e $text_reset
+                    echo ""
+                    echo -e $text_yellow && read -p " Would you like to restart hornet now (y/N): " selector_restart
+                    echo -e $text_reset
+                    if [ "$selector_restart" = "y" ] || [ "$selector_restart" = "Y" ]; then
+                        sudo systemctl restart hornet
+                    fi
                     restart=false
                 fi
                 echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
