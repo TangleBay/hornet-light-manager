@@ -123,7 +123,7 @@ if [ "$autoupdate" = "true" ]; then
                     sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
                 fi
 
-                # Check if pow is enabled
+                # Check if pow is disabled
                 powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config.json)"
                 if [ "$pow" = "false" ] && [ "$powstatus" != "false" ]; then
                     sudo jq '.httpAPI.permitRemoteAccess |= .- ["attachToTangle"]' $hornetdir/config.json|sponge $hornetdir/config.json
