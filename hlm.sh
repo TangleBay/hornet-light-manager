@@ -168,15 +168,15 @@ while [ $counter -lt 1 ]; do
             echo -e "$text_yellow Watchdog:$text_green $watchdog"
             # Autoupdate
             if [ "$autoupdate" = "true" ]; then
-                echo -e "$text_yellow Auto-update:$text_green enabled"
+                echo -e "$text_yellow Autoupdate:$text_green enabled"
             else
-                echo -e "$text_yellow Auto-update:$text_red disabled"
+                echo -e "$text_yellow Autoupdate:$text_red disabled"
             fi
             # Sync Check
             if [ "$checksync" = "true" ]; then
-                echo -e "$text_yellow Sync check:$text_green enabled"
+                echo -e "$text_yellow SyncCheck:$text_green enabled"
             else
-                echo -e "$text_yellow Sync check:$text_red disabled"
+                echo -e "$text_yellow SyncCheck:$text_red disabled"
             fi
             # Log Pruning
             if [ "$logpruning" = "true" ]; then
@@ -185,7 +185,7 @@ while [ $counter -lt 1 ]; do
                 echo -e "$text_yellow Log pruning:$text_red disabled"
             fi
             #
-            echo -e "$text_yellow WD restarts:$text_red $watchdogcount"
+            echo -e "$text_yellow WD-Restarts:$text_red $watchdogcount"
             if [ -n "$watchdogtime" ]; then
                 echo -e "$text_yellow Last restart: $watchdogtime"
             fi
@@ -196,6 +196,7 @@ while [ $counter -lt 1 ]; do
     if [ "$swarm" = "active" ] || [ "$swarm" = "inactive" ]; then
         if [ "$swarm" = "active" ]; then
             echo -e "$text_yellow Auto-Swarm:$text_green $swarm"
+        fi
     fi
     echo ""
     echo -e "\e[90m==========================================================="
