@@ -11,6 +11,8 @@ version=0.0.8
 ############################################################################################################################################################
 
 source /etc/hlm-cfgs/hornet.cfg
+source /etc/hlm-cfgs/nginx.cfg
+source /etc/hlm-cfgs/swarm.cfg
 
 #pwdcmd=`dirname "$BASH_SOURCE"`
 
@@ -49,6 +51,8 @@ function pause(){
    read -p "$*"
 }
 
+
+# Check if script is running with root permissions
 if [ $(id -u) -ne 0 ]; then
     echo -e $TEXT_RED_B "Please run HLM with sudo or as root"
     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
@@ -56,6 +60,7 @@ if [ $(id -u) -ne 0 ]; then
     exit 0
 fi
 
+# Check if a package is missing
 if ! [ -x "$(command -v curl)" ]; then
     echo -e $text_yellow && echo "Installing necessary packages curl..." && echo -e $text_reset
     sudo apt install curl -y > /dev/null
@@ -76,15 +81,31 @@ if ! [ -x "$(command -v whois)" ]; then
     sudo apt install whois -y > /dev/null
     clear
 fi
+if ! [ -x "$(command -v sponge)" ]; then
+    echo -e $text_yellow && echo "Installing necessary package moreutils..." && echo -e $text_reset
+    sudo apt install moreutils -y > /dev/null
+    clear
+fi
 if ! [ -x "$(command -v snap)" ]; then
     echo -e $text_yellow && echo "Installing necessary package snap..." && echo -e $text_reset
     sudo apt install snapd -y > /dev/null
     clear
 fi
 
+# Add snap to enviroment file
 if ! grep -q /snap/bin "$envfile"; then
     envpath="$(cat /etc/environment | sed 's/.$//')"
     echo "$envpath:/snap/bin\"" > /etc/environment
+fi
+
+# Check if cfgs are up2date
+if [ -f "$hlmdir/updater.sh" ]; then
+    if [ -x "$hlmdir/updater.sh" ]; then
+        bash $hlmdir/updater.sh
+    else
+        sudo chmod +x $hlmdir/updater.sh
+        bash $hlmdir/updater.sh
+    fi
 fi
 
 #if [ "$version" != "$latesthlm" ]; then
@@ -258,16 +279,59 @@ while [ $counter -lt 1 ]; do
                     fi
                     sudo apt update && sudo apt dist-upgrade -y && sudo apt upgrade -y
                     sudo apt install hornet -y
-                    if [ "$neighborport" != "15600" ] || [ "$autopeeringport" != "14626" ]; then
-                        sudo find $hornetdir/config.json -type f -exec sed -i 's/15600/'$neighborport'/g' {} \;
-                        sudo find $hornetdir/config.json -type f -exec sed -i 's/14626/'$autopeeringport'/g' {} \;
-                        sudo find $hornetdir/config_comnet.json -type f -exec sed -i 's/15600/'$neighborport'/g' {} \;
-                        sudo find $hornetdir/config_comnet.json -type f -exec sed -i 's/14626/'$autopeeringport'/g' {} \;
-                        sudo systemctl restart hornet
+                    if [ "$neighborport" != "15600" ]; then
+                        sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' config.json|sponge config.json
+                        sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' config_comnet.json|sponge config_comnet.json
+                        restart=true
                     fi
+                    if [ "$autopeeringport" != "14626" ]; then
+                        sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' config.json|sponge config.json
+                        sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' config_comnet.json|sponge config_comnet.json
+                        restart=true
+                    fi
+                    
+                    # Check if pow is enabled
+                    powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config.json)"
+                    if [ "$pow" = "true" ] && [ "$powstatus" != "true" ]; then
+                        sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' config_comnet.json|sponge config.json
+                        restart=true
+                    fi
+                    powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config_comnet.json)"
+                    f [ "$pow" = "true" ] && [ "$powstatus" != "true" ]; then
+                         sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' config_comnet.json|sponge config_comnet.json
+                         restart=true
+                    fi
+
+                    # Check pruning settings
+                    pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config.json)"
+                    if [ "$pruningsetting" != "$pruning" ]; then
+                        sudo jq '.snapshots.pruning.enabled = '$pruning'' config.json|sponge config.json
+                        restart=true
+                    fi
+                    pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config_comnet.json)"
+                    if [ "$pruningsetting" != "$pruning" ]; then
+                        sudo jq '.snapshots.pruning.enabled = '$pruning'' config_comnet.json|sponge config_comnet.json
+                        restart=true
+                    fi
+
+                    # Check pruning delay settings
+                    pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config.json)"
+                    if [ "$pruningsetting" != "$pruningdelay" ]; then
+                        sudo jq '.snapshots.pruning.delay = '$pruningdelay'' config.json|sponge config.json
+                        restart=true
+                    fi
+                    pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config_comnet.json)"
+                    if [ "$pruningsetting" != "$pruningdelay" ]; then
+                        sudo jq '.snapshots.pruning.delay = '$pruningdelay'' config_comnet.json|sponge config_comnet.json
+                        restart=true
+                    fi
+
                     if [ -f /usr/bin/hornet ]; then
                         check="$(systemctl show -p ActiveState --value hornet)"
                         if [ "$check" != "active" ]; then
+                            sudo systemctl restart hornet
+                        fi
+                        if [ "$restart" = "true" ]; then
                             sudo systemctl restart hornet
                         fi
                         echo ""
@@ -506,6 +570,8 @@ while [ $counter -lt 1 ]; do
                         sudo systemctl stop hornet
                         echo -e $text_yellow " Updating Hornet..."
                         sudo apt update && sudo apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install hornet
+
+                        # Check if a new config exist after updating
                         if [ -f "$hornetdir/config.json.dpkg-dist" ]; then
                             sudo cp -r $hornetdir/config.json.dpkg-dist $hornetdir/config.json
                             sudo rm -rf $hornetdir/config.json.dpkg-dist
@@ -514,12 +580,49 @@ while [ $counter -lt 1 ]; do
                             sudo cp -r $hornetdir/config_comnet.json.dpkg-dist $hornetdir/config_comnet.json
                             sudo rm -rf $hornetdir/config_comnet.json.dpkg-dist
                         fi
-                        if [ "$neighborport" != "15600" ] || [ "$autopeeringport" != "14626" ]; then
-                            sudo find $hornetdir/config.json -type f -exec sed -i 's/15600/'$neighborport'/g' {} \;
-                            sudo find $hornetdir/config.json -type f -exec sed -i 's/14626/'$autopeeringport'/g' {} \;
-                            sudo find $hornetdir/config_comnet.json -type f -exec sed -i 's/15600/'$neighborport'/g' {} \;
-                            sudo find $hornetdir/config_comnet.json -type f -exec sed -i 's/14626/'$autopeeringport'/g' {} \;
+
+                        # Check if neighbor port is not default 
+                        if [ "$neighborport" != "15600" ]; then
+                            sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' config.json|sponge config.json
+                            sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' config_comnet.json|sponge config_comnet.json
                         fi
+
+                        # Check if autopeering port is not default 
+                        if [ "$autopeeringport" != "14626" ]; then
+                            sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' config.json|sponge config.json
+                            sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' config_comnet.json|sponge config_comnet.json                
+                        fi
+
+                        # Check if pow is enabled
+                        powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config.json)"
+                        if [ "$pow" = "true" ] && [ "$powstatus" != "true" ]; then
+                            sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' config_comnet.json|sponge config.json
+                        fi
+                        powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config_comnet.json)"
+                        if [ "$pow" = "true" ] && [ "$powstatus" != "true" ]; then
+                            sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' config_comnet.json|sponge config_comnet.json
+                        fi
+
+                        # Check pruning settings
+                        pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config.json)"
+                        if [ "$pruningsetting" != "$pruning" ]; then
+                            sudo jq '.snapshots.pruning.enabled = '$pruning'' config.json|sponge config.json
+                        fi
+                        pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config_comnet.json)"
+                        if [ "$pruningsetting" != "$pruning" ]; then
+                            sudo jq '.snapshots.pruning.enabled = '$pruning'' config_comnet.json|sponge config_comnet.json
+                        fi
+
+                        # Check pruning delay settings
+                        pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config.json)"
+                        if [ "$pruningsetting" != "$pruningdelay" ]; then
+                            sudo jq '.snapshots.pruning.delay = '$pruningdelay'' config.json|sponge config.json
+                        fi
+                        pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config_comnet.json)"
+                        if [ "$pruningsetting" != "$pruningdelay" ]; then
+                            sudo jq '.snapshots.pruning.delay = '$pruningdelay'' config_comnet.json|sponge config_comnet.json
+                        fi
+
                         echo -e $text_yellow " Starting Hornet node..."
                         sudo systemctl start hornet
                         echo -e $text_yellow " Updating Hornet version finished!"
@@ -693,6 +796,7 @@ while [ $counter -lt 1 ]; do
             echo -e $text_yellow && read -p " Please type in your option: " selector
             echo -e $text_reset
 
+            # Edit hornet service options
             if [ "$selector" = "1" ] ; then
                 sudo nano /etc/default/hornet
                 echo -e $TEXT_RED_B && read -p " Would you like to restart hornet now (y/N): " selector4
@@ -703,6 +807,8 @@ while [ $counter -lt 1 ]; do
                     echo -e $text_reset
                 fi
             fi
+
+            # Edit config.json
             if [ "$selector" = "2" ] ; then
                 sudo nano $hornetdir/config.json
                 echo -e $TEXT_RED_B && read -p " Would you like to restart hornet now (y/N): " selector4
@@ -713,6 +819,8 @@ while [ $counter -lt 1 ]; do
                     echo -e $text_reset
                 fi
             fi
+
+            # Edit config_comnet.json
             if [ "$selector" = "3" ] ; then
                 sudo nano $hornetdir/config_comnet.json
                 echo -e $TEXT_RED_B && read -p " Would you like to restart hornet now (y/N): " selector4
@@ -723,6 +831,8 @@ while [ $counter -lt 1 ]; do
                     echo -e $text_reset
                 fi
             fi
+
+            # Edit peering.json
             if [ "$selector" = "4" ] ; then
                 if [ ! -f "/var/lib/hornet/peering.json" ]; then
                     echo -e $text_yellow && echo " No peering.json found...Downloading config file!" && echo -e $text_reset
@@ -733,10 +843,15 @@ while [ $counter -lt 1 ]; do
                 echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
                 echo -e $text_reset
             fi
+
+            # Change hornet.cfg
             if [ "$selector" = "5" ] ; then
                 currentrelease=$release
+                currentnetwork=$network
                 sudo nano $hlmcfgdir/hornet.cfg
                 source $hlmcfgdir/hornet.cfg
+
+                # Write selected release to config
                 if [ "$release" = "stable" ]; then
                     sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" > /etc/apt/sources.list.d/hornet.list'
                 fi
@@ -744,6 +859,8 @@ while [ $counter -lt 1 ]; do
                     sudo sh -c 'echo "deb http://ppa.hornet.zone stable main" > /etc/apt/sources.list.d/hornet.list'
                     sudo sh -c 'echo "deb http://ppa.hornet.zone testing main" >> /etc/apt/sources.list.d/hornet.list'
                 fi
+
+                # Check if release is changed
                 if [ "$release" != "$currentrelease" ]; then
                     echo ""
                     echo -e $TEXT_RED_B " Release change detected!!!" && echo -e $text_reset
@@ -765,13 +882,78 @@ while [ $counter -lt 1 ]; do
                     fi
                 echo ""
                 fi
+
+                # Check if network changed
+                if [ "$network" != "$currentnetwork" ]; then
+                    echo ""
+                    echo -e $TEXT_RED_B " Network change detected!!!" && echo -e $text_reset
+                    if [ "$network" = "mainnet" ]; then
+                        echo "" > /etc/default/hornet
+                    fi
+                    if [ "$network" = "comnet" ]; then
+                        echo "OPTIONS=\"--config config_comnet --overwriteCooAddress\"" > /etc/default/hornet
+                    fi
+                    sudo rm -rf $hornetdir/snapshots/*
+                    restart=true
+                    echo ""
+                    echo -e $text_red " Hornet network change finished!"
+                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
+                    echo -e $text_reset
+                    echo ""
+                fi
+
+                # Check if pow is enabled
+                powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config.json)"
+                if [ "$pow" = "true" ] && [ "$powstatus" != "true" ]; then
+                    sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' config.json|sponge config.json
+                    restart=true
+                fi
+                powstatus="$(jq '.httpAPI.permitRemoteAccess | contains(["attachToTangle"])' $hornetdir/config_comnet.json)"
+                if [ "$pow" = "true" ] && [ "$powstatus" != "true" ]; then
+                    sudo jq '.httpAPI.permitRemoteAccess |= .+ ["attachToTangle"]' config_comnet.json|sponge config_comnet.json
+                    restart=true
+                fi
+
+                # Check pruning settings
+                pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config.json)"
+                if [ "$pruningsetting" != "$pruning" ]; then
+                    sudo jq '.snapshots.pruning.enabled = '$pruning'' config.json|sponge config.json
+                    restart=true
+                fi
+                pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config_comnet.json)"
+                if [ "$pruningsetting" != "$pruning" ]; then
+                    sudo jq '.snapshots.pruning.enabled = '$pruning'' config_comnet.json|sponge config_comnet.json
+                    restart=true
+                fi
+
+                # Check pruning delay settings
+                pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config.json)"
+                if [ "$pruningsetting" != "$pruningdelay" ]; then
+                    sudo jq '.snapshots.pruning.delay = '$pruningdelay'' config.json|sponge config.json
+                    restart=true
+                fi
+                pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config_comnet.json)"
+                if [ "$pruningsetting" != "$pruningdelay" ]; then
+                    sudo jq '.snapshots.pruning.delay = '$pruningdelay'' config_comnet.json|sponge config_comnet.json
+                    restart=true
+                fi
+
+                # check if a restart is required
+                if [ "$restart" = "true" ]; then
+                    sudo systemctl restart hornet
+                    restart=false
+                fi
                 echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
             fi
+
+            # Change nginx.cfg
             if [ "$selector" = "6" ] ; then
                 sudo nano $hlmcfgdir/nginx.cfg
                 source $hlmcfgdir/nginx.cfg
                 echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
             fi
+
+            # Change swarm.cfg
             if [ "$selector" = "7" ] ; then
                 if [ -f "$hlmcfgdir/swarm.cfg" ]; then
                     sudo nano $hlmcfgdir/swarm.cfg
