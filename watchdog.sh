@@ -4,9 +4,11 @@ hlmcfgdir=/etc/hlm-cfgs
 hlmdir=/var/lib/hornet-light-manager
 source $hlmcfgdir/hornet.cfg
 
+# Get Service Status
+status="$(systemctl show -p ActiveState --value hornet)"
+
 # Update check
 if [ "$autoupdate" = "true" ]; then
-    status="$(systemctl show -p ActiveState --value hornet)"
     if [ "$status" = "active" ]; then
         if [ "$release" = "stable" ]; then
             latesthornet="$(curl -s https://api.github.com/repos/gohornet/hornet/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')"
