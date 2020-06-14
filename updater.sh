@@ -14,6 +14,8 @@ if [ "$hornetcfgversion" != "0.0.3" ] || [ "$hornetcfgversion" = "" ]; then
     sudo sed -i 's/dashpw.*/dashpw=\"'$dashpw'\"/' $hlmcfgdir/hornet.cfg
     sudo sed -i 's/neighborport.*/neighborport='$neighborport'/' $hlmcfgdir/hornet.cfg
     sudo sed -i 's/autopeeringport.*/autopeeringport='$autopeeringport'/' $hlmcfgdir/hornet.cfg
+    sudo sed -i 's/autoupdate.*/autoupdate='$autoupdate'/' $hlmcfgdir/hornet.cfg
+    sudo sed -i 's/checksync.*/checksync='$checksync'/' $hlmcfgdir/hornet.cfg
     sudo sed -i 's/maxlmi.*/maxlmi='$maxlmi'/' $hlmcfgdir/hornet.cfg
     sudo sed -i 's/logpruning.*/logpruning='$logpruning'/' $hlmcfgdir/hornet.cfg
     sudo sed -i 's/logsize.*/logsize='$logsize'/' $hlmcfgdir/hornet.cfg
