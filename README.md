@@ -25,8 +25,7 @@ echo "alias hlm='sudo /var/lib/hornet-light-manager/hlm.sh'" >> ~/.bashrc && . ~
 1. Set your domain over HLM in the nginx.cfg (Edit configuration -> nginx.cfg)
 2. Choose the option "Installer Manager" and "3"
 
-**If you want to reach your node from an external IP (outside of your local network) you need to open the TCP port which is selected in the installer script (apiport).**
-**Also if you want to reach you dashboard from an external IP (outside of your local network) you need to open the TCP port which is selected in the installer script (dashport).**
+**Your Dashboard address will be `https://yourdomain.com` and your API (Trinity) will be `https://yourdomain.com/api`**
 
 
 # Project SWARM #
@@ -57,4 +56,4 @@ echo "alias hlm='sudo /var/lib/hornet-light-manager/hlm.sh'" >> ~/.bashrc && . ~
 
 # Support #
 
-IOTA Address: `CP9LDJQPBNRBRWWNPI9XSUSLCTWZEBG9NMANXDWDJHMFSHSBVRIWGKVOCFWVETVBWBAKOZURNZE9NSCGDWEZXAXSFW`
+IOTA Address: `KKEMSVOKRVEOARTKSYFM9ZNFEDDQUFGTFATYGRF9RXKBJGTUMGMDVPSLSZF9TRQXSASYAFTFEUNCQCHZYTDOQAUGDW`
