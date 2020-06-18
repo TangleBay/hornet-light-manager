@@ -46,7 +46,7 @@ if [ "$swarmcfgversion" != "0.0.1" ] || [ "$swarmcfgversion" = "" ]; then
     sudo sed -i 's/nodepassword=.*/nodepassword=\"'$nodepassword'\"/' $hlmcfgdir/swarm.cfg
 fi
 
-if [ "$watchdogcfgversion" != "0.0.1" ] || [ "$swarmcfgversion" = "" ]; then
+if [ "$watchdogcfgversion" != "0.0.1" ] || [ "$watchdogcfgversion" = "" ]; then
     sudo wget -q -O $hlmcfgdir/watchdog.cfg $dlwatchdogcfg
     sudo sed -i 's/autoupdate=.*/autoupdate='$autoupdate'/' $hlmcfgdir/watchdog.cfg
     sudo sed -i 's/checksync=.*/checksync='$checksync'/' $hlmcfgdir/watchdog.cfg
