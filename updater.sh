@@ -5,10 +5,19 @@ dlhornetcfg="https://raw.githubusercontent.com/TangleBay/hlm-cfgs/master/hornet.
 dlnginxcfg="https://raw.githubusercontent.com/TangleBay/hlm-cfgs/master/nginx.cfg"
 dlswarmcfg="https://raw.githubusercontent.com/TangleBay/hlm-cfgs/master/swarm.cfg"
 dlwatchdogcfg="https://raw.githubusercontent.com/TangleBay/hlm-cfgs/master/watchdog.cfg"
-source $hlmcfgdir/hornet.cfg
-source $hlmcfgdir/nginx.cfg
-source $hlmcfgdir/swarm.cfg
-source $hlmcfgdir/watchdog.cfg
+
+if [ -f "$hlmcfgdir/hornet.cfg" ]; then
+    source $hlmcfgdir/hornet.cfg
+fi
+if [ -f "$hlmcfgdir/nginx.cfg" ]; then
+    source $hlmcfgdir/nginx.cfg
+fi
+if [ -f "$hlmcfgdir/swarm.cfg" ]; then
+    source $hlmcfgdir/swarm.cfg
+fi
+if [ -f "$hlmcfgdir/watchdog.cfg" ]; then
+    source $hlmcfgdir/watchdog.cfg
+fi
 
 if [ "$hornetcfgversion" != "0.0.4" ] || [ "$hornetcfgversion" = "" ]; then
     sudo wget -q -O $hlmcfgdir/hornet.cfg $dlhornetcfg
