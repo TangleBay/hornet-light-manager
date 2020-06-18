@@ -967,7 +967,7 @@ while [ $counter -lt 1 ]; do
             echo -e $text_yellow " SWARM: https://tanglebay.org/swarm"
             #echo -e $text_yellow " Donate: https://pool.einfachiota.de/donate"
             echo -e $text_yellow ""
-            echo " 1) Add your node to SWARM"
+            echo " 1) Edit SWARM.cfg"
             echo ""
             echo " 2) Add your node to SWARM"
             echo " 3) Remove your node from SWARM"
