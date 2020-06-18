@@ -130,6 +130,7 @@ while [ $counter -lt 1 ]; do
     clear
     source $hlmcfgdir/hornet.cfg
     source $hlmcfgdir/nginx.cfg
+    source $hlmcfgdir/watchdog.cfg
     source $envfile
 
     if [ ! -f "$hlmcfgdir/swarm.cfg" ]; then
