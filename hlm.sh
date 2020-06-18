@@ -207,10 +207,10 @@ while [ $counter -lt 1 ]; do
                 echo -e "$text_yellow Log pruning:$text_red disabled"
             fi
             #
-            echo -e "$text_yellow WD restarts:$text_red $watchdogcount"
-            if [ -n "$watchdogtime" ]; then
-                echo -e "$text_yellow Last restart: $watchdogtime"
-            fi
+#            echo -e "$text_yellow WD restarts:$text_red $watchdogcount"
+#            if [ -n "$watchdogtime" ]; then
+#                echo -e "$text_yellow Last restart: $watchdogtime"
+#            fi
         fi
     else
         echo -e "$text_yellow Watchdog:$text_red inactive"
