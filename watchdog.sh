@@ -3,6 +3,7 @@ hornetdir=/var/lib/hornet
 hlmcfgdir=/etc/hlm-cfgs
 hlmdir=/var/lib/hornet-light-manager
 source $hlmcfgdir/hornet.cfg
+source $hlmcfgdir/watchdog.cfg
 
 # Get Service Status
 status="$(systemctl show -p ActiveState --value hornet)"
