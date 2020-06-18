@@ -190,21 +190,21 @@ while [ $counter -lt 1 ]; do
             echo -e "$text_yellow Watchdog:$text_green $watchdog"
             # Autoupdate
             if [ "$autoupdate" = "true" ]; then
-                echo -e "$text_yellow Auto-update:$text_green enabled"
+                echo -e "$text_yellow Auto-updater:$text_green enabled"
             else
-                echo -e "$text_yellow Auto-update:$text_red disabled"
+                echo -e "$text_yellow Auto-updater:$text_red disabled"
             fi
             # Sync Check
             if [ "$checksync" = "true" ]; then
-                echo -e "$text_yellow Sync check:$text_green enabled"
+                echo -e "$text_yellow Sync-checker:$text_green enabled"
             else
-                echo -e "$text_yellow Sync check:$text_red disabled"
+                echo -e "$text_yellow Sync-checker:$text_red disabled"
             fi
             # Log Pruning
             if [ "$logpruning" = "true" ]; then
-                echo -e "$text_yellow Log pruning:$text_green enabled"
+                echo -e "$text_yellow Log-pruner:$text_green enabled"
             else
-                echo -e "$text_yellow Log pruning:$text_red disabled"
+                echo -e "$text_yellow Log-pruner:$text_red disabled"
             fi
             #
 #            echo -e "$text_yellow WD restarts:$text_red $watchdogcount"
