@@ -33,7 +33,7 @@ fi
 if [ "$nginxcfgversion" != "0.0.2" ] || [ "$nginxcfgversion" = "" ]; then
     sudo wget -q -O $hlmcfgdir/nginx.cfg $dlnginxcfg
     sudo sed -i 's/domain=.*/domain=\"'$domain'\"/' $hlmcfgdir/nginx.cfg
-    sudo sed -i 's/nodeport=.*/nodeport='$nodeapiport'/' $hlmcfgdir/nginx.cfg
+    sudo sed -i 's/nodeport=.*/nodeport='$nodeport'/' $hlmcfgdir/nginx.cfg
     sudo sed -i 's/dashuser=.*/dashuser=\"'$dashuser'\"/' $hlmcfgdir/nginx.cfg
     sudo sed -i 's/dashpw=.*/dashpw=\"'$dashpw'\"/' $hlmcfgdir/nginx.cfg
 fi
