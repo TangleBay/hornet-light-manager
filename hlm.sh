@@ -6,7 +6,7 @@
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-version=0.0.10
+version=0.0.11
 
 ############################################################################################################################################################
 
@@ -441,49 +441,65 @@ while [ $counter -lt 1 ]; do
                 # Check pruning settings
                 pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config.json)"
                 if [ "$pruningsetting" != "$pruning" ]; then
-                    sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config.json|sponge $hornetdir/config.json
-                    restart=true
+                    if [ "$pruning" = "true" ] || [ "$pruning" = "false" ]; then
+                        sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config.json|sponge $hornetdir/config.json
+                        restart=true
+                    fi
                 fi
                 pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config_comnet.json)"
                 if [ "$pruningsetting" != "$pruning" ]; then
-                    sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
-                    restart=true
+                    if [ "$pruning" = "true" ] || [ "$pruning" = "false" ]; then
+                        sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                        restart=true
+                    fi
                 fi
 
                 # Check pruning delay settings
                 pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config.json)"
                 if [ "$pruningsetting" != "$pruningdelay" ]; then
-                    sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config.json|sponge $hornetdir/config.json
-                    restart=true
+                    if [ -n "$pruningdelay" ] && [ "$pruningdelay" -ge 50 ] 2>/dev/null; then
+                        sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config.json|sponge $hornetdir/config.json
+                        restart=true
+                    fi
                 fi
                 pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config_comnet.json)"
                 if [ "$pruningsetting" != "$pruningdelay" ]; then
-                    sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
-                    restart=true
+                    if [ -n "$pruningdelay" ] && [ "$pruningdelay" -ge 50 ] 2>/dev/null; then
+                        sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                        restart=true
+                    fi
                 fi
 
                 # Check neighbor port
                 portsetting="$(jq '.network.gossip.bindAddress' $hornetdir/config.json)"
                 if [ "\"0.0.0.0:$neighborport\"" != "$portsetting" ]; then
-                    sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config.json|sponge $hornetdir/config.json
-                    restart=true
+                    if [ -n "$neighborport" ] && [ "$neighborport" -ge 0 ] 2>/dev/null; then
+                        sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config.json|sponge $hornetdir/config.json
+                        restart=true
+                    fi
                 fi
                 portsetting="$(jq '.network.gossip.bindAddress' $hornetdir/config_comnet.json)"
                 if [ "\"0.0.0.0:$neighborport\"" != "$portsetting" ]; then
-                    sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
-                    restart=true
+                    if [ -n "$neighborport" ] && [ "$neighborport" -ge 0 ] 2>/dev/null; then
+                        sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                        restart=true
+                    fi
                 fi
 
                 # Check autopeering port
                 portsetting="$(jq '.network.autopeering.bindAddress' $hornetdir/config.json)"
                 if [ "\"0.0.0.0:$autopeeringport\"" != "$portsetting" ]; then
-                    sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config.json|sponge $hornetdir/config.json
-                    restart=true
+                    if [ -n "$autopeeringport" ] && [ "$autopeeringport" -ge 0 ] 2>/dev/null; then
+                        sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config.json|sponge $hornetdir/config.json
+                        restart=true
+                    fi
                 fi
                 portsetting="$(jq '.network.autopeering.bindAddress' $hornetdir/config_comnet.json)"
                 if [ "\"0.0.0.0:$autopeeringport\"" != "$portsetting" ]; then
-                    sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
-                    restart=true
+                    if [ -n "$autopeeringport" ] && [ "$autopeeringport" -ge 0 ] 2>/dev/null; then
+                        sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                        restart=true
+                    fi
                 fi
 
                 # check if a restart is required
@@ -657,45 +673,61 @@ while [ $counter -lt 1 ]; do
                         # Check pruning settings
                         pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config.json)"
                         if [ "$pruningsetting" != "$pruning" ]; then
-                            sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config.json|sponge $hornetdir/config.json
+                            if [ "$pruning" = "true" ] || [ "$pruning" = "false" ]; then
+                                sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config.json|sponge $hornetdir/config.json
+                            fi
                         fi
                         pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config_comnet.json)"
                         if [ "$pruningsetting" != "$pruning" ]; then
-                            sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                            if [ "$pruning" = "true" ] || [ "$pruning" = "false" ]; then
+                                sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                            fi
                         fi
 
                         # Check pruning delay settings
                         pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config.json)"
                         if [ "$pruningsetting" != "$pruningdelay" ]; then
-                            sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config.json|sponge $hornetdir/config.json
+                            if [ -n "$pruningdelay" ] && [ "$pruningdelay" -ge 50 ] 2>/dev/null; then
+                                sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config.json|sponge $hornetdir/config.json
+                            fi
                         fi
                         pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config_comnet.json)"
                         if [ "$pruningsetting" != "$pruningdelay" ]; then
-                            sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                            if [ -n "$pruningdelay" ] && [ "$pruningdelay" -ge 50 ] 2>/dev/null; then
+                                sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                            fi
                         fi
 
                         # Check neighbor port
                         portsetting="$(jq '.network.gossip.bindAddress' $hornetdir/config.json)"
-                        if [ "\"0.0.0.0:$neighborport\"" != "$portsetting" ]; then
-                            sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config.json|sponge $hornetdir/config.json
-                            restart=true
+                        if [ "\"0.0.0.0:$neighborport\"" != "$neighborport" ]; then
+                            if [ -n "$neighborport" ] && [ "$neighborport" -ge 0 ] 2>/dev/null; then
+                                sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config.json|sponge $hornetdir/config.json
+                                restart=true
+                            fi
                         fi
                         portsetting="$(jq '.network.gossip.bindAddress' $hornetdir/config_comnet.json)"
                         if [ "\"0.0.0.0:$neighborport\"" != "$portsetting" ]; then
-                            sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
-                            restart=true
+                            if [ -n "$neighborport" ] && [ "$neighborport" -ge 0 ] 2>/dev/null; then
+                                sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                                restart=true
+                            fi
                         fi
 
                         # Check autopeering port
                         portsetting="$(jq '.network.autopeering.bindAddress' $hornetdir/config.json)"
                         if [ "\"0.0.0.0:$autopeeringport\"" != "$portsetting" ]; then
-                            sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config.json|sponge $hornetdir/config.json
-                            restart=true
+                            if [ -n "$autopeeringport" ] && [ "$autopeeringport" -ge 0 ] 2>/dev/null; then
+                                sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config.json|sponge $hornetdir/config.json
+                                restart=true
+                            fi
                         fi
                         portsetting="$(jq '.network.autopeering.bindAddress' $hornetdir/config_comnet.json)"
                         if [ "\"0.0.0.0:$autopeeringport\"" != "$portsetting" ]; then
-                            sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
-                            restart=true
+                            if [ -n "$autopeeringport" ] && [ "$autopeeringport" -ge 0 ] 2>/dev/null; then
+                                sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                                restart=true
+                            fi
                         fi
 
                         echo -e $text_yellow " Starting Hornet node..."
@@ -753,49 +785,65 @@ while [ $counter -lt 1 ]; do
                     # Check pruning settings
                     pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config.json)"
                     if [ "$pruningsetting" != "$pruning" ]; then
-                        sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config.json|sponge $hornetdir/config.json
-                        restart=true
+                        if [ "$pruning" = "true" ] || [ "$pruning" = "false" ]; then
+                            sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config.json|sponge $hornetdir/config.json
+                            restart=true
+                        fi
                     fi
                     pruningsetting="$(jq '.snapshots.pruning.enabled' $hornetdir/config_comnet.json)"
                     if [ "$pruningsetting" != "$pruning" ]; then
-                        sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
-                        restart=true
+                        if [ "$pruning" = "true" ] || [ "$pruning" = "false" ]; then
+                            sudo jq '.snapshots.pruning.enabled = '$pruning'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                            restart=true
+                        fi
                     fi
 
                     # Check pruning delay settings
                     pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config.json)"
                     if [ "$pruningsetting" != "$pruningdelay" ]; then
-                        sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config.json|sponge $hornetdir/config.json
-                        restart=true
+                        if [ -n "$pruningdelay" ] && [ "$pruningdelay" -ge 50 ] 2>/dev/null; then
+                            sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config.json|sponge $hornetdir/config.json
+                            restart=true
+                        fi
                     fi
                     pruningsetting="$(jq '.snapshots.pruning.delay' $hornetdir/config_comnet.json)"
                     if [ "$pruningsetting" != "$pruningdelay" ]; then
-                        sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
-                        restart=true
+                        if [ -n "$pruningdelay" ] && [ "$pruningdelay" -ge 50 ] 2>/dev/null; then
+                            sudo jq '.snapshots.pruning.delay = '$pruningdelay'' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                            restart=true
+                        fi
                     fi
 
                     # Check neighbor port
                     portsetting="$(jq '.network.gossip.bindAddress' $hornetdir/config.json)"
                     if [ "\"0.0.0.0:$neighborport\"" != "$portsetting" ]; then
-                        sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config.json|sponge $hornetdir/config.json
-                        restart=true
+                        if [ -n "$neighborport" ] && [ "$neighborport" -ge 0 ] 2>/dev/null; then
+                            sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config.json|sponge $hornetdir/config.json
+                            restart=true
+                        fi
                     fi
                     portsetting="$(jq '.network.gossip.bindAddress' $hornetdir/config_comnet.json)"
                     if [ "\"0.0.0.0:$neighborport\"" != "$portsetting" ]; then
-                        sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
-                        restart=true
+                        if [ -n "$neighborport" ] && [ "$neighborport" -ge 0 ] 2>/dev/null; then
+                            sudo jq '.network.gossip.bindAddress = "0.0.0.0:'$neighborport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                            restart=true
+                        fi
                     fi
 
                     # Check autopeering port
                     portsetting="$(jq '.network.autopeering.bindAddress' $hornetdir/config.json)"
                     if [ "\"0.0.0.0:$autopeeringport\"" != "$portsetting" ]; then
-                        sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config.json|sponge $hornetdir/config.json
-                        restart=true
+                        if [ -n "$autopeeringport" ] && [ "$autopeeringport" -ge 0 ] 2>/dev/null; then
+                            sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config.json|sponge $hornetdir/config.json
+                            restart=true
+                        fi
                     fi
                     portsetting="$(jq '.network.autopeering.bindAddress' $hornetdir/config_comnet.json)"
                     if [ "\"0.0.0.0:$autopeeringport\"" != "$portsetting" ]; then
-                        sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
-                        restart=true
+                        if [ -n "$autopeeringport" ] && [ "$autopeeringport" -ge 0 ] 2>/dev/null; then
+                            sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
+                            restart=true
+                        fi
                     fi
 
                     if [ -f /usr/bin/hornet ]; then
