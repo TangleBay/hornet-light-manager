@@ -42,7 +42,7 @@ if [ "$autoupdate" = "true" ]; then
                     if [ -n "$autopeeringport" ] && [ "$autopeeringport" -ge 0 ] 2>/dev/null; then
                         sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config.json|sponge $hornetdir/config.json
                         sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
-                    fi         
+                    fi
                 fi
 
                 # Check if pow is enabled
@@ -127,7 +127,7 @@ if [ "$autoupdate" = "true" ]; then
                     if [ -n "$autopeeringport" ] && [ "$autopeeringport" -ge 0 ] 2>/dev/null; then
                         sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config.json|sponge $hornetdir/config.json
                         sudo jq '.network.autopeering.bindAddress = "0.0.0.0:'$autopeeringport'"' $hornetdir/config_comnet.json|sponge $hornetdir/config_comnet.json
-                    fi         
+                    fi
                 fi
 
                 # Check if pow is enabled
