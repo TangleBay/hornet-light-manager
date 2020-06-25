@@ -203,17 +203,17 @@ if [ "$checksync" = "true" ]; then
     lsmi="$(curl -s http://127.0.0.1:14265 -X POST -H 'Content-Type: application/json' -H 'X-IOTA-API-Version: 1' -d '{"command": "getNodeInfo"}' | jq '.latestSolidSubtangleMilestoneIndex')"
     let dlmi=$lmi-$lsmi
     if [ "$status" = "active" ] && [ $dlmi -gt $maxlmi ]; then
-        dt=`date '+%m/%d/%Y %H:%M:%S'`
-        sudo systemctl stop hornet
-        sudo rm -rf $hornetdir/mainnetdb $hornetdir/export.bin $hornetdir/comnetdb $hornetdir/export_comnet.bin
-        sudo systemctl start hornet
-        counter="$(cat $hlmdir/log/watchdog.log | sed -n -e '1{p;q}')"
-        let counter=counter+1
-        {
-        echo $counter
-        echo $dt
-        } > $hlmdir/log/watchdog.log
-        counter=0
+            dt=`date '+%m/%d/%Y %H:%M:%S'`
+            sudo systemctl stop hornet
+            sudo rm -rf $hornetdir/mainnetdb $hornetdir/export.bin $hornetdir/comnetdb $hornetdir/export_comnet.bin
+            sudo systemctl start hornet
+            counter="$(cat $hlmdir/log/watchdog.log | sed -n -e '1{p;q}')"
+            let counter=counter+1
+            {
+            echo $counter
+            echo $dt
+            } > $hlmdir/log/watchdog.log
+            counter=0
     fi
 fi
 
@@ -223,17 +223,6 @@ if [ "$logpruning" = "true" ]; then
     let logsize=$logsize*1000000
     if [ $currentlogsize -gt $logsize ]; then
         echo -n "" > $hornetdir/hornet.log
-    fi
-fi
-
-# DB Pruning
-if [ "$status" != "active" ]; then
-    if [ "$pruning" = "true" ]; then
-        currentdbsize="$(du -s $hornetdir/ | awk '{print $1}')"
-        let dbsize=$maxdbsize*1000000
-        if [ $currentdbsize -gt $maxdbsize ]; then
-
-        fi
     fi
 fi
 
