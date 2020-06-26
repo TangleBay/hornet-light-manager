@@ -192,9 +192,11 @@ while [ $counter -lt 1 ]; do
             echo -e "$text_yellow Watchdog:$text_red $watchdog"
         else
             echo -e "$text_yellow Watchdog:$text_green $watchdog"
-            echo -e "$text_yellow Restarts:$text_red $watchdogcount"
-            if [ -n "$watchdogtime" ]; then
-                echo -e "$text_yellow Last restart: $watchdogtime"
+            if [ "$watchdogcount" -gt "0" ]; then
+                echo -e "$text_yellow Restarts:$text_red $watchdogcount"
+                if [ -n "$watchdogtime" ]; then
+                    echo -e "$text_yellow Last restart: $watchdogtime"
+                fi
             fi
             echo ""
             # Autoupdate
