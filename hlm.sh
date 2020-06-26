@@ -197,8 +197,8 @@ while [ $counter -lt 1 ]; do
                 if [ -n "$watchdogtime" ]; then
                     echo -e "$text_yellow Last restart: $watchdogtime"
                 fi
+                echo ""
             fi
-            echo ""
             # Autoupdate
             if [ "$autoupdate" = "true" ]; then
                 echo -e "$text_yellow Auto-updater:$text_green enabled"
