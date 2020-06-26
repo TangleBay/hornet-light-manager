@@ -12,7 +12,6 @@ version=0.0.11
 
 source /etc/hlm-cfgs/hornet.cfg
 source /etc/hlm-cfgs/nginx.cfg
-source /etc/hlm-cfgs/swarm.cfg
 
 #pwdcmd=`dirname "$BASH_SOURCE"`
 
@@ -50,7 +49,6 @@ clear
 function pause(){
    read -p "$*"
 }
-
 
 # Check if script is running with root permissions
 if [ $(id -u) -ne 0 ]; then
@@ -149,8 +147,14 @@ while [ $counter -lt 1 ]; do
         watchdogtime="$(cat $hlmdir/log/watchdog.log | sed -n -e '2{p;q}')"
     fi
 
+
+    #### REMOVE OLD CODE LATER ####
     if [ -f "$hlmdir/log/swarm.log" ]; then
         sudo crontab -l | grep -q $hlmdir/auto-swarm.sh && swarm=active || swarm=inactive
+        if [ "$swarm" = "active" ]; then
+            ( crontab -l | grep -v -F "$croncmdswarm" ) | crontab -
+            sudo rm -rf $hlmdir/log/swarm.log
+        fi
     fi
 
     ############################################################################################################################################################
@@ -186,11 +190,6 @@ while [ $counter -lt 1 ]; do
     if [ "$watchdog" = "active" ] || [ "$watchdog" = "inactive" ]; then
         if [ "$watchdog" != "active" ]; then
             echo -e "$text_yellow Watchdog:$text_red $watchdog"
-            if [ "$swarm" = "active" ] || [ "$swarm" = "inactive" ]; then
-                if [ "$swarm" = "active" ]; then
-                    echo -e "$text_yellow Auto-Swarm:$text_green $swarm"
-                fi
-            fi
         else
             echo -e "$text_yellow Watchdog:$text_green $watchdog"
             echo -e "$text_yellow Restarts:$text_red $watchdogcount"
@@ -216,20 +215,9 @@ while [ $counter -lt 1 ]; do
             else
                 echo -e "$text_yellow Log-pruner:$text_red disabled"
             fi
-            # SWARM
-            if [ "$swarm" = "active" ] || [ "$swarm" = "inactive" ]; then
-                if [ "$swarm" = "active" ]; then
-                    echo -e "$text_yellow Auto-Swarm:$text_green $swarm"
-                fi
-            fi
         fi
     else
         echo -e "$text_yellow Watchdog:$text_red inactive"
-        if [ "$swarm" = "active" ] || [ "$swarm" = "inactive" ]; then
-            if [ "$swarm" = "active" ]; then
-                echo -e "$text_yellow Auto-Swarm:$text_green $swarm"
-            fi
-        fi
     fi
     echo ""
     echo -e "\e[90m==========================================================="
@@ -242,8 +230,6 @@ while [ $counter -lt 1 ]; do
     echo " 2) Hornet Node"
     echo ""
     echo " 3) Reverse Proxy"
-    echo ""
-    echo " 4) Project SWARM"
     echo ""
     echo -e "\e[90m-----------------------------------------------------------"
     echo ""
@@ -306,7 +292,7 @@ while [ $counter -lt 1 ]; do
                 if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
                     ( cd $hlmdir ; sudo git pull ) > /dev/null 2>&1
                     ( cd $hlmdir ; sudo git reset --hard origin/master ) > /dev/null 2>&1
-                    sudo chmod +x $hlmdir/hlm.sh $hlmdir/watchdog.sh $hlmdir/auto-swarm.sh $hlmdir/updater.sh
+                    sudo chmod +x $hlmdir/hlm.sh $hlmdir/watchdog.sh $hlmdir/updater.sh
                     echo ""
                     echo -e $text_red " HLM update successfully!"
                     echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
@@ -316,19 +302,6 @@ while [ $counter -lt 1 ]; do
                     exit 0
                 fi
             fi
-
-#            if [ "$selector" = "undefined" ]; then
-#                echo -e $TEXT_RED_B && read -p " Are you sure you want to reset all HLM configs (y/N): " selector_hlmreset
-#                if [ "$selector_hlmreset" = "y" ] || [ "$selector_hlmreset" = "Y" ]; then
-#                    ( cd $hlmcfgdir ; sudo git pull ) > /dev/null 2>&1
-#                    ( cd $hlmcfgdir ; sudo git reset --hard origin/master ) > /dev/null 2>&1
-#                    echo ""
-#                    echo -e $text_red " HLM configs reset successfully!"
-#                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...' && echo -e $text_reset
-#                    clear
-#                    exit 0
-#                fi
-#            fi
 
             if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
                 counter1=1
@@ -1005,125 +978,6 @@ while [ $counter -lt 1 ]; do
 
             if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
                 counter3=1
-            fi
-        done
-        unset selector
-    fi
-
-############################################################################################################################################################
-
-    if [ "$selector" = "4" ]; then
-        counter4=0
-        while [ $counter4 -lt 1 ]; do
-            clear
-            echo ""
-            echo -e $text_red "\033[1m\033[4mProject SWARM\033[0m"
-            echo ""
-            echo -e $text_yellow " SWARM: https://tanglebay.org/swarm"
-            #echo -e $text_yellow " Donate: https://pool.einfachiota.de/donate"
-            echo -e $text_yellow ""
-            echo " 1) Edit SWARM.cfg"
-            echo ""
-            echo " 2) Add your node to SWARM"
-            echo " 3) Remove your node from SWARM"
-            echo " 4) Update node on SWARM"
-            echo ""
-            echo " 5) Manage SWARM auto-adding"
-            echo " 6) Show SWARM.log"
-            echo ""
-            echo -e "\e[90m-----------------------------------------------------------"
-            echo ""
-            echo -e $text_yellow "x) Back"
-            echo ""
-            echo -e " \e[90m==========================================================="
-            echo -e $text_yellow && read -p " Please type in your option: " selector
-            echo -e $text_reset
-
-            # Change swarm.cfg
-            if [ "$selector" = "1" ] ; then
-                if [ -f "$hlmcfgdir/swarm.cfg" ]; then
-                    sudo nano $hlmcfgdir/swarm.cfg
-                    source $hlmcfgdir/swarm.cfg
-                    echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
-                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $text_reset
-                fi
-                if [ -f "$hlmcfgdir/icnp.cfg" ]; then
-                    sudo mv $hlmcfgdir/icnp.cfg $hlmcfgdir/swarm.cfg
-                    sudo nano $hlmcfgdir/swarm.cfg
-                    source $hlmcfgdir/swarm.cfg
-                    echo -e $text_yellow && echo " Edit configuration finished!" && echo -e $text_reset
-                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $text_reset
-                fi
-            fi
-
-            if [ "$selector" = "2" ]; then
-                if [ ! -d "$hlmdir/log" ]; then
-                    sudo mkdir -p $hlmdir/log
-                fi
-                if [ ! -f "$hlmdir/log/swarm.log" ]; then
-                    sudo touch $hlmdir/log/swarm.log
-                fi
-                (curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$domain:$nodeport/api\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\" }" |jq '.') > $hlmdir/log/swarm.log
-                swarmpwd="$(sudo cat $hlmdir/log/swarm.log |jq '.password')"
-                if [ -n "$swarmpwd" ]; then
-                    sudo sed -i 's/nodepassword.*/nodepassword='$swarmpwd'/' $hlmcfgdir/swarm.cfg
-                fi
-                sleep 1
-                sudo cat $hlmdir/log/swarm.log |jq
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $text_reset
-            fi
-            if [ "$selector" = "3" ]; then
-                curl --silent -X DELETE https://register.tanglebay.org/$nodepassword |jq
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $text_reset
-            fi
-            if [ "$selector" = "4" ]; then
-                echo -e $text_red " A node should only be updated in an emergency, as it can lead to the total loss of the current points!"
-                echo -e $text_yellow && read -p " Are you sure that you want to update your node (y/N): " selector_swarm_update
-                echo -e $text_reset
-                if [ "$selector_swarm_update" = "y" ] || [ "$selector_swarm_update" = "Y" ]; then
-                    curl --silent --output /dev/null -X DELETE https://register.tanglebay.org/$nodepassword
-                    curl --silent -X POST "https://register.tanglebay.org" -H  "accept: */*" -H  "Content-Type: application/json" -d "{ \"name\": \"$nodename\", \"url\": \"https://$domain:$nodeport/api\", \"address\": \"$donationaddress\", \"pow\": \"$pownode\", \"password\": \"$nodepassword\" }" |jq
-                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $text_reset
-                fi
-            fi
-
-            if [ "$selector" = "5" ]; then
-                echo -e $TEXT_RED_B && read -p " Would you like to (1)enable/(2)disable or (c)ancel SWARM Auto-Season: " selector_autoswarm
-                echo -e $text_reset
-                if [ "$selector_autoswarm" = "1" ]; then
-                    echo -e $text_yellow && echo " Enable SWARM Auto-Season..." && echo -e $text_reset
-                    sudo chmod +x $hlmdir/auto-swarm.sh
-                    ( crontab -l | grep -v -F "$croncmdswarm" ; echo "$cronjobswarm" ) | crontab -
-                fi
-                if [ "$selector_autoswarm" = "2" ]; then
-                    echo -e $text_yellow && echo " Disable SWARM Auto-Season..." && echo -e $text_reset
-                    ( crontab -l | grep -v -F "$croncmdswarm" ) | crontab -
-                fi
-                echo -e $text_yellow && echo " SWARM Auto-Season configuration finished!" && echo -e $text_reset
-                echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                echo -e $text_reset
-            fi
-
-            if [ "$selector" = "6" ]; then
-                if [ -f "$hlmdir/log/swarm.log" ]; then
-                    sudo cat $hlmdir/log/swarm.log |jq
-                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $text_reset
-                else
-                    echo -e $text_red " No SWARM.log found!"
-                    echo ""
-                    echo -e $TEXT_RED_B && pause ' Press [Enter] key to continue...'
-                    echo -e $text_reset
-                fi
-            fi
-
-            if [ "$selector" = "x" ] || [ "$selector" = "X" ]; then
-                counter4=1
             fi
         done
         unset selector
